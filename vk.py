@@ -19,7 +19,7 @@
   avatar <file.png>           — поставить главную фотографию (нужен user-токен)
   post "<text|@file>" [--photo f]* [--video f]
 """
-import os, sys, json, mimetypes, uuid, time
+import os, sys, json, mimetypes, uuid, time, struct, base64
 import urllib.request, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -85,6 +85,34 @@ def upload(upload_url, file_field, file_path, tries=5):
     raise last_err
 
 # ------------------------------------------------------------------ операции
+def _img_size(path):
+    """Размер картинки из заголовка файла (stdlib, PNG/JPEG) — без PIL."""
+    with open(path, "rb") as f:
+        head = f.read(2)
+        if head == b"\x89P":                      # PNG
+            f.seek(16)
+            w, h = struct.unpack(">II", f.read(8))
+            return w, h
+        if head == b"\xff\xd8":                    # JPEG — идём по маркерам до SOF
+            f.seek(2)
+            while True:
+                b = f.read(1)
+                if not b:
+                    break
+                if b != b"\xff":
+                    continue
+                while b == b"\xff":
+                    b = f.read(1)
+                m = b[0]
+                if m in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB):
+                    f.read(3)
+                    h, w = struct.unpack(">HH", f.read(4))
+                    return w, h
+                seg = struct.unpack(">H", f.read(2))[0]
+                f.seek(seg - 2, 1)
+    raise ValueError(f"не смог прочитать размер {path}")
+
+
 def whoami():
     g = call("groups.getById")
     if isinstance(g, dict):
@@ -95,10 +123,20 @@ def whoami():
 
 def set_cover(path):
     gid = whoami()["id"]
-    up = call("photos.getOwnerCoverPhotoUploadServer", group_id=gid,
-              crop_x=0, crop_y=0, crop_x2=1590, crop_y2=400)["upload_url"]
-    res = upload(up, "photo", path)
-    return call("photos.saveOwnerCoverPhoto", hash=res["hash"], photo=res["photo"])
+    w, h = _img_size(path)          # кроп = ВСЯ картинка (ВК принудительно делает зону 2.5:1;
+    #                                 передашь 1590 — он режет справа). Картинка уже 2.5:1.
+    last = None
+    for _ in range(6):
+        up = call("photos.getOwnerCoverPhotoUploadServer", group_id=gid,
+                  crop_x=0, crop_y=0, crop_x2=w, crop_y2=h)["upload_url"]
+        res = upload(up, "photo", path)
+        info = json.loads(base64.b64decode(res["photo"] + "=" * (-len(res["photo"]) % 4))
+                          .decode("utf-8", "replace"))
+        if not info.get("error"):   # pu.vk.com иногда отдаёт ERR_STORAGE_ENGINE_SAVE_FAILED
+            return call("photos.saveOwnerCoverPhoto", hash=res["hash"], photo=res["photo"])
+        last = info.get("error")
+        time.sleep(2)
+    raise RuntimeError(f"обложка не загрузилась: {last}")
 
 def set_avatar(path):
     gid = whoami()["id"]
