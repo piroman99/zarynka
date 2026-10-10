@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1117">
+<title>Зарянка — визуальная новелла</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="stage">
+    <div id="bg-a" class="bg"></div>
+    <div id="bg-b" class="bg"></div>
+    <img id="sprite" alt="">
+    <div id="vignette"></div>
+
+    <!-- Титры -->
+    <section id="title" class="screen show">
+      <div class="title-inner">
+        <img src="icons/icon-512.png" alt="" class="logo">
+        <h1>ЗАРЯНКА</h1>
+        <p class="sub">визуальная новелла</p>
+        <p class="ep">Эпизод 1 · «Приёмная комиссия»</p>
+        <button id="start">Начать</button>
+        <p class="by" id="byline"></p>
+      </div>
+    </section>
+
+    <!-- Диалог -->
+    <div id="hud">
+      <div id="chapter"></div>
+      <div id="box">
+        <div id="name"></div>
+        <div id="text"></div>
+        <div id="hint">▸ клик / пробел — далее</div>
+      </div>
+    </div>
+
+    <!-- Финал эпизода -->
+    <section id="end" class="screen">
+      <div class="title-inner">
+        <h1>Конец эпизода 1</h1>
+        <p class="sub">Дальше — «Лига пожилых людей»</p>
+        <button id="again">Начать заново</button>
+      </div>
+    </section>
+  </div>
+  <script src="scenes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
