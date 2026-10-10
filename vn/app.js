@@ -16,6 +16,9 @@
   const bgA = $("bg-a"), bgB = $("bg-b"), sprite = $("sprite");
   const box = $("box"), nameEl = $("name"), textEl = $("text"), chapter = $("chapter");
   const hud = $("hud"), title = $("title"), end = $("end");
+  const bgm = $("bgm"), muteBtn = $("mute"), cinema = $("cinema"), avm = $("avm"), skip = $("skip");
+  const AVM = "../out/avm_v3_epic.mp4";
+  let bgmStarted = false, cinemaOpen = false;
 
   // плоский список шагов + метки начала сцен
   const steps = [];
@@ -85,21 +88,59 @@
     idx = 0; curBg = ""; curSprite = "~"; setSprite(null);
     title.classList.remove("show"); end.classList.remove("show");
     hud.style.opacity = "";            // сбросить inline-стиль от finish()
-    hud.classList.add("on"); render();
+    hud.classList.add("on"); startBgm(); render();
   }
   function finish() {
     hud.classList.remove("on");
     hud.style.opacity = 0;
     end.classList.add("show");
+    setTimeout(() => { if (!cinemaOpen) playCinema(AVM); }, 650);   // тизер «дальше»
+  }
+
+  // --- звук и кинозал ---
+  function startBgm() {
+    if (bgmStarted) return;
+    bgmStarted = true;
+    bgm.volume = 0.5;
+    bgm.play().catch(() => {});
+  }
+  function toggleMute(e) {
+    e.stopPropagation();
+    bgm.muted = !bgm.muted;
+    muteBtn.textContent = bgm.muted ? "🔇" : "🔊";
+  }
+  function playCinema(src) {
+    cinemaOpen = true;
+    avm.src = src;
+    cinema.hidden = false;
+    requestAnimationFrame(() => cinema.classList.add("on"));
+    bgm.pause();
+    const done = () => {
+      cinemaOpen = false;
+      cinema.classList.remove("on");
+      avm.pause(); avm.removeAttribute("src"); avm.load();
+      setTimeout(() => { cinema.hidden = true; }, 400);
+      if (bgmStarted && !bgm.muted) bgm.play().catch(() => {});
+    };
+    avm.onended = done;
+    skip.onclick = (e) => { e.stopPropagation(); done(); };
+    cinema.onclick = done;
+    avm.play().catch((err) => { console.log("cinema:", err.message); });
   }
 
   $("start").onclick = (e) => { e.stopPropagation(); start(); };
   $("again").onclick = (e) => { e.stopPropagation(); start(); };
+  $("teaser").onclick = (e) => { e.stopPropagation(); playCinema(AVM); };
+  $("trailer").onclick = (e) => { e.stopPropagation(); playCinema(AVM); };
+  muteBtn.onclick = toggleMute;
   document.getElementById("stage").addEventListener("click", (e) => {
+    if (cinemaOpen) return;
     if (title.classList.contains("show") || end.classList.contains("show")) return;
     next();
   });
   addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && cinemaOpen) { skip.click(); return; }
+    if (cinemaOpen) return;
     if ([" ", "Enter", "ArrowRight"].includes(e.key)) {
       e.preventDefault();
       if (title.classList.contains("show")) return start();

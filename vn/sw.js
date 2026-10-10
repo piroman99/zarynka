@@ -1,5 +1,5 @@
 // Service worker: оффлайн-кеш оболочки и ресурсов эпизода 1.
-const CACHE = "zaryanka-ep1-v1";
+const CACHE = "zaryanka-ep1-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -9,6 +9,7 @@ const ASSETS = [
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
+  "../assets/audio/theme_epic_0.mp3",
   "../assets/gen/ok_x_ship_dock_0.jpg",
   "../assets/gen/ok_reception_fix2_0.jpg",
   "../assets/bg_alley.png",

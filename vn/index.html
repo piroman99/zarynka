@@ -16,6 +16,8 @@
     <img id="sprite" alt="">
     <div id="vignette"></div>
 
+    <button id="mute" title="Звук">🔊</button>
+
     <!-- Титры -->
     <section id="title" class="screen show">
       <div class="title-inner">
@@ -24,6 +26,7 @@
         <p class="sub">визуальная новелла</p>
         <p class="ep">Эпизод 1 · «Приёмная комиссия»</p>
         <button id="start">Начать</button>
+        <button id="teaser" class="ghost">▶ Тизер</button>
         <p class="by" id="byline"></p>
       </div>
     </section>
@@ -43,10 +46,19 @@
       <div class="title-inner">
         <h1>Конец эпизода 1</h1>
         <p class="sub">Дальше — «Лига пожилых людей»</p>
-        <button id="again">Начать заново</button>
+        <button id="trailer">▶ Смотреть тизер</button>
+        <button id="again" class="ghost">Начать заново</button>
       </div>
     </section>
+
+    <!-- Кинозал (тизер/AVM) -->
+    <div id="cinema" hidden>
+      <video id="avm" playsinline preload="none"></video>
+      <button id="skip">Пропустить ▸</button>
+    </div>
   </div>
+
+  <audio id="bgm" loop preload="auto" src="../assets/audio/theme_epic_0.mp3"></audio>
   <script src="scenes.js"></script>
   <script src="app.js"></script>
 </body>

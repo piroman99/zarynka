@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Снимает экраны VN-прототипа и проверяет PWA (manifest + service worker).
+"""Снимает экраны VN-прототипа, проверяет PWA, музыку и кинозал (AVM).
 Запуск из корня workspace:  .venv/bin/python novella/zaryanka/_vn_shot.py
 """
-import functools, http.server, os, socketserver, subprocess, sys, threading, time
+import functools, http.server, os, socketserver, threading
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WS = os.path.dirname(os.path.dirname(HERE))
@@ -15,8 +15,12 @@ PORT = 8791
 
 def serve():
     handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=HERE)
-    httpd = socketserver.TCPServer(("127.0.0.1", PORT), handler)
-    httpd.allow_reuse_address = True
+
+    class Srv(socketserver.ThreadingTCPServer):
+        allow_reuse_address = True
+        daemon_threads = True
+
+    httpd = Srv(("127.0.0.1", PORT), handler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     return httpd
 
@@ -27,20 +31,15 @@ def main():
     httpd = serve()
     url = f"http://127.0.0.1:{PORT}/vn/index.html"
     with sync_playwright() as p:
-        br = p.chromium.launch(args=["--use-gl=swiftshader", "--no-sandbox", "--hide-scrollbars"])
+        br = p.chromium.launch(args=["--use-gl=swiftshader", "--no-sandbox",
+                                     "--hide-scrollbars", "--autoplay-policy=no-user-gesture-required"])
         pg = br.new_page(viewport={"width": 1280, "height": 720})
-        logs = []
-        pg.on("console", lambda m: logs.append(m.text))
         pg.goto(url, wait_until="load")
-        pg.wait_for_timeout(600)
-
-        # PWA checks
-        manifest = pg.get_attribute('link[rel="manifest"]', "href")
-        sw = pg.evaluate("!!navigator.serviceWorker")
-        reg = pg.evaluate("navigator.serviceWorker.getRegistrations().then(r=>r.length)")
         pg.wait_for_timeout(700)
-        reg2 = pg.evaluate("navigator.serviceWorker.getRegistrations().then(r=>r.length)")
-        print("manifest:", manifest, "| SW api:", sw, "| registrations:", reg, "->", reg2)
+
+        # PWA
+        reg = pg.evaluate("navigator.serviceWorker.getRegistrations().then(r=>r.length)")
+        print("PWA service worker registrations:", reg)
 
         pg.screenshot(path=os.path.join(SHOTS, "01_title.png"))
 
@@ -50,42 +49,56 @@ def main():
                                "t:document.getElementById('text').textContent})")
 
         def advance():
-            pg.click("#stage"); pg.wait_for_timeout(140)
+            pg.click("#stage"); pg.wait_for_timeout(150)
 
-        # Старт
-        pg.click("#start"); pg.wait_for_timeout(500)
+        # --- кинозал: тизер с тайтла ---
+        pg.click("#teaser"); pg.wait_for_timeout(1200)
+        cin = pg.evaluate("({open:!document.getElementById('cinema').hidden,"
+                          "paused:document.getElementById('avm').paused,"
+                          "t:document.getElementById('avm').currentTime,"
+                          "dur:document.getElementById('avm').duration})")
+        print("cinema (тизер):", cin)
+        pg.screenshot(path=os.path.join(SHOTS, "05_teaser.png"))
+        pg.click("#skip"); pg.wait_for_timeout(600)
 
-        # идём до сцены «Екатерина Ивановна» + реплика Сергея
-        guard = 0
-        while guard < 40:
+        # --- старт: музыка ---
+        pg.click("#start"); pg.wait_for_timeout(1400)
+        a = pg.evaluate("({paused:document.getElementById('bgm').paused,"
+                        "t:document.getElementById('bgm').currentTime,"
+                        "dur:document.getElementById('bgm').duration})")
+        print("BGM после Старт:", a)
+
+        # до сцены «Екатерина Ивановна» (реплика Сергея)
+        g = 0
+        while g < 40:
             s = state()
             if s["c"] == "Екатерина Ивановна" and "Лихнецкий" in s["n"]:
                 break
-            advance(); guard += 1
+            advance(); g += 1
         pg.wait_for_timeout(300)
-        print("frame2:", state())
         pg.screenshot(path=os.path.join(SHOTS, "02_kate_dialog.png"))
+        print("frame2:", state())
 
-        # до аллеи, до реплики поэта (Лёша)
-        guard = 0
-        while guard < 120:
+        # до аллеи (реплика поэта)
+        g = 0
+        while g < 120:
             s = state()
             if s["c"] == "На аллее" and "Лёша" in s["n"]:
                 break
-            advance(); guard += 1
+            advance(); g += 1
         pg.wait_for_timeout(300)
-        print("frame3:", state())
         pg.screenshot(path=os.path.join(SHOTS, "03_alley.png"))
+        print("frame3:", state())
 
-        # до финала эпизода
-        guard = 0
-        while guard < 160:
+        # до финала
+        g = 0
+        while g < 160:
             if pg.evaluate("document.getElementById('end').classList.contains('show')"):
                 break
-            advance(); guard += 1
-        pg.wait_for_timeout(600)
+            advance(); g += 1
+        pg.wait_for_timeout(1600)   # ждём автоплей тизера на финале
         ended = pg.evaluate("document.getElementById('end').classList.contains('show')")
-        print("end screen shown:", ended)
+        print("end shown:", ended, "| cinema open:", pg.evaluate("!document.getElementById('cinema').hidden"))
         pg.screenshot(path=os.path.join(SHOTS, "04_end.png"))
 
         br.close()
