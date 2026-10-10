@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Контрольный лист оформления ВК: обложка (десктоп), мобильный кроп, аватары + мок с аватаром."""
+"""Контрольный лист оформления ВК: обложка (2.5:1), аватары и мок с наложенным аватаром."""
 import os
 from PIL import Image, ImageDraw, ImageFont
 
@@ -8,50 +8,44 @@ VK = os.path.join(HERE, "assets", "vk")
 REV = os.path.join(HERE, "assets", "review")
 os.makedirs(REV, exist_ok=True)
 F = "/usr/share/fonts/truetype/lato/Lato-Regular.ttf"
-def fnt(s): return ImageFont.truetype(F, s)
 
-W = 1200
-PAD = 24
+
+def fnt(s):
+    return ImageFont.truetype(F, s)
+
+
+W, PAD = 1200, 24
 cover = Image.open(os.path.join(VK, "cover_b.png")).convert("RGB")
-mob = Image.open(os.path.join(VK, "cover_b_mobile.png")).convert("RGB")
-
 cw = W - 2 * PAD
 cover_s = cover.resize((cw, round(cover.height * cw / cover.width)), Image.LANCZOS)
-mob_s = mob.resize((cw, round(mob.height * cw / mob.width)), Image.LANCZOS)
 
-# мок: обложка с аватаром в левом-нижнем углу (как рисует ВК)
 mock = cover.copy()
-av = Image.open(os.path.join(VK, "avatar_b.png")).convert("RGB").resize((190, 190), Image.LANCZOS)
-mask = Image.new("L", (190, 190), 0)
-ImageDraw.Draw(mask).ellipse((0, 0, 189, 189), fill=255)
-ring = Image.new("RGB", (202, 202), (255, 255, 255))
-ring.paste(av, (6, 6), mask)
-mock.paste(ring, (26, cover.height - 202))
+av = Image.open(os.path.join(VK, "avatar_b.png")).convert("RGB").resize((150, 150), Image.LANCZOS)
+mask = Image.new("L", (150, 150), 0)
+ImageDraw.Draw(mask).ellipse((0, 0, 149, 149), fill=255)
+mock.paste(av, (26, cover.height - 150 - 20), mask)
 mock_s = mock.resize((cw, round(mock.height * cw / mock.width)), Image.LANCZOS)
 
-avas = [Image.open(os.path.join(VK, f"avatar_{k}.png")).convert("RGB").resize((150, 150), Image.LANCZOS)
+avas = [Image.open(os.path.join(VK, f"avatar_{k}.png")).convert("RGB").resize((140, 140), Image.LANCZOS)
         for k in "abc"]
 
-rows = []
-y = PAD
-def label(txt):
-    global y
-    d.text((PAD, y), txt, font=fnt(24), fill=(30, 30, 30)); y += 34
-
-body = Image.new("RGB", (W, 2000), (250, 250, 250))
+body = Image.new("RGB", (W, 1600), (250, 250, 250))
 d = ImageDraw.Draw(body)
-d.text((PAD, y), "«ЗАРЯНКА» — оформление сообщества ВК", font=fnt(30), fill=(20, 20, 20)); y += 46
-label("Обложка, десктоп 1590×400:")
-body.paste(cover_s, (PAD, y)); y += cover_s.height + 20
-label("Мобильная видимая зона 1196×400 (безопасная):")
-body.paste(mob_s, (PAD, y)); y += mob_s.height + 20
-label("Мок: как ВК кладёт аватар (левый-нижний угол) — контент не перекрыт:")
-body.paste(mock_s, (PAD, y)); y += mock_s.height + 20
-label("Аватары 400×400 (B / A / C):")
+y = PAD
+d.text((PAD, y), "«ЗАРЯНКА» — оформление ВК (2.5:1, без обрезки)", font=fnt(30), fill=(20, 20, 20))
+y += 46
+d.text((PAD, y), "Обложка 1920×768 (ровно формат ВК):", font=fnt(22), fill=(60, 60, 60))
+y += 32
+body.paste(cover_s, (PAD, y)); y += cover_s.height + 22
+d.text((PAD, y), "Мок: аватар в левом-нижнем углу, композиция не перекрыта:", font=fnt(22), fill=(60, 60, 60))
+y += 32
+body.paste(mock_s, (PAD, y)); y += mock_s.height + 22
+d.text((PAD, y), "Аватары 400×400 (B / A / C):", font=fnt(22), fill=(60, 60, 60))
+y += 32
 for i, a in enumerate(avas):
-    body.paste(a, (PAD + i * 170, y))
-y += 170
+    body.paste(a, (PAD + i * 160, y))
+y += 160
 body = body.crop((0, 0, W, y + PAD))
-out = os.path.join(REV, "review_19_vk.png")
+out = os.path.join(REV, "review_20_vk_cover.png")
 body.save(out, quality=92)
 print("saved", out, body.size)
