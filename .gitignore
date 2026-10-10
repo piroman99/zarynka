@@ -12,5 +12,6 @@ __pycache__/
 
 # Рабочий мусор
 .tmp/
+.tmp_intro/
 .cache/
 *.log
