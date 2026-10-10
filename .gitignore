@@ -11,7 +11,7 @@ __pycache__/
 *.pyc
 
 # Рабочий мусор
-.tmp/
-.tmp_intro/
+.tmp*/
+_shots*/
 .cache/
 *.log
