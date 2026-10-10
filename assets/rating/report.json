@@ -1,0 +1,141 @@
+{
+  "z-image": {
+    "model": "z-image",
+    "opts": {
+      "aspect_ratio": "3:4"
+    },
+    "quote_rub": 1,
+    "ok": true,
+    "price_rub": 0.5,
+    "seconds": 9.1,
+    "file": "assets/rating/z-image_0.png"
+  },
+  "gpt-image-2": {
+    "model": "gpt-image-2",
+    "opts": {
+      "aspect_ratio": "3:4",
+      "resolution": "1K"
+    },
+    "quote_rub": 2.7,
+    "ok": true,
+    "price_rub": 2.7,
+    "seconds": 33.0,
+    "file": "assets/rating/gpt-image-2_0.png"
+  },
+  "nano-banana-2": {
+    "model": "nano-banana-2",
+    "opts": {
+      "aspect_ratio": "3:4",
+      "resolution": "1K"
+    },
+    "quote_rub": 1.89,
+    "ok": true,
+    "price_rub": 1.89,
+    "seconds": 19.4,
+    "file": "assets/rating/nano-banana-2_0.jpg"
+  },
+  "seedream-5-0-flash": {
+    "model": "seedream-5-0-flash",
+    "opts": {
+      "aspect_ratio": "3:4",
+      "resolution": "1K"
+    },
+    "quote_rub": 1.86,
+    "ok": true,
+    "price_rub": 1.86,
+    "seconds": 20.7,
+    "file": "assets/rating/seedream-5-0-flash_0.jpg"
+  },
+  "grok-imagine": {
+    "model": "grok-imagine",
+    "opts": {
+      "aspect_ratio": "3:4"
+    },
+    "quote_rub": 2.02,
+    "ok": true,
+    "price_rub": 2.02,
+    "seconds": 11.5,
+    "file": "assets/rating/grok-imagine_0.jpg"
+  },
+  "imagen4": {
+    "model": "imagen4",
+    "opts": {
+      "aspect_ratio": "3:4"
+    },
+    "quote_rub": 5.03,
+    "ok": true,
+    "price_rub": 5.03,
+    "seconds": 9.1,
+    "file": "assets/rating/imagen4_0.webp"
+  },
+  "qwen3-image": {
+    "model": "qwen3-image",
+    "opts": {
+      "aspect_ratio": "3:4",
+      "resolution": "1K"
+    },
+    "quote_rub": 2.59,
+    "ok": true,
+    "price_rub": 2.59,
+    "seconds": 11.8,
+    "file": "assets/rating/qwen3-image_0.png"
+  },
+  "flux-2": {
+    "model": "flux-2",
+    "opts": {
+      "aspect_ratio": "3:4",
+      "resolution": "1K"
+    },
+    "quote_rub": 3.38,
+    "ok": true,
+    "price_rub": 3.38,
+    "seconds": 50.7,
+    "file": "assets/rating/flux-2_0.jpg"
+  },
+  "seedream-5-0-pro": {
+    "model": "seedream-5-0-pro",
+    "opts": {
+      "resolution": "1K"
+    },
+    "quote_rub": 3.68,
+    "ok": true,
+    "price_rub": 3.68,
+    "seconds": 81.9,
+    "file": "assets/rating/seedream-5-0-pro_0.jpg"
+  },
+  "recraft-v4-1": {
+    "model": "recraft-v4-1",
+    "opts": {
+      "aspect_ratio": "3:4"
+    },
+    "quote_rub": 4.74,
+    "ok": true,
+    "price_rub": 4.74,
+    "seconds": 10.3,
+    "file": "assets/rating/recraft-v4-1_0.webp"
+  },
+  "flux-2-max": {
+    "model": "flux-2-max",
+    "opts": {
+      "aspect_ratio": "3:4",
+      "resolution": "1MP"
+    },
+    "quote_rub": 7.59,
+    "ok": true,
+    "price_rub": 7.59,
+    "seconds": 31.7,
+    "file": "assets/rating/flux-2-max_0.jpg"
+  },
+  "nano-banana-pro": {
+    "model": "nano-banana-pro",
+    "opts": {
+      "aspect_ratio": "3:4",
+      "resolution": "1K"
+    },
+    "quote_rub": 12.18,
+    "ok": true,
+    "price_rub": 12.18,
+    "seconds": 29.8,
+    "file": "assets/rating/nano-banana-pro_0.jpg"
+  }
+}

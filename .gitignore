@@ -1,0 +1,16 @@
+# Секреты — НИКОГДА не публиковать
+.pv_key
+.api_keys.json
+*.key
+.env
+
+# Окружения и зависимости
+.probe/.lib/
+.tools/
+__pycache__/
+*.pyc
+
+# Рабочий мусор
+.tmp/
+.cache/
+*.log

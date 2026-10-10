@@ -1,0 +1,36 @@
+[
+  {
+    "model": "gpt-image-2",
+    "price": 4.06,
+    "sec": 87,
+    "ref": "assets/sprites/sergey.png",
+    "file": "assets/gen/sergey_eng_old__gpt-image-2_0.png"
+  },
+  {
+    "model": "nano-banana-2",
+    "price": 5.42,
+    "sec": 19,
+    "ref": "assets/sprites/sergey.png",
+    "file": "assets/gen/sergey_eng_old__nano-banana-2_0.jpg"
+  },
+  {
+    "model": "qwen3-image",
+    "error": "job fail: Не удалось завершить генерацию медиа. media_generation_failed",
+    "sec": 115,
+    "ref": "assets/sprites/sergey.png"
+  },
+  {
+    "model": "grok-imagine",
+    "price": 2.51,
+    "sec": 19,
+    "ref": "assets/sprites/sergey.png",
+    "file": "assets/gen/sergey_eng_old__grok-imagine_0.jpg"
+  },
+  {
+    "model": "flux-2",
+    "price": 3.38,
+    "sec": 83,
+    "ref": "assets/sprites/sergey.png",
+    "file": "assets/gen/sergey_eng_old__flux-2_0.jpg"
+  }
+]
