@@ -11,6 +11,10 @@
 __pycache__/
 *.pyc
 
+# Фанарт конкурса «Зарянка» (2061.su) — права авторов, НЕ публиковать
+refs/contest*/
+assets/review/review_26_contest.png
+
 # Рабочий мусор
 .tmp*/
 _shots*/
