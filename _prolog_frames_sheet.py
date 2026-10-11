@@ -10,7 +10,7 @@ L = "/usr/share/fonts/truetype/lato/Lato-Medium.ttf"
 PW, PH = 620, 349
 c, r = 3, 2
 M, H = 18, 60
-names = [("s1", "S1 · подворотня"), ("s2", "S2 · Звёздный городок"), ("s3", "S3 · «а обычных людей нет?»"),
+names = [("s1", "S1 · подворотня"), ("s2", "S2 · Космодром (ракета)"), ("s3", "S3 · «а обычных людей нет?»"),
          ("s4", "S4 · слепленный ролик"), ("s5", "S5 · лозунг облетел страну"), ("s6", "S6 · очередь")]
 W = c * PW + (c + 1) * M
 Hh = H + r * PH + (r + 1) * M
@@ -18,7 +18,7 @@ sh = Image.new("RGB", (W, Hh), (12, 12, 16))
 d = ImageDraw.Draw(sh)
 d.text((M, 16), "«ЗАРЯНКА» — пролог: черновые кадры (кадры-моки, 0 ₽)", font=ImageFont.truetype(G, 26), fill=(255, 200, 120))
 for i, (n, lbl) in enumerate(names):
-    im = Image.open(os.path.join(SRC, n + ".png")).resize((PW, PH), Image.LANCZOS)
+    im = Image.open(os.path.join(SRC, n + "_base.png")).resize((PW, PH), Image.LANCZOS)
     x = M + (i % c) * (PW + M); y = H + M + (i // c) * (PH + M)
     sh.paste(im, (x, y))
     d.rectangle([x, y, x + PW, y + PH], outline=(70, 74, 90), width=2)

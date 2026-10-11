@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-"""ЧЕРНОВИК-АНИМАТИК ПРОЛОГА «Зарянка».
-P0 (3D-значок) + S1..S6 (кадры-моки + кен-бёрнс + текст-буквы).
-Голос: vo_prolog2 (Charon, БЕЗ иронии, замедлен atempo). Музыка: пролог-скетч.
-Кадры рендерятся ОДИН раз; на выходе ДВА файла с одинаковым видео:
-  • out/prolog_animatic_draft.mp4 — с закадровым голосом
-  • out/prolog_animatic_subs.mp4  — только подстрочник + музыка (без голоса)
+"""ЧЕРНОВИК-АНИМАТИК ПРОЛОГА «Зарянка» v3 (слои + появление по фразе + затемнение).
+P0 (3D-значок) + S1..S6: base-кадры + оверлеи, которые проявляются ПО ФРАЗЕ закадра
+(правка заказчика: «МАРС — ДЕЛО ОБЩЕЕ» и т.д. появляются в момент произнесения).
+Голос: vo_prolog2 (Charon) + atempo 0.95. Конец — плавное затемнение в чёрное.
+Выход: out/prolog_animatic_draft.mp4 (с голосом) и out/prolog_animatic_subs.mp4.
 1920x1080, 25 fps.
 """
-import os, sys, math, wave, subprocess, random
+import os, sys, wave, subprocess, random
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FF = os.path.abspath(os.path.join(HERE, '..', '..', '.probe', '.lib', 'imageio_ffmpeg',
@@ -23,16 +22,26 @@ OUT_SUB = os.path.join(HERE, 'out', 'prolog_animatic_subs.mp4')
 LATO_B = '/usr/share/fonts/truetype/lato/Lato-Bold.ttf'
 
 W, H, FPS = 1920, 1080, 25
-SW, SH = 2400, 1350          # размер исходных кадров-моков
-CF = 0.4                     # кроссфейд, с
+SW, SH = 2400, 1350
+CF = 0.4                 # кроссфейд между кадрами, с
 P0_SEC = 6.0
-VO_TEMPO = 0.95              # замедление закадра (заказчик: «не то ускорен»)
-BED_VOL = 0.30               # фон под голосом
-BED_VOL_SUB = 0.55           # фон в версии без голоса
+VO_TEMPO = 0.95
+BED_VOL = 0.30
+BED_VOL_SUB = 0.55
 CREAM = (246, 238, 222)
+REVEAL_FADE = 0.7        # длительность проявления оверлея, с
+END_FADE = 2.4           # финальное затемнение, с
 
 sys.path.insert(0, HERE)
 from prolog_script import SEG
+
+# какие оверлеи кадра проявляются на какой фразе закадра
+REVEALS = {
+    's1': [('poster', 'Марс — дело общее')],
+    's3': [('q1', 'Марс — дело общее'), ('q2', 'Общее!'), ('q3', 'обычных людей')],
+    's4': [('video', 'слепил видеоролик'), ('q', 'неудобным вопросом')],
+    's5': [('posters', 'лозунг'), ('soviet', 'Верховного Совета'), ('seats', 'два места')],
+}
 
 # ---- рендер значка (3D) -----------------------------------------------
 _src = open(os.path.join(HERE, '_znak3d.py')).read().split("if '--sheet' in sys.argv:")[0]
@@ -73,18 +82,15 @@ def render_p0(t):
     t = max(0.0, min(P0_SEC, t))
     a = angle_at(t)
     zn = render3d(a, w=1920, h=1920)
-    zn = zn.crop((0, 420, 1920, 1500))          # 1920x1080
+    zn = zn.crop((0, 420, 1920, 1500))
     im = Image.alpha_composite(BG.convert('RGBA'), zn.convert('RGBA')).convert('RGB')
-    flash = 0.0
     if t > 5.2:
-        flash = ease(min(1.0, (t - 5.2) / 0.75))
-    if flash > 0.01:
-        im = Image.blend(im, Image.new('RGB', (W, H), (255, 255, 255)), flash)
+        im = Image.blend(im, Image.new('RGB', (W, H), (255, 255, 255)), ease(min(1.0, (t - 5.2) / 0.75)))
     return im
 
 
-# ---- кадры-моки + кен-бёрнс -------------------------------------------
-MOT = {   # z0,z1 (доля ширины источника), cx0,cx1, cy0,cy1
+# ---- base + оверлеи ----------------------------------------------------
+MOT = {
     's1': (0.96, 0.85, 0.50, 0.45, 0.50, 0.50),
     's2': (1.00, 0.90, 0.50, 0.55, 0.55, 0.50),
     's3': (0.94, 0.84, 0.50, 0.50, 0.50, 0.55),
@@ -92,11 +98,20 @@ MOT = {   # z0,z1 (доля ширины источника), cx0,cx1, cy0,cy1
     's5': (0.90, 1.00, 0.50, 0.50, 0.52, 0.48),
     's6': (1.00, 0.87, 0.50, 0.42, 0.56, 0.50),
 }
-_SRC = {n: Image.open(os.path.join(MOCK, n + '.png')).convert('RGB') for n in MOT}
+_SRC = {n: Image.open(os.path.join(MOCK, n + '_base.png')).convert('RGB') for n in MOT}
+OVL = {}   # name -> list of (rgb, alphaL, reveal_time)
+for n, revs in REVEALS.items():
+    lst = []
+    for label, phrase in revs:
+        p = os.path.join(MOCK, '%s_%s.png' % (n, label))
+        if not os.path.exists(p):
+            print('!! нет оверлея', p); continue
+        ov = Image.open(p).convert('RGBA')
+        lst.append((ov.convert('RGB'), ov.getchannel('A'), phrase))
+    OVL[n] = lst
 
 
-def render_mock(name, p):
-    p = max(0.0, min(1.0, p))
+def crop_box(name, p):
     z0, z1, cx0, cx1, cy0, cy1 = MOT[name]
     z = z0 + (z1 - z0) * p
     cx = (cx0 + (cx1 - cx0) * p) * SW
@@ -105,7 +120,23 @@ def render_mock(name, p):
     ch = cw * SH / SW
     x0 = min(max(cx - cw / 2, 0), SW - cw)
     y0 = min(max(cy - ch / 2, 0), SH - ch)
-    return _SRC[name].crop((int(x0), int(y0), int(x0 + cw), int(y0 + ch))).resize((W, H), Image.BILINEAR)
+    return (int(x0), int(y0), int(x0 + cw), int(y0 + ch))
+
+
+def render_mock(name, lt, dur):
+    p = max(0.0, min(1.0, lt / dur if dur > 0 else 0))
+    full = _SRC[name].copy()
+    for rgb, alpha, phrase in OVL.get(name, []):
+        rt = REVEAL_T.get((name, phrase))
+        if rt is None:
+            continue
+        a = (lt - rt) / REVEAL_FADE
+        a = 0 if a <= 0 else (1 if a >= 1 else ease(a))
+        if a > 0.001:
+            m = alpha if a >= 0.999 else alpha.point(lambda v, aa=a: int(v * aa))
+            full.paste(rgb, (0, 0), m)
+    box = crop_box(name, p)
+    return full.crop(box).resize((W, H), Image.BILINEAR)
 
 
 # ---- субтитры (текст-буквы, печатная машинка) --------------------------
@@ -140,7 +171,7 @@ def draw_subs(im, name, p):
     ImageDraw.Draw(band).rectangle([0, 848, W, H], fill=(0, 0, 0, 120))
     im.paste(Image.alpha_composite(im.convert('RGBA'), band).convert('RGB'), (0, 0))
     d = ImageDraw.Draw(im, 'RGBA')
-    y = TOP - 26
+    y = TOTAL_TOP = TOP - 26
     used = 0
     for ln in lines:
         vis = ln[:max(0, n - used)]
@@ -161,6 +192,7 @@ VOSLOW = os.path.join(TMP, 'vo_slow')
 os.makedirs(VOSLOW, exist_ok=True)
 
 order = [name for _, _, name in SEG]
+TXT = {name: txt for _, txt, name in SEG}
 durs = {}
 for name in order:
     src = os.path.join(VO, name + '_0.wav')
@@ -178,9 +210,22 @@ for name in order:
     st += durs[name]
 TOTAL = st
 NF = int(round(TOTAL * FPS))
+
+# времена появления оверлеев (оценка по доле символов в озвучке сегмента)
+REVEAL_T = {}
 print('кадры:', NF, '| длительность %.1f c (%.2f мин)' % (TOTAL, TOTAL / 60))
 for nm, a, dd in segs:
     print('  %-3s %6.2f -> %6.2f (%.2f c)' % (nm, a, a + dd, dd))
+    if nm == 'P0':
+        continue
+    txt = TXT[nm]
+    for label, phrase in REVEALS.get(nm, []):
+        idx = txt.find(phrase)
+        if idx < 0:
+            idx = 0
+        rt = idx / max(1, len(txt)) * dd
+        REVEAL_T[(nm, phrase)] = rt
+        print('        появление %-8s «%s» -> +%.2f c' % (label, phrase, rt))
 
 
 def shot_at(t):
@@ -194,12 +239,12 @@ def shot_at(t):
 def render_shot(nm, lt, dur):
     if nm == 'P0':
         return render_p0(lt)
-    return render_mock(nm, lt / dur if dur > 0 else 0)
+    return render_mock(nm, lt, dur)
 
 
-# ---- фон-зерно ---------------------------------------------------------
 random.seed(3)
 NOISE = Image.effect_noise((W + 240, H + 240), 14).convert('RGB')
+BLACK = Image.new('RGB', (W, H), (0, 0, 0))
 
 
 def grain(im):
@@ -207,7 +252,7 @@ def grain(im):
     return Image.blend(im, NOISE.crop((ox, oy, ox + W, oy + H)), 0.05)
 
 
-# ---- 1) немое видео (рендер кадров один раз) ---------------------------
+# ---- 1) немое видео ----------------------------------------------------
 SILENT = os.path.join(TMP, 'prolog_silent.mp4')
 os.makedirs(os.path.dirname(OUT_VO), exist_ok=True)
 vcmd = [FF, '-y', '-f', 'rawvideo', '-pixel_format', 'rgb24', '-video_size', '%dx%d' % (W, H),
@@ -226,6 +271,10 @@ for fidx in range(NF):
     if nm != 'P0':
         draw_subs(im, nm, lt / dur if dur > 0 else 0)
     im = grain(im)
+    # финальное затемнение в чёрное
+    if t > TOTAL - END_FADE:
+        f = max(0.0, min(1.0, (TOTAL - t) / END_FADE))
+        im = Image.blend(BLACK, im, ease(f))
     proc.stdin.write(im.tobytes())
     if fidx % 200 == 0:
         print('  frame', fidx, '/', NF)
@@ -235,11 +284,10 @@ print('silent video rc', rc, os.path.getsize(SILENT) if os.path.exists(SILENT) e
 if rc:
     print(proc.stderr.read().decode('utf-8', 'replace')[-1500:]); sys.exit(1)
 
-# ---- 2) две звуковые дорожки ------------------------------------------
+# ---- 2) звук -----------------------------------------------------------
 AUD_VO = os.path.join(TMP, 'prolog_audio_vo.wav')
 AUD_SUB = os.path.join(TMP, 'prolog_audio_subs.wav')
 bed_out = TOTAL - 3.0
-
 fc = ["[0:a]volume=%s,afade=t=in:st=0:d=1.5,afade=t=out:st=%.2f:d=3[bed]" % (BED_VOL, bed_out)]
 for i, (nm, a, dd) in enumerate(segs[1:], start=1):
     fc.append("[%d:a]adelay=%d:all=1[v%d]" % (i, int(a * 1000), i))
@@ -254,16 +302,12 @@ r = subprocess.run(cmd, capture_output=True, text=True)
 print('audio VO rc', r.returncode)
 if r.returncode:
     print(r.stderr[-1500:]); sys.exit(1)
-
 r = subprocess.run([FF, '-y', '-i', BED, '-filter:a',
                     "volume=%s,afade=t=in:st=0:d=1.5,afade=t=out:st=%.2f:d=4,atrim=0:%.3f" % (BED_VOL_SUB, TOTAL - 4.0, TOTAL),
-                    '-t', '%.3f' % TOTAL, '-ar', '48000', '-ac', '2', AUD_SUB],
-                   capture_output=True, text=True)
+                    '-t', '%.3f' % TOTAL, '-ar', '48000', '-ac', '2', AUD_SUB], capture_output=True, text=True)
 print('audio SUB rc', r.returncode)
-if r.returncode:
-    print(r.stderr[-1500:]); sys.exit(1)
 
-# ---- 3) мультиплекс: видео копируем, звук добавляем -------------------
+# ---- 3) мультиплекс ----------------------------------------------------
 for aud, out, tag in ((AUD_VO, OUT_VO, 'ГС'), (AUD_SUB, OUT_SUB, 'ПС')):
     r = subprocess.run([FF, '-y', '-i', SILENT, '-i', aud, '-c:v', 'copy', '-c:a', 'aac',
                         '-b:a', '192k', '-shortest', out], capture_output=True, text=True)
