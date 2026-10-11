@@ -74,20 +74,93 @@ def save_ov(im, name):
     print("ovl  ", os.path.relpath(p, HERE))
 
 
-# ================================================================ S1 подворотня
-im = new_base((16, 20, 34), (6, 8, 16))
+# ================================================================ S1 подворотня (СОВЕТСКАЯ)
+# Правка заказчика 2026-10-11: «слишком западная подворотня; советская — другая, менее аккуратная».
+# Советский двор-подворотня: облупленная кирпичная стена, ржавая водосточная труба, арка во двор,
+# тусклая лампочка на проводе, мусорные контейнеры, лужа и люк на асфальте.
+im = new_base((14, 17, 28), (5, 7, 14))
 d = ImageDraw.Draw(im)
-for side, x0 in (("L", 0), ("R", FW - 520)):
-    d.rectangle([x0, 0, x0 + 520, FH], fill=(24, 27, 42))
-    for by in range(60, FH, 46):
-        for bx in range(x0 + ((by // 46) % 2) * 55, x0 + 520, 110):
-            d.rectangle([bx + 3, by + 3, bx + 100, by + 38], fill=(30, 34, 52), outline=(20, 23, 36))
-d.ellipse([820, 980, 1600, 1180], fill=(24, 30, 46))
-person(d, 1180, 700, 300, (7, 8, 14))
-person(d, 1250, 720, 270, (9, 10, 16))
-for _ in range(220):
+
+# --- левая кирпичная стена, облупленная
+d.rectangle([0, 0, 560, 1120], fill=(26, 28, 42))
+for by in range(30, 1120, 44):
+    for bx in range(((by // 44) % 2) * 52, 560, 104):
+        d.rectangle([bx + 2, by + 2, bx + 98, by + 38], fill=(31, 34, 50), outline=(19, 21, 34))
+for _ in range(28):
+    x = random.randint(10, 470); y = random.randint(40, 1050)
+    d.rectangle([x, y, x + random.randint(30, 120), y + random.randint(20, 70)],
+                fill=random.choice([(38, 40, 56), (16, 18, 28), (24, 26, 40)]))
+for _ in range(12):
+    x = random.randint(20, 520)
+    d.line([(x, 60), (x + random.randint(-10, 10), random.randint(400, 900))], fill=(15, 17, 26), width=2)
+
+# --- дальняя стена двора (глубь)
+d.rectangle([560, 360, 1400, 1120], fill=(20, 22, 34))
+for _ in range(26):
+    x = random.randint(580, 1340); y = random.randint(390, 1080)
+    d.rectangle([x, y, x + random.randint(20, 90), y + random.randint(16, 52)],
+                fill=random.choice([(16, 18, 28), (26, 28, 42)]))
+d.rectangle([980, 660, 1120, 800], fill=(13, 15, 24), outline=(42, 44, 60), width=4)
+d.rectangle([998, 678, 1102, 782], fill=(46, 44, 36))
+
+# --- здание справа с АРКОЙ во двор
+d.rectangle([1400, 280, FW, 1120], fill=(23, 25, 38))
+for by in range(300, 1120, 46):
+    for bx in range(1400 + ((by // 46) % 2) * 56, FW, 112):
+        d.rectangle([bx + 2, by + 2, bx + 106, by + 40], fill=(28, 31, 46), outline=(18, 20, 32))
+d.pieslice([1520, 380, 2120, 760], 180, 360, fill=(58, 60, 78))
+d.rectangle([1520, 570, 2120, 1120], fill=(58, 60, 78))
+d.pieslice([1570, 430, 2070, 720], 180, 360, fill=(30, 36, 54))
+d.rectangle([1570, 575, 2070, 1120], fill=(30, 36, 54))
+d.ellipse([1740, 700, 1880, 810], fill=(70, 74, 96))
+d.ellipse([1760, 715, 1780, 735], fill=(152, 142, 112))
+for x in (1660, 1720, 1900, 1960):
+    person(d, x, 980, 150, (16, 18, 28))
+
+# --- асфальт, лужа, люк
+d.rectangle([0, 1120, FW, FH], fill=(18, 20, 30))
+for _ in range(18):
+    x = random.randint(0, FW); y = random.randint(1130, 1340)
+    d.line([(x, y), (x + random.randint(-60, 60), y + random.randint(-14, 14))], fill=(38, 42, 56), width=2)
+d.ellipse([700, 1180, 1560, 1330], fill=(24, 30, 44))
+d.ellipse([820, 1210, 1180, 1270], fill=(38, 46, 64))
+d.ellipse([1660, 1180, 1860, 1300], fill=(30, 32, 44), outline=(52, 56, 72), width=4)
+
+# --- ржавая водосточная труба
+d.rectangle([472, 0, 502, 1120], fill=(56, 50, 48))
+for yy in range(120, 1100, 220):
+    d.rectangle([466, yy, 508, yy + 16], fill=(40, 36, 36))
+for _ in range(20):
+    y = random.randint(40, 1080)
+    d.line([(480, y), (480, y + random.randint(20, 70))], fill=(92, 62, 44), width=2)
+
+# --- мусорные контейнеры
+for cx, col in ((1180, (44, 50, 60)), (1360, (40, 46, 56))):
+    d.rectangle([cx, 990, cx + 200, 1118], fill=col)
+    d.rectangle([cx - 6, 970, cx + 206, 1000], fill=(56, 62, 74))
+d.rectangle([1210, 1010, 1250, 1040], fill=(70, 76, 90))
+
+# --- лампочка на проводе
+x0, y0, x1, y1 = 560, 150, 1400, 200
+for i in range(0, 61):
+    t = i / 60
+    x = x0 + (x1 - x0) * t
+    y = y0 + (y1 - y0) * t + 90 * (4 * t * (1 - t))
+    d.ellipse([x - 2, y - 2, x + 2, y + 2], fill=(60, 62, 78))
+bx = 980; by = y0 + (y1 - y0) * 0.5 + 90
+d.line([(bx, by), (bx, by + 34)], fill=(60, 62, 78), width=3)
+d.ellipse([bx - 16, by + 30, bx + 16, by + 66], fill=(210, 200, 160))
+d.ellipse([bx - 62, by - 30, bx + 62, by + 98], fill=(60, 56, 42))
+
+# --- силуэты у стены (с кепками)
+for px, ph, col in ((980, 320, (8, 9, 15)), (1080, 286, (10, 11, 17))):
+    person(d, px, 760, ph, col)
+    d.rectangle([px - ph * 0.20, 760 + ph * 0.02, px + ph * 0.20, 760 + ph * 0.10], fill=col)
+
+# --- редкая морось
+for _ in range(120):
     x = random.randint(0, FW); y = random.randint(0, FH)
-    d.line([(x, y), (x - 6, y + 40)], fill=(60, 70, 95), width=2)
+    d.line([(x, y), (x - 5, y + 34)], fill=(52, 60, 80), width=2)
 chronicle_tag(d, "ХРОНИКА · 2061")
 save_base(im, "s1_base.png")
 
