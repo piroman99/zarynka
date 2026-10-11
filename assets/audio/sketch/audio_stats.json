@@ -1,0 +1,26 @@
+[
+  {
+    "name": "vn_reception",
+    "mp3": "assets/audio/sketch/vn_reception_0.mp3",
+    "dur_s": 160.8,
+    "rms_db": -20.4,
+    "peak": 0.803,
+    "centroid_hz": 792
+  },
+  {
+    "name": "prolog_chronicle",
+    "mp3": "assets/audio/sketch/prolog_chronicle_0.mp3",
+    "dur_s": 169.0,
+    "rms_db": -20.5,
+    "peak": 0.721,
+    "centroid_hz": 1215
+  },
+  {
+    "name": "vn_space",
+    "mp3": "assets/audio/sketch/vn_space_0.mp3",
+    "dur_s": 162.8,
+    "rms_db": -19.7,
+    "peak": 0.867,
+    "centroid_hz": 842
+  }
+]

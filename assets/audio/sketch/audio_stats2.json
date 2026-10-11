@@ -1,0 +1,34 @@
+[
+  {
+    "name": "vn_reception_soft",
+    "mp3": "assets/audio/sketch/vn_reception_soft_0.mp3",
+    "dur_s": 165.8,
+    "rms_db": -23.5,
+    "peak": 0.564,
+    "centroid_hz": 501
+  },
+  {
+    "name": "vn_reception_lullaby",
+    "mp3": "assets/audio/sketch/vn_reception_lullaby_0.mp3",
+    "dur_s": 175.9,
+    "rms_db": -21.1,
+    "peak": 0.633,
+    "centroid_hz": 719
+  },
+  {
+    "name": "prolog_bed_soft",
+    "mp3": "assets/audio/sketch/prolog_bed_soft_0.mp3",
+    "dur_s": 176.5,
+    "rms_db": -23.0,
+    "peak": 0.881,
+    "centroid_hz": 845
+  },
+  {
+    "name": "prolog_bed_ambient",
+    "mp3": "assets/audio/sketch/prolog_bed_ambient_0.mp3",
+    "dur_s": 174.3,
+    "rms_db": -23.0,
+    "peak": 0.532,
+    "centroid_hz": 440
+  }
+]

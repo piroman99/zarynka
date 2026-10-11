@@ -1,0 +1,38 @@
+[
+  {
+    "frame": "S1",
+    "file": "assets/audio/vo_prolog2/s1_0.wav",
+    "chars": 147,
+    "price": 0.42
+  },
+  {
+    "frame": "S2",
+    "file": "assets/audio/vo_prolog2/s2_0.wav",
+    "chars": 179,
+    "price": 0.51
+  },
+  {
+    "frame": "S3",
+    "file": "assets/audio/vo_prolog2/s3_0.wav",
+    "chars": 190,
+    "price": 0.54
+  },
+  {
+    "frame": "S4",
+    "file": "assets/audio/vo_prolog2/s4_0.wav",
+    "chars": 103,
+    "price": 0.3
+  },
+  {
+    "frame": "S5",
+    "file": "assets/audio/vo_prolog2/s5_0.wav",
+    "chars": 183,
+    "price": 0.52
+  },
+  {
+    "frame": "S6",
+    "file": "assets/audio/vo_prolog2/s6_0.wav",
+    "chars": 180,
+    "price": 0.51
+  }
+]

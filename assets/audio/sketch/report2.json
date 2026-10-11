@@ -1,0 +1,26 @@
+[
+  {
+    "name": "vn_reception_soft",
+    "title": "Приёмная — мягкая (A)",
+    "file": "assets/audio/sketch/vn_reception_soft_0.mp4",
+    "price": 8.13
+  },
+  {
+    "name": "vn_reception_lullaby",
+    "title": "Приёмная — колыбельная (B)",
+    "file": "assets/audio/sketch/vn_reception_lullaby_0.mp4",
+    "price": 8.13
+  },
+  {
+    "name": "prolog_bed_soft",
+    "title": "Пролог — тихий фон (A)",
+    "file": "assets/audio/sketch/prolog_bed_soft_0.mp4",
+    "price": 8.13
+  },
+  {
+    "name": "prolog_bed_ambient",
+    "title": "Пролог — эмбиент-фон (B)",
+    "file": "assets/audio/sketch/prolog_bed_ambient_0.mp4",
+    "price": 8.13
+  }
+]

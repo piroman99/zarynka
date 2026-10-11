@@ -20,3 +20,10 @@ assets/review/review_26_contest.png
 _shots*/
 .cache/
 *.log
+_probe/
+
+# Регенерируемое скриптами (не плодим бинарь в репе)
+assets/mock/
+assets/audio/sketch/*.mp4
+assets/audio/vo_prolog*/*.wav
+out/prolog_animatic_*.mp4

@@ -1,0 +1,214 @@
+# -*- coding: utf-8 -*-
+"""ЧЕРНОВЫЕ КАДРЫ ПРОЛОГА (кадры-моки, 0 ₽, PIL).
+Кадр = схематичная иллюстрация сцены в тоне будущего финала (хроника-пролог).
+Стиль: тёмный кинематографичный мок — силуэты, плакаты, ракета, толпа.
+Выход: assets/mock/prolog/s1..s6.png (2400x1350, с запасом под кен-бёрнс).
+"""
+import os, math, random
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(HERE, "assets", "mock", "prolog")
+GOTHIC = "/usr/share/fonts/opentype/urw-base35/URWGothic-Demi.otf"
+LATO = "/usr/share/fonts/truetype/lato/Lato-Medium.ttf"
+LATO_B = "/usr/share/fonts/truetype/lato/Lato-Bold.ttf"
+
+FW, FH = 2400, 1350
+GOLD = (226, 186, 104)
+CREAM = (246, 238, 222)
+RED = (206, 74, 66)
+random.seed(7)
+
+
+def f(p, s):
+    return ImageFont.truetype(p, s)
+
+
+def vgrad(size, top, bot):
+    w, h = size
+    im = Image.new("RGB", (1, h))
+    px = im.load()
+    for y in range(h):
+        t = y / (h - 1)
+        px[0, y] = tuple(int(top[i] + (bot[i] - top[i]) * t) for i in range(3))
+    return im.resize((w, h))
+
+
+def add_vignette(im, strength=0.8):
+    w, h = im.size
+    mask = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(mask).ellipse([-w * 0.22, -h * 0.30, w * 1.22, h * 1.30], fill=255)
+    mask = mask.filter(ImageFilter.GaussianBlur(w // 10))
+    dark = Image.new("RGB", (w, h), (0, 0, 0))
+    return Image.composite(im, dark, Image.eval(mask, lambda v: 255 - int((255 - v) * strength)))
+
+
+def add_grain(im, amt=16):
+    w, h = im.size
+    n = Image.effect_noise((w, h), amt).convert("L")
+    return Image.blend(im, Image.merge("RGB", (n, n, n)), 0.10)
+
+
+def person(d, x, y, h, col):
+    """силуэт человека: голова + тело."""
+    hh = h * 0.24
+    d.ellipse([x - hh / 2, y, x + hh / 2, y + hh], fill=col)
+    d.polygon([(x - h * 0.16, y + hh * 1.05), (x + h * 0.16, y + hh * 1.05),
+               (x + h * 0.13, y + h), (x - h * 0.13, y + h)], fill=col)
+
+
+def chronicle_tag(d, txt):
+    d.rectangle([70, 70, 70 + 26 + int(len(txt) * 15), 128], fill=(0, 0, 0))
+    d.text((90, 82), txt, font=f(LATO_B, 30), fill=(232, 180, 120))
+
+
+def save(im, name):
+    os.makedirs(OUT, exist_ok=True)
+    p = os.path.join(OUT, name)
+    add_grain(add_vignette(im, 0.75), 14).save(p)
+    print("saved", os.path.relpath(p, HERE), im.size)
+
+
+# ---------------------------------------------------------------- S1 подворотня
+im = vgrad((FW, FH), (16, 20, 34), (6, 8, 16))
+d = ImageDraw.Draw(im)
+# стены кирпичом
+for side, x0 in (("L", 0), ("R", FW - 520)):
+    d.rectangle([x0, 0, x0 + 520, FH], fill=(24, 27, 42))
+    for by in range(60, FH, 46):
+        for bx in range(x0 + ((by // 46) % 2) * 55, x0 + 520, 110):
+            d.rectangle([bx + 3, by + 3, bx + 100, by + 38], fill=(30, 34, 52), outline=(20, 23, 36))
+# лужа-свет
+d.ellipse([820, 980, 1600, 1180], fill=(24, 30, 46))
+# силуэт у стены
+person(d, 1180, 700, 300, (7, 8, 14))
+person(d, 1250, 720, 270, (9, 10, 16))
+# плакат-вопрос
+d.rectangle([560, 250, 1180, 520], fill=(18, 20, 30), outline=(70, 74, 96), width=4)
+d.text((870, 300), "МАРС", font=f(GOTHIC, 96), fill=(210, 196, 160), anchor="ma")
+d.text((870, 410), "ДЕЛО ОБЩЕЕ?", font=f(GOTHIC, 62), fill=(200, 150, 90), anchor="ma")
+d.line([(600, 470), (1140, 470)], fill=(150, 70, 60), width=10)   # зачёркнуто
+# дождь
+for _ in range(220):
+    x = random.randint(0, FW); y = random.randint(0, FH)
+    d.line([(x, y), (x - 6, y + 40)], fill=(60, 70, 95), width=2)
+chronicle_tag(d, "ХРОНИКА · 2061")
+save(im, "s1.png")
+
+# ---------------------------------------------------------------- S2 Звёздный городок
+# ВАЖНО (правка заказчика 2026-10-11): Звёздный городок — небольшой городок в Подмосковье,
+# ЦЕНТР ПОДГОТОВКИ КОСМОНАВТОВ (тренажёры, центрифуга, гидролаборатория, медицина).
+# Крупных космических ракет там НЕТ (ракеты — Байконур). Ракету из кадра убрали.
+im = vgrad((FW, FH), (28, 36, 64), (12, 15, 26))
+d = ImageDraw.Draw(im)
+# закатное зарево
+d.ellipse([1620, 720, 2200, 1180], fill=(54, 50, 72))
+d.rectangle([0, 1120, FW, FH], fill=(14, 16, 24))   # земля
+# жилые дома городка (низкие, тёплые окна)
+for x, w, h in ((120, 300, 190), (450, 260, 230), (740, 300, 200), (1080, 280, 240)):
+    d.rectangle([x, 1120 - h, x + w, 1120], fill=(50, 56, 78))
+    for wy in range(1120 - h + 34, 1120 - 26, 48):
+        for wx in range(x + 24, x + w - 30, 58):
+            d.rectangle([wx, wy, wx + 28, wy + 28], fill=(158, 172, 120))
+# центр подготовки: длинный корпус с окнами
+d.rectangle([1380, 780, 2360, 1120], fill=(58, 64, 88))
+for wx in range(1410, 2340, 74):
+    d.rectangle([wx, 820, wx + 40, 1120], fill=(74, 82, 110))
+d.rectangle([1380, 760, 2360, 800], fill=(78, 86, 112))
+# купол гидролаборатории
+d.pieslice([1560, 560, 1960, 860], 180, 360, fill=(72, 80, 108))
+# центрифуга: башня + вращающаяся стрела
+d.rectangle([850, 800, 910, 1120], fill=(46, 52, 72))
+d.ellipse([852, 762, 908, 818], fill=(122, 130, 152))
+d.line([(880, 790), (1130, 640)], fill=(154, 162, 184), width=14)
+d.ellipse([1112, 622, 1168, 678], fill=(176, 184, 204))
+# прожекторы-мачты
+for x in (600, 1760):
+    d.line([(x, 1120), (x - 36, 900)], fill=(120, 126, 150), width=4)
+    d.ellipse([x - 66, 840, x + 6, 912], fill=(120, 128, 150))
+# люди у корпуса
+for x in range(260, 1340, 150):
+    person(d, x, 1010, 110, (10, 12, 20))
+d.text((1870, 1070), "ЦПК", font=f(GOTHIC, 44), fill=(226, 186, 104), anchor="ma")
+chronicle_tag(d, "ЗВЁЗДНЫЙ ГОРОДОК · ЦЕНТР ПОДГОТОВКИ")
+save(im, "s2.png")
+
+# ---------------------------------------------------------------- S3 вопрос
+im = vgrad((FW, FH), (22, 26, 42), (8, 9, 16))
+d = ImageDraw.Draw(im)
+d.rectangle([340, 250, 2060, 950], fill=(12, 16, 26), outline=(80, 120, 175), width=6)
+d.text((1200, 330), "«МАРС —", font=f(GOTHIC, 120), fill=CREAM, anchor="ma")
+d.text((1200, 480), "ДЕЛО ОБЩЕЕ?»", font=f(GOTHIC, 120), fill=GOLD, anchor="ma")
+d.text((1200, 680), "«ОБЩЕЕ!»", font=f(GOTHIC, 96), fill=(150, 210, 150), anchor="ma")
+d.text((1200, 820), "А ЧТО ЖЕ ОБЫЧНЫХ ЛЮДЕЙ НЕТ?", font=f(GOTHIC, 54), fill=(200, 205, 225), anchor="ma")
+# хор толпы
+for x in range(160, 2320, 130):
+    person(d, x, 1080, 190 + (x // 130 % 3) * 30, (9, 10, 16))
+chronicle_tag(d, "ЗАЛ · ВОПРОС")
+save(im, "s3.png")
+
+# ---------------------------------------------------------------- S4 ролик-нарезка
+im = vgrad((FW, FH), (10, 12, 22), (4, 5, 10))
+d = ImageDraw.Draw(im)
+d.rectangle([420, 230, 1980, 1120], fill=(8, 20, 34), outline=(120, 124, 140), width=5)
+# звёзды внутри
+for _ in range(120):
+    x = random.randint(450, 1950); y = random.randint(260, 1000)
+    d.point((x, y), fill=(200, 210, 235))
+# планета
+d.ellipse([1500, 780, 1900, 1110], fill=(176, 118, 88))
+d.ellipse([1500, 780, 1900, 1110], outline=(220, 180, 150))
+# play
+d.polygon([(1080, 520), (1080, 840), (1420, 680)], fill=(235, 235, 238))
+# глитч-полосы
+for _ in range(24):
+    y = random.randint(240, 1110)
+    d.rectangle([420, y, 1980, y + random.randint(2, 7)], fill=(40, 120, 150))
+# неудобный вопрос в конце
+d.rectangle([560, 900, 1840, 1010], fill=(0, 0, 0))
+d.text((1200, 922), "А ЧТО ЖЕ ОБЫЧНЫХ ЛЮДЕЙ НЕТ?", font=f(GOTHIC, 44), fill=(230, 190, 120), anchor="ma")
+chronicle_tag(d, "ВИДЕОРОЛИК · НАРЕЗКА")
+save(im, "s4.png")
+
+# ---------------------------------------------------------------- S5 лозунг облетел страну
+im = vgrad((FW, FH), (30, 26, 40), (12, 10, 18))
+d = ImageDraw.Draw(im)
+# силуэт карты
+d.polygon([(360, 470), (980, 330), (1500, 470), (1480, 900), (900, 1010), (420, 880)],
+          fill=(38, 52, 72), outline=(90, 110, 140))
+# красные плакаты-лозунги
+for x, y in ((560, 520), (860, 470), (1120, 560), (720, 720), (1040, 760)):
+    d.rectangle([x, y, x + 230, y + 130], fill=(186, 62, 54))
+    d.text((x + 115, y + 40), "МАРС —", font=f(GOTHIC, 34), fill=CREAM, anchor="ma")
+    d.text((x + 115, y + 82), "ДЛЯ ВСЕХ!", font=f(GOTHIC, 30), fill=CREAM, anchor="ma")
+# здание Верховного Совета
+d.rectangle([1720, 620, 2300, 1120], fill=(64, 60, 70))
+for x in range(1760, 2280, 90):
+    d.rectangle([x, 700, x + 46, 1120], fill=(90, 86, 96))
+d.polygon([(1700, 620), (2320, 620), (2010, 520)], fill=(76, 70, 82))
+d.text((2010, 1160), "ВЕРХОВНЫЙ СОВЕТ", font=f(LATO_B, 40), fill=(230, 190, 120), anchor="ma")
+d.text((760, 1160), "2 МЕСТА «С УЛИЦЫ»", font=f(GOTHIC, 52), fill=(255, 210, 120), anchor="ma")
+chronicle_tag(d, "ЛОЗУНГ · СТРАНА")
+save(im, "s5.png")
+
+# ---------------------------------------------------------------- S6 очередь
+im = vgrad((FW, FH), (34, 32, 44), (14, 13, 20))
+d = ImageDraw.Draw(im)
+# здание приёмной
+d.rectangle([1500, 380, 2380, 1120], fill=(60, 54, 46))
+d.rectangle([1500, 380, 2380, 470], fill=(76, 68, 56))
+d.text((1940, 520), "ПРИЁМНАЯ", font=f(GOTHIC, 64), fill=GOLD, anchor="ma")
+d.rectangle([1660, 720, 1840, 1120], fill=(30, 26, 20))
+d.rectangle([2000, 720, 2180, 1120], fill=(30, 26, 20))
+# очередь силуэтов
+x = 240
+i = 0
+while x < 1460:
+    h = 300 + (i % 3) * 60
+    person(d, x + 90, 820 - h + h, h, (12, 13, 20))
+    x += 150
+    i += 1
+chronicle_tag(d, "ОЧЕРЕДЬ · ПРИЁМНАЯ")
+save(im, "s6.png")
+
+print("готово: 6 кадров-моков")

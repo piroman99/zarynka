@@ -1,0 +1,20 @@
+[
+  {
+    "name": "vn_reception",
+    "title": "Приёмная (тёплая)",
+    "file": "assets/audio/sketch/vn_reception_0.mp4",
+    "price": 8.13
+  },
+  {
+    "name": "prolog_chronicle",
+    "title": "Пролог-хроника",
+    "file": "assets/audio/sketch/prolog_chronicle_0.mp4",
+    "price": 8.13
+  },
+  {
+    "name": "vn_space",
+    "title": "Космос (холодный)",
+    "file": "assets/audio/sketch/vn_space_0.mp4",
+    "price": 8.13
+  }
+]

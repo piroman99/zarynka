@@ -1,0 +1,30 @@
+[
+  {
+    "label": "gpt_onyx",
+    "model": "gpt-4o-mini-tts",
+    "voice": "onyx",
+    "file": "assets/audio/vo_test/gpt_onyx_0.mp3",
+    "price": 0.02
+  },
+  {
+    "label": "gemini_charon",
+    "model": "gemini-3.8-flash-tts",
+    "voice": "Charon",
+    "file": "assets/audio/vo_test/gemini_charon_0.wav",
+    "price": 0.46
+  },
+  {
+    "label": "qwen_unclefu",
+    "model": "qwen3-tts",
+    "voice": "Uncle_Fu",
+    "file": "assets/audio/vo_test/qwen_unclefu_0.mp3",
+    "price": 0.44
+  },
+  {
+    "label": "elv_roger",
+    "model": "elevenlabs-v4-tts",
+    "voice": "Roger",
+    "file": "assets/audio/vo_test/elv_roger_0.mp3",
+    "price": 1.76
+  }
+]
