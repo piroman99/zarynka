@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-"""ЧЕРНОВИК-АНИМАТИК ПРОЛОГА «Зарянка» v3 (слои + появление по фразе + затемнение).
-P0 (3D-значок) + S1..S6: base-кадры + оверлеи, которые проявляются ПО ФРАЗЕ закадра
-(правка заказчика: «МАРС — ДЕЛО ОБЩЕЕ» и т.д. появляются в момент произнесения).
-Голос: vo_prolog2 (Charon) + atempo 0.95. Конец — плавное затемнение в чёрное.
+"""ЧЕРНОВИК-АНИМАТИК ПРОЛОГА «Зарянка» v4 (слои + появление по фразе + грейд + хвост).
+P0 (3D-значок) + S1..S6 (с закадром) + S7 «проходная·очередь» (ХВОСТ БЕЗ РЕЧИ).
+Оверлеи проявляются ПО ФРАЗЕ закадра («МАРС — ДЕЛО ОБЩЕЕ» и т.д. — в момент произнесения).
+Голос: vo_prolog2 (Charon) + atempo 0.95. Грейд «тёплый архив»-lite.
+Финал: речь кончается на S6, ДАЛЬШЕ идёт молчаливый S7, и только ПОСЛЕ него — затемнение
+(правка заказчика 2026-10-11: «сначала закончим речь, потом затемнение»).
 Выход: out/prolog_animatic_draft.mp4 (с голосом) и out/prolog_animatic_subs.mp4.
 1920x1080, 25 fps.
 """
@@ -31,6 +33,9 @@ BED_VOL_SUB = 0.55
 CREAM = (246, 238, 222)
 REVEAL_FADE = 0.7        # длительность проявления оверлея, с
 END_FADE = 2.4           # финальное затемнение, с
+TAIL_SHOT = 's7'         # кадр-хвост «проходная·очередь» (БЕЗ закадра) — речь кончается перед ним
+TAIL_SEC = 10.4          # длительность хвоста, с (последние END_FADE — затемнение)
+GRADE = True             # грейд «тёплый архив»-lite (подтверждён заказчиком 2026-10-11)
 
 sys.path.insert(0, HERE)
 from prolog_script import SEG
@@ -75,6 +80,24 @@ for _i, (_co, _ci) in enumerate(zip((5, 5, 14), (20, 18, 42))):
 BG = Image.fromarray(_bgbuf.astype(np.uint8), 'RGB')
 
 
+# ---- грейд «тёплый архив»-lite ---------------------------------------
+_CM = np.array([[0.393, 0.769, 0.189],
+                [0.349, 0.686, 0.168],
+                [0.272, 0.534, 0.131]], np.float32)
+
+
+def grade(im):
+    """45% сепии + тёплый тинт + чуть контраста (НЕ гасит красные плакаты/золото значка)."""
+    a = np.asarray(im, np.float32)
+    s = np.clip(a @ _CM.T, 0, 255)
+    b = 0.45 * s + 0.55 * a
+    b[..., 0] = np.clip(b[..., 0] * 1.035, 0, 255)
+    b[..., 1] = np.clip(b[..., 1] * 1.005, 0, 255)
+    b[..., 2] = np.clip(b[..., 2] * 0.930, 0, 255)
+    b = np.clip((b - 128.0) * 1.07 + 128.0, 0, 255)
+    return Image.fromarray(b.astype(np.uint8), 'RGB')
+
+
 def render_p0(t):
     t = max(0.0, min(P0_SEC, t))
     a = angle_at(t)
@@ -94,6 +117,7 @@ MOT = {
     's4': (1.00, 0.90, 0.50, 0.50, 0.50, 0.50),
     's5': (0.90, 1.00, 0.50, 0.50, 0.52, 0.48),
     's6': (1.00, 0.87, 0.50, 0.42, 0.56, 0.50),
+    's7': (1.00, 0.88, 0.50, 0.60, 0.54, 0.50),   # хвост: медленный наезд к будке с плакатом
 }
 _SRC = {n: Image.open(os.path.join(MOCK, n + '_base.png')).convert('RGB') for n in MOT}
 OVL = {}   # name -> list of (rgb, alphaL, reveal_time)
@@ -205,6 +229,9 @@ st = P0_SEC
 for name in order:
     segs.append((name, st, durs[name]))
     st += durs[name]
+VO_END = st               # здесь кончается закадровая речь
+segs.append((TAIL_SHOT, VO_END, TAIL_SEC))   # молчаливый хвост S7
+st += TAIL_SEC
 TOTAL = st
 NF = int(round(TOTAL * FPS))
 
@@ -213,7 +240,7 @@ REVEAL_T = {}
 print('кадры:', NF, '| длительность %.1f c (%.2f мин)' % (TOTAL, TOTAL / 60))
 for nm, a, dd in segs:
     print('  %-3s %6.2f -> %6.2f (%.2f c)' % (nm, a, a + dd, dd))
-    if nm == 'P0':
+    if nm not in TXT:
         continue
     txt = TXT[nm]
     for label, phrase in REVEALS.get(nm, []):
@@ -252,10 +279,14 @@ def grain(im):
 # ---- 1) немое видео ----------------------------------------------------
 SILENT = os.path.join(TMP, 'prolog_silent.mp4')
 os.makedirs(os.path.dirname(OUT_VO), exist_ok=True)
-vcmd = [FF, '-y', '-f', 'rawvideo', '-pixel_format', 'rgb24', '-video_size', '%dx%d' % (W, H),
+vcmd = [FF, '-y', '-nostats', '-loglevel', 'error',
+        '-f', 'rawvideo', '-pixel_format', 'rgb24', '-video_size', '%dx%d' % (W, H),
         '-framerate', str(FPS), '-i', '-', '-c:v', 'libx264', '-preset', 'veryfast',
         '-crf', '20', '-pix_fmt', 'yuv420p', SILENT]
-proc = subprocess.Popen(vcmd, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+# ВАЖНО: stderr НЕ в PIPE — иначе буфер трубы переполняется и ffmpeg встаёт (дедлок).
+FFLOG = os.path.join(TMP, 'ffmpeg_silent.log')
+_fflog = open(FFLOG, 'wb')
+proc = subprocess.Popen(vcmd, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=_fflog)
 for fidx in range(NF):
     t = fidx / FPS
     k, nm, lt, dur = shot_at(t)
@@ -265,7 +296,9 @@ for fidx in range(NF):
         pnm, pa, pd = segs[k - 1]
         prev = render_shot(pnm, min(t - pa, pd - 1e-6), pd)
         im = Image.blend(prev, im, a)
-    if nm != 'P0':
+    if GRADE:
+        im = grade(im)
+    if nm in TXT:
         draw_subs(im, nm, lt / dur if dur > 0 else 0)
     im = grain(im)
     # финальное затемнение в чёрное
@@ -279,19 +312,21 @@ proc.stdin.close()
 rc = proc.wait()
 print('silent video rc', rc, os.path.getsize(SILENT) if os.path.exists(SILENT) else 0)
 if rc:
-    print(proc.stderr.read().decode('utf-8', 'replace')[-1500:]); sys.exit(1)
+    _fflog.flush()
+    print(open(FFLOG).read()[-1500:]); sys.exit(1)
 
 # ---- 2) звук -----------------------------------------------------------
 AUD_VO = os.path.join(TMP, 'prolog_audio_vo.wav')
 AUD_SUB = os.path.join(TMP, 'prolog_audio_subs.wav')
 bed_out = TOTAL - 3.0
 fc = ["[0:a]volume=%s,afade=t=in:st=0:d=1.5,afade=t=out:st=%.2f:d=3[bed]" % (BED_VOL, bed_out)]
-for i, (nm, a, dd) in enumerate(segs[1:], start=1):
+vo_segs = [s for s in segs if s[0] in durs]     # только сегменты с озвучкой (без S7-хвоста)
+for i, (nm, a, dd) in enumerate(vo_segs, start=1):
     fc.append("[%d:a]adelay=%d:all=1[v%d]" % (i, int(a * 1000), i))
-mixin = "[bed]" + "".join("[v%d]" % i for i in range(1, len(segs)))
-fc.append("%samix=inputs=%d:normalize=0,alimiter=level_in=1:limit=0.97[a]" % (mixin, len(segs)))
+mixin = "[bed]" + "".join("[v%d]" % i for i in range(1, len(vo_segs) + 1))
+fc.append("%samix=inputs=%d:normalize=0,alimiter=level_in=1:limit=0.97[a]" % (mixin, len(vo_segs) + 1))
 cmd = [FF, '-y', '-i', BED]
-for nm in order:
+for nm, a, dd in vo_segs:
     cmd += ['-i', os.path.join(VOSLOW, nm + '.wav')]
 cmd += ['-filter_complex', ';'.join(fc), '-map', '[a]', '-t', '%.3f' % TOTAL,
         '-ar', '48000', '-ac', '2', AUD_VO]
