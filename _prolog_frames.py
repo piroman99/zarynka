@@ -325,4 +325,65 @@ while x < 1460:
 chronicle_tag(d, "ОЧЕРЕДЬ · ПРИЁМНАЯ")
 save_base(im, "s6_base.png")
 
+# ================================================================ S7 ПРОХОДНАЯ (КПП) с очередью
+# Предложение заказчика 2026-10-11: отдельный кадр — проходная/КПП, куда тянется очередь
+# от приёмной; сюда же вешаем плакат «ТЫ НЕ ПРОЙДЁШЬ!».
+im = new_base((30, 34, 48), (11, 12, 18))
+d = ImageDraw.Draw(im)
+
+# --- асфальт с разметкой
+d.rectangle([0, 1120, FW, FH], fill=(16, 18, 26))
+for _ in range(16):
+    x = random.randint(0, FW); y = random.randint(1130, 1340)
+    d.line([(x, y), (x + random.randint(-60, 60), y + random.randint(-12, 12))], fill=(38, 42, 56), width=2)
+
+# --- кирпичный забор (дальний план)
+for by in range(520, 1120, 42):
+    for bx in range(((by // 42) % 2) * 50, 1560, 100):
+        d.rectangle([bx + 2, by + 2, bx + 94, by + 36], fill=(31, 34, 49), outline=(20, 22, 34))
+d.rectangle([0, 480, 1560, 520], fill=(44, 46, 60))
+
+# --- БУДКА-ПРОХОДНАЯ (справа)
+d.rectangle([1560, 340, FW, 1120], fill=(48, 46, 42))
+d.rectangle([1560, 340, FW, 420], fill=(68, 64, 58))
+d.rectangle([1640, 520, 1980, 790], fill=(92, 106, 120), outline=(28, 28, 32), width=7)   # окно
+d.line([(1810, 520), (1810, 790)], fill=(28, 28, 32), width=5)
+d.rectangle([1560, 900, 1640, 1120], fill=(30, 27, 22))                                   # дверь
+d.rectangle([1980, 470, 2300, 560], fill=(36, 34, 30))                                    # вывеска
+d.text((2140, 486), "ПРОХОДНАЯ", font=f(GOTHIC, 52), fill=GOLD, anchor="ma")
+
+# --- ТУРНИКЕТ у будки
+d.rectangle([1470, 780, 1560, 1120], fill=(70, 74, 86))
+for yy in range(840, 1100, 64):
+    d.line([(1470, yy), (1408, yy - 22)], fill=(112, 118, 132), width=9)
+d.ellipse([1470, 748, 1560, 838], fill=(96, 102, 116))
+
+# --- ОЧЕРЕДЬ: змейка людей, тянущаяся от приёмной (слева) к проходной
+for row, (yy, dx, col) in enumerate(((820, 0, (12, 13, 20)), (940, 60, (9, 10, 16)))):
+    x = 120 + dx
+    i = 0
+    while x < 1420:
+        h = 300 + (i % 3) * 46
+        person(d, x + 70, yy, h, col)
+        x += 142
+        i += 1
+
+# --- ПЛАКАТ «ТЫ НЕ ПРОЙДЁШЬ!» на будке
+px0, py0, px1, py1 = 2010, 640, 2290, 830
+d.rectangle([px0, py0, px1, py1], fill=(206, 196, 170), outline=(178, 54, 46), width=9)
+import math as _m
+_cx, _cy, _R = (px0 + px1) / 2, py0 + 34, 22
+_star = []
+for _k in range(10):
+    _r = _R if _k % 2 == 0 else _R * 0.42
+    _a = _m.radians(-90 + 36 * _k)
+    _star.append((_cx + _r * _m.cos(_a), _cy + _r * _m.sin(_a)))
+d.polygon(_star, fill=(196, 54, 44))
+d.text((_cx, py0 + 78), "ТЫ НЕ", font=f(GOTHIC, 38), fill=(170, 44, 36), anchor="ma")
+d.text((_cx, py0 + 122), "ПРОЙДЁШЬ!", font=f(GOTHIC, 32), fill=(170, 44, 36), anchor="ma")
+d.text((_cx, py0 + 162), "ВАХТА · ПРИЁМНАЯ", font=f(LATO_B, 16), fill=(120, 96, 60), anchor="ma")
+
+chronicle_tag(d, "ПРОХОДНАЯ · ОЧЕРЕДЬ")
+save_base(im, "s7_base.png")
+
 print("готово: base + оверлеи")
