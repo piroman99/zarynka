@@ -22,7 +22,8 @@ BACK_TEX = os.path.join(GEN, 'znachek_k2_back.png')      # оборот-иллю
 LATO_B = '/usr/share/fonts/truetype/lato/Lato-Bold.ttf'
 GOTHIC = '/usr/share/fonts/opentype/urw-base35/URWGothic-Demi.otf'
 
-RIB_TEXT = 'ЛМД · Ц. 67 КОП.'
+RIB_TEXT = 'ЛМД'
+RIB_FACE = 3   # грань, которая повёрнута к камере при 90° (ребро) — гравировка тут
 R = 1.0                       # радиус описанной окружности пятиугольника
 T = 0.10                      # толщина значка (ребро)
 CAM_D = 6.0                   # дистанция камеры
@@ -67,7 +68,7 @@ def load_pent_tex(path):
     return im
 
 
-def side_tex(w=48, h=512, text=None):
+def side_tex(w=128, h=1024, text=None):
     """Боковая грань: золотой градиент; если text — вертикальная гравировка."""
     im = Image.new('RGB', (w, h), (150, 116, 52))
     d = ImageDraw.Draw(im)
@@ -156,7 +157,7 @@ def cam_depth(verts_rot):
     return float(np.mean(CAM_D - verts_rot[:, 2]))
 
 
-def render(theta_deg, rib_face=0, w=OUT_W, h=OUT_H):
+def render(theta_deg, rib_face=RIB_FACE, w=OUT_W, h=OUT_H):
     theta = math.radians(theta_deg)
     Ry = rot_y(theta)
     V0 = prism_vertices() @ Ry.T
@@ -171,7 +172,7 @@ def render(theta_deg, rib_face=0, w=OUT_W, h=OUT_H):
 
     front_tex = load_pent_tex(FRONT_TEX)
     back_tex = load_pent_tex(BACK_TEX)
-    rib_texs = [side_tex(48, 512, RIB_TEXT if i == rib_face else None) for i in range(5)]
+    rib_texs = [side_tex(128, 1024, RIB_TEXT if i == rib_face else None) for i in range(5)]
 
     canvas = {'img': np.zeros((h, w, 3), np.uint8), 'zbuf': np.full((h, w), 1e9), 'W': w, 'H': h}
     canvas['img'][:] = (6, 8, 18)

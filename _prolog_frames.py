@@ -157,6 +157,21 @@ for px, ph, col in ((980, 320, (8, 9, 15)), (1080, 286, (10, 11, 17))):
     person(d, px, 760, ph, col)
     d.rectangle([px - ph * 0.20, 760 + ph * 0.02, px + ph * 0.20, 760 + ph * 0.10], fill=col)
 
+# --- ПАСХАЛКА: котобус — детский рисунок МЕЛОМ на кирпичной стене (псевдоним автора → Catbus)
+CK = (210, 205, 190)
+kx0, ky0, kx1, ky1 = 165, 815, 470, 955
+d.rounded_rectangle([kx0, ky0, kx1, ky1], radius=42, outline=CK, width=5)
+d.polygon([(kx0 + 60, ky0 + 6), (kx0 + 108, ky0 - 54), (kx0 + 150, ky0 + 6)], outline=CK, width=5)
+d.polygon([(kx1 - 150, ky0 + 6), (kx1 - 108, ky0 - 54), (kx1 - 60, ky0 + 6)], outline=CK, width=5)
+for wx in range(kx0 + 46, kx1 - 40, 74):
+    d.rectangle([wx, ky0 + 34, wx + 46, ky0 + 86], outline=CK, width=4)
+for lx in range(kx0 + 34, kx1 - 30, 62):
+    d.line([(lx, ky1), (lx, ky1 + 58)], fill=CK, width=5)
+d.line([(kx1 - 4, ky0 + 96), (kx1 + 66, ky0 + 70), (kx1 + 74, ky0 + 128)], fill=CK, width=5)
+d.ellipse([kx1 - 96, ky0 + 40, kx1 - 78, ky0 + 58], outline=CK, width=4)
+for k in range(3):
+    d.line([(kx1 - 96, ky0 + 74 + k * 12), (kx1 - 10, ky0 + 62 + k * 16)], fill=CK, width=2)
+
 # --- редкая морось
 for _ in range(120):
     x = random.randint(0, FW); y = random.randint(0, FH)
@@ -197,6 +212,21 @@ for x in (380, 1360, 1960):
     d.ellipse([x - 64, 840, x + 4, 908], fill=(126, 132, 154))
 for x in range(1180, 2360, 160):
     person(d, x, 1010, 120, (10, 12, 20))
+# --- ПАСХАЛКА: современный транспорт-2061 с маршрутом «410» на краю космодрома
+tx0, ty0, tx1, ty1 = 120, 986, 486, 1098
+d.rounded_rectangle([tx0, ty0, tx1, ty1], radius=34, fill=(172, 180, 196), outline=(96, 104, 122), width=3)
+d.rounded_rectangle([tx0 + 6, ty0 + 6, tx1 - 6, ty0 + 40], radius=24, fill=(198, 205, 220))
+d.rounded_rectangle([tx0 + 34, ty0 + 40, tx1 - 30, ty0 + 78], radius=14, fill=(22, 30, 42))
+d.rounded_rectangle([tx0 + 40, ty0 + 45, tx1 - 36, ty0 + 55], radius=8, fill=(60, 78, 100))
+d.rounded_rectangle([tx0 + 12, ty0 + 12, tx0 + 96, ty0 + 44], radius=8, fill=(12, 14, 20))
+d.text((tx0 + 20, ty0 + 14), "410", font=f(GOTHIC, 26), fill=(120, 234, 210))
+d.rounded_rectangle([tx1 - 40, ty0 + 18, tx1 - 10, ty0 + 40], radius=6, fill=(246, 232, 180))
+d.line([(tx0 + 20, ty1 - 26), (tx1 - 20, ty1 - 26)], fill=(120, 234, 210), width=3)
+d.rounded_rectangle([tx0 + 10, ty1 - 14, tx1 - 10, ty1], radius=6, fill=(60, 66, 80))
+for cx in (tx0 + 78, tx1 - 78):
+    d.ellipse([cx - 30, ty1 - 26, cx + 30, ty1 + 18], fill=(30, 32, 40))
+    d.ellipse([cx - 16, ty1 - 12, cx + 16, ty1 + 4], fill=(120, 126, 140))
+d.line([(tx0 + 30, ty0 + 20), (tx0 + 150, ty0 + 12)], fill=(200, 205, 215), width=4)
 chronicle_tag(d, "КОСМОДРОМ · 2061")
 save_base(im, "s2_base.png")
 
@@ -281,6 +311,11 @@ d.rectangle([1500, 380, 2380, 470], fill=(76, 68, 56))
 d.text((1940, 520), "ПРИЁМНАЯ", font=f(GOTHIC, 64), fill=GOLD, anchor="ma")
 d.rectangle([1660, 720, 1840, 1120], fill=(30, 26, 20))
 d.rectangle([2000, 720, 2180, 1120], fill=(30, 26, 20))
+# --- ПАСХАЛКА: цифровые часы 06:07 на стене (валидное время, но читается «шесть-семь»)
+clx0, cly0, clx1, cly1 = 1552, 536, 1772, 614
+d.rounded_rectangle([clx0, cly0, clx1, cly1], radius=8, fill=(16, 18, 20), outline=(90, 86, 78), width=3)
+d.text(((clx0 + clx1) / 2, (cly0 + cly1) / 2), "06:07", font=f(GOTHIC, 50),
+       fill=(238, 176, 84), anchor="mm")
 x, i = 240, 0
 while x < 1460:
     h = 300 + (i % 3) * 60
