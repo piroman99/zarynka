@@ -25,7 +25,7 @@
   let autoOn = qp.get("auto") === "1";
 
   let autoTimer = null, playToken = 0;
-  const AUTO_BASE = 700, AUTO_PER_CHAR = 34, AUTO_GAP = 700;
+  const AUTO_BASE = 450, AUTO_PER_CHAR = 20, AUTO_GAP = 500;   // ~1.1–2.4 с на страницу
 
   const NODES = D.nodes;
   // плоский список страниц всех сцен → единая навигация вперёд/назад
@@ -141,7 +141,7 @@
     const s = SCENES[pos]; if (!s) return;
     const nd = NODES[s.n], pg = nd.pages[s.p];
     const t = playToken;
-    let delay = AUTO_BASE + Math.min(4500, pg.tx.length * AUTO_PER_CHAR);
+    let delay = AUTO_BASE + Math.min(1900, pg.tx.length * AUTO_PER_CHAR);
     if (voiceOn && nd.vo && !voice.paused && isFinite(voice.duration)) {
       const remain = Math.max(0, (voice.duration - voice.currentTime)) * 1000;
       delay = Math.max(delay, remain + AUTO_GAP);
