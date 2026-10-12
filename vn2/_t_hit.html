@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1117">
+<title>Зарянка — визуальная новелла</title>
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="stage">
+    <div id="bg-a" class="bg"></div>
+    <div id="bg-b" class="bg"></div>
+    <img id="sprite" alt="">
+    <div id="vignette"></div>
+
+    <!-- тулбар: авто / тумблеры текст / голос / музыка -->
+    <div id="tools">
+      <button id="t-auto"  class="tg wide" title="Авто-режим (листается само)">Авто</button>
+      <button id="t-text"  class="tg" title="Текст (подстрочник)">Aa</button>
+      <button id="t-voice" class="tg" title="Голос закадра">🎙</button>
+      <button id="t-music" class="tg" title="Музыка">♪</button>
+    </div>
+
+    <!-- Титры -->
+    <section id="title" class="screen show">
+      <div class="title-inner">
+        <img src="img/logo.png" alt="" class="logo">
+        <h1 id="tt">ЗАРЯНКА</h1>
+        <p class="sub">визуальная новелла</p>
+        <p class="ep" id="tep"></p>
+        <button id="start">Начать</button>
+        <button id="teaser" class="ghost">▶ Тизер</button>
+        <p class="by" id="byline"></p>
+      </div>
+    </section>
+
+    <!-- Видео-узел: интро-значок -->
+    <div id="vlayer" hidden>
+      <video id="znak" playsinline preload="auto"></video>
+      <button id="vskip">Пропустить ▸</button>
+    </div>
+
+    <!-- Навигация: назад / далее -->
+    <div id="nav">
+      <button id="prev" title="Назад (←)">‹</button>
+      <button id="next" title="Далее (→)">›</button>
+    </div>
+
+    <!-- Диалог -->
+    <div id="hud">
+      <div id="chapter"></div>
+      <div id="box">
+        <div id="name"></div>
+        <div id="text"></div>
+        <div id="hint">▸ пробел / клик — далее · ← — назад</div>
+      </div>
+    </div>
+
+    <!-- Конец серии -->
+    <section id="end" class="screen">
+      <div class="title-inner">
+        <p class="endkicker">Конец первой серии</p>
+        <h2 class="endttl">Ждите следующих серий</h2>
+        <div class="endbtns">
+          <button id="e-menu">В меню</button>
+          <button id="e-teaser" class="ghost">▶ Тизер</button>
+        </div>
+        <p class="by" id="e-byline"></p>
+      </div>
+    </section>
+
+    <!-- Кинозал (тизер/AVM) -->
+    <div id="cinema" hidden>
+      <video id="avm" playsinline preload="none"></video>
+      <button id="skip">Пропустить ▸</button>
+    </div>
+  </div>
+
+  <audio id="music" loop preload="auto"></audio>
+  <audio id="voice" preload="auto"></audio>
+  <script src="content.js"></script>
+  <script src="app.js"></script>
+<script>
+function probe(){
+  var b=document.getElementById('t-auto'), r=b.getBoundingClientRect();
+  var el=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
+  function d(e){return e? (e.id?('#'+e.id):(e.className?('.'+(''+e.className).split(' ')[0]):e.tagName)) : 'null';}
+  var out=document.createElement('div'); out.id='PROBE';
+  out.textContent='at='+d(el)+' | tools_z='+getComputedStyle(document.getElementById('tools')).zIndex
+    +' | title_z='+getComputedStyle(document.getElementById('title')).zIndex
+    +' | title_show='+document.getElementById('title').classList.contains('show')
+    +' | title_pe='+getComputedStyle(document.getElementById('title')).pointerEvents;
+  document.body.appendChild(out);
+}
+setTimeout(probe, 50);
+</script>
+</body>
+</html>

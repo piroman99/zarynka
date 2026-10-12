@@ -108,7 +108,7 @@ button:active{transform:translateY(1px)}
 @keyframes blink{0%,60%{opacity:.35}80%{opacity:1}100%{opacity:.35}}
 
 /* тулбар тумблеров */
-#tools{position:absolute; top:2.6%; right:3.4%; z-index:18; display:flex; gap:.5em}
+#tools{position:absolute; top:2.6%; right:3.4%; z-index:40; display:flex; gap:.5em}
 .tg{
   margin:0; padding:0; width:clamp(34px,6vmin,46px); height:clamp(34px,6vmin,46px);
   border-radius:50%; font-size:clamp(14px,2.4vmin,20px); line-height:1; box-shadow:none;
