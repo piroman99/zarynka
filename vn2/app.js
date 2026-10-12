@@ -5,7 +5,8 @@
 (function () {
   const D = window.VN;
   const $ = (id) => document.getElementById(id);
-  const bgA = $("bg-a"), bgB = $("bg-b"), sprite = $("sprite");
+  const bgA = $("bg-a"), bgB = $("bg-b");
+  const castEls = Array.from(document.querySelectorAll("#cast .sprite"));
   const box = $("box"), nameEl = $("name"), textEl = $("text"), chapter = $("chapter");
   const hud = $("hud"), title = $("title"), vlayer = $("vlayer"), znak = $("znak"), vskip = $("vskip");
   const music = $("music"), voice = $("voice");
@@ -17,7 +18,7 @@
   const INSTANT = qp.get("instant") === "1";     // не печатать по буквам (для скриншотов)
   const SHOT = qp.has("node");
 
-  let curBg = "", curSprite = "~", curVo = "";
+  let curBg = "", curVo = "";
   let bgActive = bgA, other = bgB, typing = null;
   let musicKey = "", cinemaOpen = false, started = false, curNode = -1;
   let textOn = qp.get("text") !== "0";
@@ -51,24 +52,40 @@
     if (INSTANT) bgActive.style.opacity = 0;
     [bgActive, other] = [other, bgActive];
   }
-  function setSprite(url) {
-    if (url === curSprite) return;
-    curSprite = url;
-    if (!url) { sprite.classList.remove("on"); if (INSTANT) sprite.style.opacity = 0; return; }
-    if (sprite.getAttribute("src") !== url) sprite.src = url;
-    sprite.classList.add("on");
-    if (INSTANT) { sprite.style.transition = "none"; sprite.style.opacity = 1; }
+  // ---------- персонажи: ДВА слота, эмоции, кроссфейд, говорящий ярко ----------
+  // Слот 0 = левый, слот 1 = правый. Кто на сцене — из pg.cast {l,r,speak},
+  // его пишет _vn2_build.py. Эмоции — из D.chars[who].emos (нейтр. = база).
+  function charUrl(who, emo) {
+    const ch = D.chars && D.chars[who];
+    if (!ch) return null;
+    return (ch.emos && (ch.emos[emo] || ch.emos.neutral)) || ch.base || null;
   }
-  function spriteFor(who) {
-    if (who === "Сергей") return "img/char/sergey.png";
-    if (who === "Екатерина") return "img/char/kate.png";
-    return null;
+  function applySlot(i, who, emo) {
+    const el = castEls[i]; if (!el) return;
+    if (!who) { el.classList.remove("on", "dim", "breathe"); return; }
+    const url = charUrl(who, emo);
+    if (!url) { el.classList.remove("on", "dim", "breathe"); return; }
+    el.dataset.base = charUrl(who, "neutral") || url;
+    if (el.getAttribute("src") !== url) el.src = url;
+    el.classList.add("on", "breathe");
+    if (INSTANT) { el.style.transition = "none"; el.style.opacity = 1; }
   }
-  // спрайт на странице p = последний говорящий до этой страницы (устойчиво при листании назад)
-  function spriteAt(nd, p) {
-    for (let k = p; k >= 0; k--) { if (nd.pages[k].who) return spriteFor(nd.pages[k].who); }
-    return null;
+  function renderCast(c) {
+    c = c || {};
+    const l = c.l, r = c.r, sp = c.speak;
+    applySlot(0, l && l[0], l && l[1]);
+    applySlot(1, r && r[0], r && r[1]);
+    const solo = !(l && r);
+    castEls[0].classList.toggle("solo", solo);
+    castEls[1].classList.toggle("solo", solo);
+    castEls[0].classList.toggle("dim", !!(l && r && sp && l[0] !== sp));
+    castEls[1].classList.toggle("dim", !!(l && r && sp && r[0] !== sp));
   }
+  function clearCast() { castEls.forEach((el) => el.classList.remove("on", "dim", "breathe", "solo")); }
+  // нет файла эмоции -> откат на базовый спрайт (движок готов к доб. эмоциям)
+  castEls.forEach((el) => el.addEventListener("error", () => {
+    if (el.dataset.base && el.getAttribute("src") !== el.dataset.base) el.src = el.dataset.base;
+  }));
 
   // ---------- музыка ----------
   function setMusic(key) {
@@ -136,8 +153,7 @@
       setMusic(nd.music || musicKey);
       curNode = s.n;
     }
-    const sp = spriteAt(nd, s.p);
-    if (sp) setSprite(sp);
+    renderCast(pg.cast);
     if (pg.name) { nameEl.style.visibility = "visible"; nameEl.textContent = pg.name; }
     else nameEl.style.visibility = "hidden";
     playVoice(pg, nd);
@@ -184,7 +200,8 @@
   function enterEnd() {
     clearTimeout(autoTimer);
     playToken++;
-    curNode = -1; curSprite = "~";
+    curNode = -1;
+    clearCast();
     paused = false; tyPaused = false;
     showHud(false);
     vlayer.hidden = true;
@@ -196,10 +213,10 @@
   function goMenu() {
     clearTimeout(autoTimer);
     playToken++;
-    curNode = -1; curSprite = "~";
+    curNode = -1;
+    clearCast();
     paused = false; tyPaused = false;
     showHud(false); hideScreens();
-    sprite.classList.remove("on");
     setBg("");
     music.pause(); voice.pause();
     title.classList.add("show");

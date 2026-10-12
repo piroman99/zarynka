@@ -13,15 +13,14 @@ SHOTS = [
     ('title',       'node=0&text=1&voice=0&music=0'),
     ('s1',          'node=2&text=1&voice=0&music=0'),
     ('s3',          'node=4&text=1&voice=0&music=0'),
-    ('s5',          'node=6&text=1&voice=0&music=0'),
     ('s7',          'node=8&text=1&voice=0&music=0'),
-    ('kate_n',      'node=9&page=0&text=1&voice=0&music=0'),
-    ('kate_sergey', 'node=9&page=8&text=1&voice=0&music=0'),
-    ('kate_kate',   'node=9&page=10&text=1&voice=0&music=0'),
+    ('s_sergey',    'node=9&page=8&text=1&voice=0&music=0'),
+    ('s_both',      'node=9&page=10&text=1&voice=0&music=0'),
+    ('s_sergey_sad','node=9&page=24&text=1&voice=0&music=0'),
+    ('s_kate_sad',  'node=9&page=32&text=1&voice=0&music=0'),
+    ('s_narr',      'node=9&page=45&text=1&voice=0&music=0'),
     ('voice_off',   'node=9&page=10&text=0&voice=0&music=0'),
-    ('auto_on',     'node=9&page=8&text=1&voice=0&music=0&auto=1'),
-    ('auto_paused', 'node=9&page=8&text=1&voice=0&music=0&auto=1&pause=1'),
-    ('mid',         'node=9&page=20&text=1&voice=0&music=0'),
+    ('auto_on',     'node=9&page=10&text=1&voice=0&music=0&auto=1'),
     ('end',         'node=99&text=1&voice=0&music=0'),
 ]
 
@@ -46,8 +45,8 @@ subprocess.run([FF, '-y', '-ss', '1.2', '-i', os.path.join(HERE, 'out', 'znak3d_
                 '-frames:v', '1', '-vf', 'scale=1280:720:force_original_aspect_ratio=decrease,'
                 'pad=1280:720:(ow-iw)/2:(oh-ih)/2:black', zn], capture_output=True, text=True)
 
-order = ['title', 'znakframe', 's1', 's3', 's5', 's7', 'kate_n', 'kate_sergey', 'kate_kate',
-         'auto_on', 'auto_paused', 'mid', 'end']
+order = ['title', 'znakframe', 's1', 's3', 's7', 's_sergey', 's_both', 's_sergey_sad',
+         's_kate_sad', 's_narr', 'voice_off', 'auto_on', 'end']
 cw, ch, cols = 480, 270, 4
 rows = (len(order) + cols - 1) // cols
 sheet = Image.new('RGB', (cols * cw, rows * ch), (10, 12, 18))

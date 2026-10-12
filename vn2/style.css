@@ -24,14 +24,33 @@ body{
 }
 .bg.on{opacity:1}
 
-#sprite{
-  position:absolute; bottom:-3%; left:50%; transform:translateX(-50%);
-  height:99%; width:auto; object-fit:contain; opacity:0;
-  transition:opacity .35s ease;
+/* спрайты: ДВА слота. Смена персонажа = кроссфейд (старый тает, новый проявляется),
+   говорящий ярко, слушающий притемнён, у говорящего лёгкое «дыхание». */
+#cast{position:absolute; inset:0; z-index:2; pointer-events:none}
+.sprite{
+  position:absolute; bottom:-3%; height:99%; width:auto; object-fit:contain; opacity:0;
+  transition:opacity .42s ease, filter .3s ease, left .45s ease, transform 3.2s ease-in-out;
   filter:drop-shadow(0 26px 30px rgba(0,0,0,.6));
-  z-index:2;
+  transform-origin:50% 100%;
 }
-#sprite.on{opacity:1}
+.sprite[data-slot="0"]{left:27%; transform:translateX(-50%)}
+.sprite[data-slot="1"]{left:73%; transform:translateX(-50%)}
+.sprite.solo[data-slot="0"]{left:50%}
+.sprite.solo[data-slot="1"]{left:50%}
+.sprite.on{opacity:1}
+.sprite.dim{filter:drop-shadow(0 26px 30px rgba(0,0,0,.6)) brightness(.62) saturate(.82)}
+.sprite.on.breathe[data-slot="0"]{animation:breathe0 3.2s ease-in-out infinite}
+.sprite.on.breathe[data-slot="1"]{animation:breathe1 3.6s ease-in-out infinite}
+@keyframes breathe0{0%,100%{transform:translateX(-50%) translateY(0) scale(1)}
+  50%{transform:translateX(-50%) translateY(-4px) scale(1.004)}}
+@keyframes breathe1{0%,100%{transform:translateX(-50%) translateY(0) scale(1)}
+  50%{transform:translateX(-50%) translateY(-4px) scale(1.004)}}
+.sprite.solo.breathe[data-slot="0"]{animation:breatheS0 3.2s ease-in-out infinite}
+.sprite.solo.breathe[data-slot="1"]{animation:breatheS1 3.6s ease-in-out infinite}
+@keyframes breatheS0{0%,100%{transform:translateX(-50%) translateY(0) scale(1)}
+  50%{transform:translateX(-50%) translateY(-4px) scale(1.004)}}
+@keyframes breatheS1{0%,100%{transform:translateX(-50%) translateY(0) scale(1)}
+  50%{transform:translateX(-50%) translateY(-4px) scale(1.004)}}
 
 #vignette{
   position:absolute; inset:0; pointer-events:none; z-index:3;

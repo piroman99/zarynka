@@ -18,6 +18,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 VN2 = os.path.join(HERE, 'vn2')
 IMG = os.path.join(VN2, 'img')
 MOCK = os.path.join(HERE, 'assets', 'mock', 'prolog')
+FIN = os.path.join(HERE, 'assets', 'final', 'prolog')   # финальные кадры (_prolog_finals.py)
 GEN = os.path.join(HERE, 'assets', 'gen')
 SPR = os.path.join(HERE, 'assets', 'sprites')
 STORY = os.path.join(HERE, 'assets', 'story.txt')
@@ -56,14 +57,21 @@ PROLOG_OVL = {
     's7': [],
 }
 for n, ovls in PROLOG_OVL.items():
-    base = Image.open(os.path.join(MOCK, n + '_base.png')).convert('RGBA')
-    for ov in ovls:
-        p = os.path.join(MOCK, ov + '.png')
-        if os.path.exists(p):
-            base = Image.alpha_composite(base, Image.open(p).convert('RGBA'))
-    im = grade(base.convert('RGB')).resize((W, H), Image.LANCZOS)
+    fin = os.path.join(FIN, n + '.png')
+    if os.path.exists(fin):                      # финальный кадр flux-2 (+текст-слой)
+        base = Image.open(fin).convert('RGB')
+        src = 'final'
+    else:                                        # фолбэк: мок base + оверлеи
+        b = Image.open(os.path.join(MOCK, n + '_base.png')).convert('RGBA')
+        for ov in ovls:
+            p = os.path.join(MOCK, ov + '.png')
+            if os.path.exists(p):
+                b = Image.alpha_composite(b, Image.open(p).convert('RGBA'))
+        base = b.convert('RGB')
+        src = 'mock'
+    im = grade(base).resize((W, H), Image.LANCZOS)
     im.save(os.path.join(IMG, 'prolog', n + '.png'))
-    print('prolog', n, '->', os.path.relpath(os.path.join(IMG, 'prolog', n + '.png'), HERE))
+    print('prolog', n, '(%s)' % src, '->', os.path.relpath(os.path.join(IMG, 'prolog', n + '.png'), HERE))
 
 # ---- вырезка фона (плоский фон) для спрайтов ---------------------------
 def cutout(im, tol=34):
@@ -109,11 +117,42 @@ Image.open(bg_src).convert('RGB').resize((W, H), Image.LANCZOS).save(
     os.path.join(IMG, 'bg', 'reception.jpg'))
 print('bg reception OK')
 
-for dst, src in (('kate.png', os.path.join(GEN, 'kate_overalls_0.png')),
-                 ('sergey.png', os.path.join(GEN, 'sergey_eng_old__flux-2_0.jpg'))):
+# базовые спрайты + готовые эмоции (отсутствующие файлы пропускаем;
+# остальные эмоции рисует _vn2_emo.py — движок подхватит их без правок)
+CHAR_SRC = {
+    'kate.png':     os.path.join(GEN, 'kate_overalls_0.png'),
+    'sergey.png':   os.path.join(GEN, 'sergey_eng_old__flux-2_0.jpg'),
+    'kate_sad.png': os.path.join(GEN, 'kate_sad_0.png'),
+}
+for dst, src in CHAR_SRC.items():
+    if not os.path.exists(src):
+        print('char SKIP (нет источника):', dst)
+        continue
     out = cutout(Image.open(src))
     out.save(os.path.join(IMG, 'char', dst))
     print('char', dst, out.size, out.mode)
+
+
+# доступные спрайты и эмоции (по фактическим файлам в img/char) — движок
+# рисует только то, что есть, и подхватит новые эмоции без правок кода
+def char_manifest():
+    key_of = {'Сергей': 'sergey', 'Екатерина': 'kate', 'Старик': 'starik'}
+    known = ['neutral', 'smile', 'sad', 'concerned', 'stern']
+    have = set(os.listdir(os.path.join(IMG, 'char')))
+    d = {}
+    for who, k in key_of.items():
+        emos = {}
+        for em in known:
+            fn = k + ('' if em == 'neutral' else '_' + em) + '.png'
+            if fn in have:
+                emos[em] = 'img/char/' + fn
+        if emos:
+            d[who] = {'base': emos.get('neutral') or next(iter(emos.values())),
+                      'emos': emos}
+    return d
+
+
+CHARS_AVAIL = char_manifest()
 
 # ---- 3) лого/иконки -----------------------------------------------------
 logo = Image.open(os.path.join(GEN, 'logo_b_0.jpg')).convert('RGB')
@@ -186,20 +225,58 @@ SPEAK = {15: 'Старик', 23: 'Сергей', 25: 'Екатерина', 29: '
          61: 'Сергей', 63: 'Екатерина', 65: 'Сергей', 67: 'Екатерина'}
 NAME = {'Сергей': 'Лихнецкий Сергей', 'Екатерина': 'Екатерина Ивановна',
         'Старик': 'Старик'}
-SPRITE = {'Сергей': 'img/char/sergey.png', 'Екатерина': 'img/char/kate.png'}
 
-kate_pgs = []
+# --- приёмная: страницы, каст (кто и где стоит) и эмоции ---
+# Эмоции/появления проставлены РУЧНО по смыслу (текст авторский, эмоций в нём нет)
+# и вынесены на согласование с Ivan. Индексы — по списку страниц приёмной.
+EMO = {1:  ('Старик', 'stern'),
+       10: ('Екатерина', 'smile'), 20: ('Екатерина', 'smile'),
+       30: ('Екатерина', 'neutral'), 32: ('Екатерина', 'sad'),
+       45: ('Екатерина', 'sad'), 50: ('Екатерина', 'smile'),
+       18: ('Сергей', 'concerned'), 46: ('Сергей', 'concerned'),
+       24: ('Сергей', 'concerned'), 41: ('Сергей', 'concerned'),
+       49: ('Сергей', 'smile')}
+# смена состава: страница -> сторона ('l' левый / 'r' правый) : (кто, эмоция)
+CAST_EV = {0: {'l': ('Сергей', 'neutral')},
+           1: {'l': ('Старик', 'stern')},
+           2: {'l': ('Сергей', 'neutral')},
+           7: {'r': ('Екатерина', 'neutral')}}
+
+# 1) текст + говорящие (имя — только у ПРЯМОЙ РЕЧИ, стр. начинается с тире)
+raw = []
 for n in sorted(reception_par):
     who = SPEAK.get(n, '')
     for p in pages(reception_par[n], 2):
-        pg = {'tx': p, 'vo': 'audio/vo/rec_%02d.mp3' % len(kate_pgs)}
-        # имя — только для ПРЯМОЙ РЕЧИ (страница начинается с тире); иначе — авторский нарратив
+        pg = {'tx': p, 'vo': 'audio/vo/rec_%02d.mp3' % len(raw)}
         if who and p.lstrip().startswith('—'):
             pg['who'] = who
             pg['name'] = NAME[who]
-        kate_pgs.append(pg)
+        raw.append(pg)
+
+# 2) каст и эмоции по страницам (детерминированно, устойчиво при листании назад)
+lside = rside = None
+last = None
+for i, pg in enumerate(raw):
+    ev = CAST_EV.get(i)
+    if ev:
+        if 'l' in ev and ev['l'][0] in CHARS_AVAIL: lside = list(ev['l'])
+        if 'r' in ev and ev['r'][0] in CHARS_AVAIL: rside = list(ev['r'])
+    e = EMO.get(i)
+    if e:
+        who, em = e
+        if lside and lside[0] == who: lside = [lside[0], em]
+        if rside and rside[0] == who: rside = [rside[0], em]
+    if pg.get('who'):
+        last = pg['who']
+    cast = {}
+    if lside: cast['l'] = lside
+    if rside: cast['r'] = rside
+    if last: cast['speak'] = last
+    pg['cast'] = cast
+
 nodes.append({'t': 'scene', 'id': 'reception', 'bg': 'img/bg/reception.jpg',
-              'music': 'reception', 'pages': kate_pgs})
+              'music': 'reception', 'pages': raw})
+
 
 data = {
     'title': 'ЗАРЯНКА',
@@ -207,6 +284,7 @@ data = {
     'byline': 'по рассказу Александра «Котобус» Горбова',
     'music': {'prolog': '../assets/audio/sketch/prolog_bed_soft_0.mp3',
               'reception': '../assets/audio/sketch/vn_reception_soft_0.mp3'},
+    'chars': CHARS_AVAIL,
     'nodes': nodes,
 }
 out = os.path.join(VN2, 'content.js')
