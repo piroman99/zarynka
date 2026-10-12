@@ -25,6 +25,7 @@ _probe/
 # Регенерируемое скриптами (не плодим бинарь в репе)
 assets/mock/
 assets/audio/sketch/*.mp4
+assets/audio/vo_kate/_wav/
 assets/audio/vo_prolog*/*.wav
 out/prolog_animatic_*.mp4
 out/prolog_grade_ab.mp4

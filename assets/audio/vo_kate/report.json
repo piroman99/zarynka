@@ -1,0 +1,58 @@
+[
+  {
+    "n": "01",
+    "model": "gemini-3.8-flash-tts",
+    "voice": "Aoede",
+    "label": "Джемини · Aoede",
+    "file": "assets/audio/vo_kate/kate_01_0.wav",
+    "price": 0.33
+  },
+  {
+    "n": "02",
+    "model": "gemini-3.8-flash-tts",
+    "voice": "Kore",
+    "label": "Джемини · Kore",
+    "file": "assets/audio/vo_kate/kate_02_0.wav",
+    "price": 0.33
+  },
+  {
+    "n": "03",
+    "model": "gemini-3.8-flash-tts",
+    "voice": "Leda",
+    "label": "Джемини · Leda",
+    "file": "assets/audio/vo_kate/kate_03_0.wav",
+    "price": 0.33
+  },
+  {
+    "n": "04",
+    "model": "elevenlabs-v4-tts",
+    "voice": "Sarah",
+    "label": "ElevenLabs · Sarah",
+    "file": "assets/audio/vo_kate/kate_04_0.mp3",
+    "price": 1.24
+  },
+  {
+    "n": "05",
+    "model": "elevenlabs-v4-tts",
+    "voice": "Matilda",
+    "label": "ElevenLabs · Matilda",
+    "file": "assets/audio/vo_kate/kate_05_0.mp3",
+    "price": 1.24
+  },
+  {
+    "n": "06",
+    "model": "elevenlabs-v4-tts",
+    "voice": "Charlotte",
+    "label": "ElevenLabs · Charlotte",
+    "file": "assets/audio/vo_kate/kate_06_0.mp3",
+    "price": 1.24
+  },
+  {
+    "n": "07",
+    "model": "qwen3-tts",
+    "voice": "Serena",
+    "label": "Qwen · Serena",
+    "file": "assets/audio/vo_kate/kate_07_0.mp3",
+    "price": 0.31
+  }
+]

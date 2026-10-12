@@ -7,6 +7,7 @@
   3) иконку/лого -> vn2/img/logo.png, vn2/icons/icon-*.png
   4) vn2/content.js — узлы эп1: титул -> значок(video) -> пролог S1..S7 -> приёмная
 Текст — АВТОРСКИЙ ДОСЛОВНО из assets/story.txt (строки 5,7,9 = пролог; 13..67 = приёмная).
+Голос — ПОСТРАНИЧНО: у каждой страницы поле vo = audio/vo/<файл>, закадр пишет _vn2_vo.py.
 """
 import os, json, re, shutil, sys
 from collections import deque
@@ -173,11 +174,9 @@ for name, texts, vo in PROLOG:
     pgs = []
     for tx in texts:
         for p in pages(tx):
-            pgs.append({'tx': p})
+            pgs.append({'tx': p, 'vo': f'audio/vo/{name}_{len(pgs):02d}.mp3'})
     node = {'t': 'scene', 'id': name, 'bg': f'img/prolog/{name}.png',
             'music': 'prolog', 'pages': pgs}
-    if vo:
-        node['vo'] = f'audio/{vo}.mp3'      # плейсхолдер (ужатый клип) — см. vn2/README
     nodes.append(node)
 
 # приёмная: фон + спрайты + дословный текст, с говорящими
@@ -193,7 +192,7 @@ kate_pgs = []
 for n in sorted(reception_par):
     who = SPEAK.get(n, '')
     for p in pages(reception_par[n], 2):
-        pg = {'tx': p}
+        pg = {'tx': p, 'vo': 'audio/vo/rec_%02d.mp3' % len(kate_pgs)}
         # имя — только для ПРЯМОЙ РЕЧИ (страница начинается с тире); иначе — авторский нарратив
         if who and p.lstrip().startswith('—'):
             pg['who'] = who

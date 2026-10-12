@@ -1,6 +1,7 @@
 // Зарянка — VN-эп1 «Пролог + Приёмная». Движок без зависимостей.
 // Тумблеры: текст (подстрочник) ⇄ голос закадра ⇄ музыка — независимы.
 // Навигация: → далее, ← назад, «Авто» — само листается; конец серии = экран, не авто-тизер.
+// Голос — ПОСТРАНИЧНО (pg.vo), иначе 51 страница Приёмной не озвучивается.
 (function () {
   const D = window.VN;
   const $ = (id) => document.getElementById(id);
@@ -16,7 +17,7 @@
   const INSTANT = qp.get("instant") === "1";     // не печатать по буквам (для скриншотов)
   const SHOT = qp.has("node");
 
-  let curBg = "", curSprite = "~";
+  let curBg = "", curSprite = "~", curVo = "";
   let bgActive = bgA, other = bgB, typing = null;
   let musicKey = "", cinemaOpen = false, started = false, curNode = -1;
   let textOn = qp.get("text") !== "0";
@@ -36,8 +37,6 @@
   const scriptStart = {};
   SCENES.forEach((s, i) => { if (!(s.n in scriptStart)) scriptStart[s.n] = i; });
   let pos = 0;
-
-  function curNodeND() { const s = SCENES[pos]; return s ? NODES[s.n] : null; }
 
   // ---------- фон / спрайт ----------
   function setBg(url) {
@@ -79,12 +78,16 @@
     if (musicOn && started) music.play().catch(() => {});
   }
 
-  // ---------- голос ----------
-  function playVoice(node) {
+  // ---------- голос (постранично) ----------
+  function playVoice(pg, nd) {
     voice.pause();
     voice.removeAttribute("src");
-    if (!voiceOn || !node || !node.vo) return;
-    voice.src = node.vo;
+    curVo = "";
+    if (!voiceOn) return;
+    const src = (pg && pg.vo) || (nd && nd.vo);   // страница → узел (совместимость)
+    if (!src) return;
+    curVo = src;
+    voice.src = src;
     voice.volume = 1.0;
     voice.play().catch(() => {});
   }
@@ -108,7 +111,7 @@
     title.classList.remove("show"); endScr.classList.remove("show"); vlayer.hidden = true;
   }
 
-  function enterPos(i, noVoiceRestart) {
+  function enterPos(i) {
     if (i < 0) i = 0;
     if (i > SCENES.length - 1) return enterEnd();
     playToken++;
@@ -121,15 +124,13 @@
     if (s.n !== curNode) {
       setBg(nd.bg);
       setMusic(nd.music || musicKey);
-      if (!noVoiceRestart) playVoice(nd);
-      setSprite(spriteAt(nd, s.p) || null);
       curNode = s.n;
-    } else {
-      const sp = spriteAt(nd, s.p);
-      if (sp) setSprite(sp);
     }
+    const sp = spriteAt(nd, s.p);
+    if (sp) setSprite(sp);
     if (pg.name) { nameEl.style.visibility = "visible"; nameEl.textContent = pg.name; }
     else nameEl.style.visibility = "hidden";
+    playVoice(pg, nd);
     typeText(pg.tx, scheduleAuto);
     prevBtn.disabled = (pos === 0);
   }
@@ -142,7 +143,7 @@
     const nd = NODES[s.n], pg = nd.pages[s.p];
     const t = playToken;
     let delay = AUTO_BASE + Math.min(1900, pg.tx.length * AUTO_PER_CHAR);
-    if (voiceOn && nd.vo && !voice.paused && isFinite(voice.duration)) {
+    if (voiceOn && curVo && !voice.paused && isFinite(voice.duration)) {
       const remain = Math.max(0, (voice.duration - voice.currentTime)) * 1000;
       delay = Math.max(delay, remain + AUTO_GAP);
     }
@@ -165,7 +166,7 @@
     clearTimeout(autoTimer);
     if (cinemaOpen) return;
     if (!vlayer.hidden) return;
-    if (pos > 0) enterPos(pos - 1, true);
+    if (pos > 0) enterPos(pos - 1);
   }
 
   function enterEnd() {
@@ -177,6 +178,7 @@
     title.classList.remove("show");
     endScr.classList.add("show");
     prevBtn.disabled = true;
+    voice.pause();
   }
   function goMenu() {
     clearTimeout(autoTimer);
@@ -246,7 +248,8 @@
   $("t-text").onclick = (e) => { e.stopPropagation(); textOn = !textOn; syncToggles(); };
   $("t-voice").onclick = (e) => {
     e.stopPropagation(); voiceOn = !voiceOn; syncToggles();
-    if (!voiceOn) voice.pause(); else { const nd = curNodeND(); if (nd && nd.vo) playVoice(nd); }
+    if (!voiceOn) voice.pause();
+    else { const s = SCENES[pos]; if (s) { const nd = NODES[s.n]; playVoice(nd.pages[s.p], nd); } }
     if (autoOn) scheduleAuto();
   };
   $("t-music").onclick = (e) => {
@@ -309,6 +312,13 @@
   $("tep").textContent = D.episode;
   $("byline").textContent = D.byline;
   $("e-byline").textContent = D.byline;
+  // голос дочитал страницу → не ждём полный расчётный таймер
+  voice.addEventListener("ended", () => {
+    if (!autoOn || cinemaOpen) return;
+    const s = SCENES[pos]; if (!s) return;
+    const nd = NODES[s.n], pg = nd.pages[s.p];
+    if (curVo && ((pg && pg.vo) || nd.vo) === curVo) scheduleAuto();
+  });
   syncToggles();
   if (SHOT) {                      // режим скриншота: сразу к нужному узлу
     started = true;
@@ -316,7 +326,7 @@
     const nd = NODES[ni];
     if (nd && nd.t === "scene") {
       const base = scriptStart[ni] || 0;
-      enterPos(base + parseInt(qp.get("page") || "0", 10), true);
+      enterPos(base + parseInt(qp.get("page") || "0", 10));
     } else if (nd && nd.t === "znak") { enterZnak(nd); }
     else if (nd && nd.t === "title") { enterTitle(); }
     else { enterEnd(); }
