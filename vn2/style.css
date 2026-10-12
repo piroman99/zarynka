@@ -1,0 +1,129 @@
+:root{
+  --red:#dc2626; --red2:#ff5a4d; --ink:#eef0f4; --dim:#9aa3b2;
+  --box:rgba(12,14,20,.80); --dark:#0d1117;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%}
+body{
+  background:#05070b; color:var(--ink); overflow:hidden;
+  font-family:Georgia,"Times New Roman",serif;
+  -webkit-tap-highlight-color:transparent;
+}
+
+#stage{
+  position:fixed; inset:0; margin:auto;
+  width:min(100vw, calc(100vh * 16 / 9));
+  height:min(100vh, calc(100vw * 9 / 16));
+  overflow:hidden; background:#05070b; cursor:pointer;
+}
+
+/* фоны (кроссфейд) */
+.bg{
+  position:absolute; inset:0; background-position:center; background-size:cover;
+  transition:opacity .6s ease; opacity:0;
+}
+.bg.on{opacity:1}
+
+#sprite{
+  position:absolute; bottom:-3%; left:50%; transform:translateX(-50%);
+  height:99%; width:auto; object-fit:contain; opacity:0;
+  transition:opacity .35s ease;
+  filter:drop-shadow(0 26px 30px rgba(0,0,0,.6));
+  z-index:2;
+}
+#sprite.on{opacity:1}
+
+#vignette{
+  position:absolute; inset:0; pointer-events:none; z-index:3;
+  background:
+    radial-gradient(120% 90% at 50% 30%, transparent 55%, rgba(0,0,0,.5) 100%),
+    linear-gradient(to top, rgba(0,0,0,.55), transparent 35%);
+}
+
+/* экраны */
+.screen{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(60% 60% at 50% 40%, #12161f 0%, #05070b 100%);
+  opacity:0; pointer-events:none; transition:opacity .5s ease; z-index:20; text-align:center;
+}
+.screen.show{opacity:1; pointer-events:auto}
+.title-inner{padding:5%}
+.logo{width:min(26vmin,168px); border-radius:50%;
+  filter:drop-shadow(0 10px 30px rgba(220,38,38,.35))}
+h1{font-size:clamp(38px,7.2vmin,92px); letter-spacing:.14em; margin:.25em 0 .1em;
+  font-weight:700; text-shadow:0 4px 24px rgba(0,0,0,.6)}
+.sub{color:var(--red2); letter-spacing:.32em; text-transform:uppercase;
+  font-size:clamp(11px,1.7vmin,17px)}
+.ep{color:var(--dim); margin-top:1.4em; font-size:clamp(13px,2vmin,20px)}
+.by{color:#5d6577; margin-top:2.2em; font-size:clamp(11px,1.6vmin,15px); font-style:italic}
+button{
+  margin-top:1.6em; font-family:inherit; font-size:clamp(15px,2.2vmin,22px);
+  color:#fff; background:linear-gradient(180deg,var(--red2),var(--red));
+  border:0; border-radius:999px; padding:.7em 2.4em; cursor:pointer;
+  box-shadow:0 10px 26px rgba(220,38,38,.35); letter-spacing:.04em;
+}
+button:hover{filter:brightness(1.08)}
+button:active{transform:translateY(1px)}
+.ghost{background:transparent; border:2px solid rgba(255,90,77,.72);
+  color:#ffd9d4; box-shadow:none; margin-top:.9em}
+
+/* видео-узел (значок) */
+#vlayer{position:absolute; inset:0; z-index:25; background:#000;
+  display:flex; align-items:center; justify-content:center}
+#vlayer[hidden]{display:none}
+#vlayer video{width:100%; height:100%; object-fit:contain; background:#000}
+#vskip{position:absolute; bottom:4%; right:4%; z-index:26; margin:0;
+  padding:.5em 1.4em; font-size:clamp(12px,1.8vmin,16px)}
+
+/* HUD */
+#hud{position:absolute; inset:0; opacity:0; pointer-events:none; transition:opacity .4s; z-index:10}
+#hud.on{opacity:1}
+#chapter{
+  position:absolute; top:3%; left:4%; color:var(--dim); letter-spacing:.28em;
+  text-transform:uppercase; font-size:clamp(10px,1.5vmin,14px);
+  text-shadow:0 2px 10px #000;
+}
+#box{
+  position:absolute; left:5%; right:5%; bottom:4.5%;
+  background:var(--box); backdrop-filter:blur(3px);
+  border:2px solid rgba(220,60,60,.85); border-radius:16px;
+  padding:clamp(16px,3.2vmin,30px) clamp(20px,3.6vmin,40px) clamp(20px,3.6vmin,36px);
+  box-shadow:0 18px 50px rgba(0,0,0,.5); transition:opacity .3s ease;
+}
+#stage.notext #box{opacity:0}
+#stage.nofx *{transition:none !important; animation:none !important}
+#name{
+  position:absolute; top:calc(-1 * clamp(14px,2.2vmin,22px)); left:clamp(14px,2.4vmin,26px);
+  background:linear-gradient(180deg,var(--red2),var(--red)); color:#fff;
+  border-radius:11px; padding:.28em .9em; font-size:clamp(13px,2vmin,20px);
+  font-family:"Trebuchet MS",Verdana,sans-serif; letter-spacing:.02em;
+  box-shadow:0 6px 18px rgba(220,38,38,.35); visibility:hidden;
+}
+#text{font-size:clamp(15px,2.35vmin,25px); line-height:1.5}
+#hint{
+  position:absolute; right:clamp(14px,2.2vmin,22px); bottom:clamp(6px,1.2vmin,12px);
+  color:#79839a; font-size:clamp(10px,1.4vmin,13px);
+  font-family:"Trebuchet MS",Verdana,sans-serif; animation:blink 1.6s infinite;
+}
+@keyframes blink{0%,60%{opacity:.35}80%{opacity:1}100%{opacity:.35}}
+
+/* тулбар тумблеров */
+#tools{position:absolute; top:2.6%; right:3.4%; z-index:18; display:flex; gap:.5em}
+.tg{
+  margin:0; padding:0; width:clamp(34px,6vmin,46px); height:clamp(34px,6vmin,46px);
+  border-radius:50%; font-size:clamp(14px,2.4vmin,20px); line-height:1; box-shadow:none;
+  background:rgba(12,14,20,.62); border:1px solid rgba(255,255,255,.16);
+  font-family:"Trebuchet MS",Verdana,sans-serif;
+}
+.tg:hover{filter:brightness(1.15)}
+.tg.off{opacity:.42; text-decoration:line-through}
+
+/* кинозал */
+#cinema{position:absolute; inset:0; z-index:30; background:#000;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity .4s ease}
+#cinema[hidden]{display:none}
+#cinema.on{opacity:1}
+#cinema video{width:100%; height:100%; object-fit:contain; background:#000}
+#skip{position:absolute; bottom:4%; right:4%; z-index:31; margin:0;
+  padding:.5em 1.4em; font-size:clamp(12px,1.8vmin,16px)}
