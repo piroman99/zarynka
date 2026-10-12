@@ -226,7 +226,7 @@
       avm.pause(); avm.removeAttribute("src"); avm.load();
       setTimeout(() => { cinema.hidden = true; }, 400);
       if (started && musicOn && !endScr.classList.contains("show")) music.play().catch(() => {});
-      if (autoOn) scheduleAuto();
+      if (autoOn && !endScr.classList.contains("show")) scheduleAuto();
     };
     avm.onended = done;
     skip.onclick = (e) => { e.stopPropagation(); done(); };
