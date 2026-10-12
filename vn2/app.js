@@ -26,6 +26,8 @@
   let autoOn = qp.get("auto") === "1";
 
   let autoTimer = null, playToken = 0;
+  let paused = qp.get("pause") === "1";
+  let ty = null, tyPaused = false;
   const AUTO_BASE = 450, AUTO_PER_CHAR = 20, AUTO_GAP = 500;   // ~1.1–2.4 с на страницу
 
   const NODES = D.nodes;
@@ -95,15 +97,23 @@
   // ---------- печать ----------
   function typeText(s, cb) {
     clearInterval(typing);
-    if (INSTANT) { textEl.textContent = s; if (cb) cb(); return; }
+    ty = { full: s, i: 0, cb: cb };
+    tyPaused = false;
     textEl.textContent = "";
-    let i = 0;
-    typing = setInterval(() => {
-      textEl.textContent += s[i++];
-      if (i >= s.length) { clearInterval(typing); typing = null; if (cb) cb(); }
-    }, 18);
+    if (INSTANT) { textEl.textContent = s; ty.i = s.length; typing = null; if (cb) cb(); return; }
+    typing = setInterval(typeTick, 18);
   }
-  function typingDone() { return !typing; }
+  function typeTick() {
+    if (tyPaused || !ty) return;
+    textEl.textContent += ty.full[ty.i++];
+    if (ty.i >= ty.full.length) { clearInterval(typing); typing = null; if (ty.cb) ty.cb(); }
+  }
+  function typingDone() { return !ty || ty.i >= ty.full.length; }
+  function skipTyping() {
+    if (ty && ty.i < ty.full.length) {
+      clearInterval(typing); typing = null; textEl.textContent = ty.full; ty.i = ty.full.length;
+    }
+  }
 
   // ---------- рендер ----------
   function showHud(on) { hud.style.opacity = on ? "" : 0; hud.classList.toggle("on", on); }
@@ -138,7 +148,7 @@
   // ---------- авто-режим ----------
   function scheduleAuto() {
     clearTimeout(autoTimer);
-    if (!autoOn || cinemaOpen) return;
+    if (!autoOn || paused || cinemaOpen) return;
     const s = SCENES[pos]; if (!s) return;
     const nd = NODES[s.n], pg = nd.pages[s.p];
     const t = playToken;
@@ -154,9 +164,10 @@
   function next() {
     clearTimeout(autoTimer);
     if (!vlayer.hidden) { vskip.click(); return; }   // идёт интро-значок → пропустить
+    if (paused) { paused = false; tyPaused = false; syncToggles(); }
     if (!typingDone()) {                      // сперва дописать страницу
-      const s = SCENES[pos]; const nd = NODES[s.n], pg = nd.pages[s.p];
-      clearInterval(typing); typing = null; textEl.textContent = pg.tx;
+      const s = SCENES[pos]; const pg = NODES[s.n].pages[s.p];
+      skipTyping(); textEl.textContent = pg.tx;
       if (autoOn) scheduleAuto();
       return;
     }
@@ -166,6 +177,7 @@
     clearTimeout(autoTimer);
     if (cinemaOpen) return;
     if (!vlayer.hidden) return;
+    if (paused) { paused = false; tyPaused = false; syncToggles(); }
     if (pos > 0) enterPos(pos - 1);
   }
 
@@ -173,6 +185,7 @@
     clearTimeout(autoTimer);
     playToken++;
     curNode = -1; curSprite = "~";
+    paused = false; tyPaused = false;
     showHud(false);
     vlayer.hidden = true;
     title.classList.remove("show");
@@ -184,6 +197,7 @@
     clearTimeout(autoTimer);
     playToken++;
     curNode = -1; curSprite = "~";
+    paused = false; tyPaused = false;
     showHud(false); hideScreens();
     sprite.classList.remove("on");
     setBg("");
@@ -241,8 +255,13 @@
     $("t-text").classList.toggle("off", !textOn);
     $("t-voice").classList.toggle("off", !voiceOn);
     $("t-music").classList.toggle("off", !musicOn);
-    $("t-auto").classList.toggle("on", autoOn);
-    $("t-auto").classList.toggle("off", !autoOn);
+    const au = $("t-auto");
+    au.classList.toggle("on", autoOn && !paused);
+    au.classList.toggle("pause", autoOn && paused);
+    au.classList.toggle("off", !autoOn);
+    $("t-pause").hidden = !autoOn;
+    $("t-pause").textContent = paused ? "▶" : "⏸";
+    $("t-pause").classList.toggle("on", paused);
     document.getElementById("stage").classList.toggle("notext", !textOn);
   }
   $("t-text").onclick = (e) => { e.stopPropagation(); textOn = !textOn; syncToggles(); };
@@ -257,9 +276,32 @@
     if (!musicOn) music.pause(); else if (started) music.play().catch(() => {});
   };
   $("t-auto").onclick = (e) => {
-    e.stopPropagation(); autoOn = !autoOn; syncToggles();
-    if (autoOn) { if (typingDone()) scheduleAuto(); } else clearTimeout(autoTimer);
+    e.stopPropagation();
+    autoOn = !autoOn;
+    if (!autoOn) { paused = false; tyPaused = false; clearTimeout(autoTimer); }
+    syncToggles();
+    if (autoOn && !paused && typingDone()) scheduleAuto();
   };
+  $("t-pause").onclick = (e) => { e.stopPropagation(); togglePause(); };
+
+  // пауза: замораживает таймер + голос + печать (резюм с того же места)
+  function togglePause() {
+    if (!autoOn) return;
+    if (!paused) {
+      paused = true;
+      clearTimeout(autoTimer);
+      tyPaused = true;
+      if (!voice.paused) voice.pause();
+    } else {
+      paused = false;
+      tyPaused = false;
+      if (voiceOn && curVo && voice.currentTime > 0 && voice.currentTime < voice.duration) {
+        voice.play().catch(() => {});
+      }
+      scheduleAuto();
+    }
+    syncToggles();
+  }
 
   // ---------- ввод ----------
   $("start").onclick = (e) => { e.stopPropagation(); start(); };
@@ -290,6 +332,8 @@
       e.preventDefault();
       if (title.classList.contains("show") || endScr.classList.contains("show")) return;
       prev();
+    } else if (e.key === "p" || e.key === "P" || e.key === "\\u043f") {
+      if (autoOn) { e.preventDefault(); togglePause(); }
     }
   });
 

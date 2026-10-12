@@ -121,6 +121,9 @@ button:active{transform:translateY(1px)}
   letter-spacing:.02em}
 .tg.on{background:linear-gradient(180deg,var(--red2),var(--red));
   border-color:rgba(255,90,77,.9); box-shadow:0 6px 18px rgba(220,38,38,.4)}
+.tg.pause{background:linear-gradient(180deg,#f59e0b,#d97706);
+  border-color:rgba(245,158,11,.9); box-shadow:0 6px 18px rgba(217,119,6,.45)}
+.tg[hidden]{display:none}
 
 /* навигация: назад / далее */
 #nav{position:absolute; inset:0; pointer-events:none; z-index:9}

@@ -35,11 +35,12 @@ crop('review_75_vn2_title_auto.png', (0, 0, 1280, 720), 'review_75_vn2_title_aut
 crop('review_70_vn2_kate_sergey.png', (0, 250, 120, 480), 'review_70_vn2_peek_prev.png')
 crop('review_70_vn2_kate_sergey.png', (1170, 250, 1280, 480), 'review_70_vn2_peek_next.png')
 crop('review_70_vn2_auto_on.png', (820, 6, 1280, 74), 'review_70_vn2_peek_tools_auto.png')
+crop('review_70_vn2_auto_paused.png', (820, 6, 1280, 74), 'review_70_vn2_peek_tools_paused.png')
 crop('review_70_vn2_kate_n.png', (820, 6, 1280, 74), 'review_70_vn2_peek_tools_off.png')
 
 tiles = ['review_75_vn2_tools_title_on.png', 'review_70_vn2_peek_tools_auto.png',
-         'review_70_vn2_peek_tools_off.png', 'review_70_vn2_peek_prev.png',
-         'review_70_vn2_peek_next.png']
+         'review_70_vn2_peek_tools_paused.png', 'review_70_vn2_peek_tools_off.png',
+         'review_70_vn2_peek_prev.png', 'review_70_vn2_peek_next.png']
 ims = [Image.open(os.path.join(REV, t)).convert('RGB') for t in tiles]
 W = max(i.width for i in ims); H = sum(i.height for i in ims)
 sheet = Image.new('RGB', (W, H), (8, 10, 14))
