@@ -8,9 +8,10 @@
   4) vn2/content.js — узлы эп1: титул -> значок(video) -> пролог S1..S7 -> приёмная
 Текст — АВТОРСКИЙ ДОСЛОВНО из assets/story.txt (строки 5,7,9 = пролог; 13..67 = приёмная).
 """
-import os, json, re, shutil
+import os, json, re, shutil, sys
+from collections import deque
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 VN2 = os.path.join(HERE, 'vn2')
@@ -63,6 +64,44 @@ for n, ovls in PROLOG_OVL.items():
     im.save(os.path.join(IMG, 'prolog', n + '.png'))
     print('prolog', n, '->', os.path.relpath(os.path.join(IMG, 'prolog', n + '.png'), HERE))
 
+# ---- вырезка фона (плоский фон) для спрайтов ---------------------------
+def cutout(im, tol=34):
+    """Убрать СВЯЗАННЫЙ с краями фон ПО ЦВЕТОВОЙ ДИСТАНЦИИ от образца фона
+    (flood fill). Не зависит от того, белый фон или светло-серый; однотипная
+    одежда внутри фигуры не трогается — она не связана с краем."""
+    a = np.asarray(im.convert('RGB'), np.float32)
+    h, w, _ = a.shape
+    # образец фона: верхняя полоса + верхние части левого/правого борта
+    ring = np.concatenate([a[:8].reshape(-1, 3),
+                           a[:h * 3 // 5, :8].reshape(-1, 3),
+                           a[:h * 3 // 5, -8:].reshape(-1, 3)])
+    seed = np.median(ring, 0)
+    dist = np.sqrt(((a - seed) ** 2).sum(2))
+    cand = dist <= tol
+    vis = np.zeros((h, w), bool)
+    dq = deque()
+    for x in range(w):
+        for y in (0, h - 1):
+            if cand[y, x] and not vis[y, x]:
+                vis[y, x] = True; dq.append((y, x))
+    for y in range(h):
+        for x in (0, w - 1):
+            if cand[y, x] and not vis[y, x]:
+                vis[y, x] = True; dq.append((y, x))
+    while dq:
+        y, x = dq.popleft()
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            ny, nx = y + dy, x + dx
+            if 0 <= ny < h and 0 <= nx < w and cand[ny, nx] and not vis[ny, nx]:
+                vis[ny, nx] = True; dq.append((ny, nx))
+    alpha = np.where(vis, 0, 255).astype(np.uint8)
+    A = Image.fromarray(alpha, 'L').filter(ImageFilter.GaussianBlur(1.1))
+    out = im.convert('RGBA')
+    out.putalpha(A)
+    print('   cutout seed=%s tol=%d transparent=%.0f%%' % (seed.astype(int).tolist(), tol, 100 * vis.mean()))
+    return out
+
+
 # ---- 2) фон приёмной + спрайты -----------------------------------------
 bg_src = os.path.join(GEN, 'ok_office_clean_0.jpg')   # пустой кабинет (без фигур)
 Image.open(bg_src).convert('RGB').resize((W, H), Image.LANCZOS).save(
@@ -70,9 +109,10 @@ Image.open(bg_src).convert('RGB').resize((W, H), Image.LANCZOS).save(
 print('bg reception OK')
 
 for dst, src in (('kate.png', os.path.join(GEN, 'kate_overalls_0.png')),
-                 ('sergey.png', os.path.join(GEN, 'sergey_eng_0.png'))):
-    shutil.copy(src, os.path.join(IMG, 'char', dst))
-    print('char', dst, Image.open(os.path.join(IMG, 'char', dst)).size)
+                 ('sergey.png', os.path.join(GEN, 'sergey_eng_old__flux-2_0.jpg'))):
+    out = cutout(Image.open(src))
+    out.save(os.path.join(IMG, 'char', dst))
+    print('char', dst, out.size, out.mode)
 
 # ---- 3) лого/иконки -----------------------------------------------------
 logo = Image.open(os.path.join(GEN, 'logo_b_0.jpg')).convert('RGB')

@@ -71,9 +71,10 @@
 Спрайт Екатерины — тот; **Сергея — не тот**; фон взят **с фигурой Екатерины** — мешает.
 
 Факты (проверено):
-- **Сергей:** VN берёт `assets/sprites/sergey.png` (718×1111) — старый. Канон заказчика —
-  `assets/gen/sergey_eng_0.png` (1086×1448; рабочая рубашка + жилет, «не полицейский»,
-  лёгкая щетина, усталые глаза). → **заменить на `sergey_eng_0`**.
+- **Сергей:** VN (`vn2/`) берёт `assets/gen/sergey_eng_old__flux-2_0.jpg` → `vn2/img/char/sergey.png`.
+  Устарели: `assets/sprites/sergey.png` (2016) и `assets/gen/sergey_eng_0.png` (33 года).
+  **Канон заказчика (2026-10-12): 42 года**, рабочий жилет, «не полицейский», лёгкая щетина, усталые глаза.
+  Партия `sergey_eng_old` = 4 движка (`__flux-2/gpt-image-2/nano-banana-2/grok-imagine`), выбран **flux-2**. ✅ заменено.
 - **Екатерина:** `assets/sprites/kate_overalls.png` — соответствует утверждённому
   `assets/gen/kate_overalls_0.png`. ок.
 - **Фоны VN:** commission/kate = `assets/gen/ok_reception_fix2_0.jpg` (1008×1344, портрет,
