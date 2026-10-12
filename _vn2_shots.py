@@ -19,6 +19,9 @@ SHOTS = [
     ('kate_sergey', 'node=9&page=8&text=1&voice=0&music=0'),
     ('kate_kate',   'node=9&page=10&text=1&voice=0&music=0'),
     ('voice_off',   'node=9&page=10&text=0&voice=0&music=0'),
+    ('auto_on',     'node=9&page=8&text=1&voice=0&music=0&auto=1'),
+    ('mid',         'node=9&page=20&text=1&voice=0&music=0'),
+    ('end',         'node=99&text=1&voice=0&music=0'),
 ]
 
 
@@ -42,7 +45,8 @@ subprocess.run([FF, '-y', '-ss', '1.2', '-i', os.path.join(HERE, 'out', 'znak3d_
                 '-frames:v', '1', '-vf', 'scale=1280:720:force_original_aspect_ratio=decrease,'
                 'pad=1280:720:(ow-iw)/2:(oh-ih)/2:black', zn], capture_output=True, text=True)
 
-order = ['title', 'znakframe', 's1', 's3', 's5', 's7', 'kate_n', 'kate_sergey', 'kate_kate']
+order = ['title', 'znakframe', 's1', 's3', 's5', 's7', 'kate_n', 'kate_sergey', 'kate_kate',
+         'auto_on', 'mid', 'end']
 cw, ch, cols = 480, 270, 3
 rows = (len(order) + cols - 1) // cols
 sheet = Image.new('RGB', (cols * cw, rows * ch), (10, 12, 18))

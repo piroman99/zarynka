@@ -15,8 +15,9 @@
     <img id="sprite" alt="">
     <div id="vignette"></div>
 
-    <!-- тулбар: тумблеры текст / голос / музыка -->
+    <!-- тулбар: авто / тумблеры текст / голос / музыка -->
     <div id="tools">
+      <button id="t-auto"  class="tg wide" title="Авто-режим (листается само)">Авто</button>
       <button id="t-text"  class="tg" title="Текст (подстрочник)">Aa</button>
       <button id="t-voice" class="tg" title="Голос закадра">🎙</button>
       <button id="t-music" class="tg" title="Музыка">♪</button>
@@ -41,15 +42,34 @@
       <button id="vskip">Пропустить ▸</button>
     </div>
 
+    <!-- Навигация: назад / далее -->
+    <div id="nav">
+      <button id="prev" title="Назад (←)">‹</button>
+      <button id="next" title="Далее (→)">›</button>
+    </div>
+
     <!-- Диалог -->
     <div id="hud">
       <div id="chapter"></div>
       <div id="box">
         <div id="name"></div>
         <div id="text"></div>
-        <div id="hint">▸ клик / пробел — далее</div>
+        <div id="hint">▸ пробел / клик — далее · ← — назад</div>
       </div>
     </div>
+
+    <!-- Конец серии -->
+    <section id="end" class="screen">
+      <div class="title-inner">
+        <p class="endkicker">Конец первой серии</p>
+        <h2 class="endttl">Ждите следующих серий</h2>
+        <div class="endbtns">
+          <button id="e-menu">В меню</button>
+          <button id="e-teaser" class="ghost">▶ Тизер</button>
+        </div>
+        <p class="by" id="e-byline"></p>
+      </div>
+    </section>
 
     <!-- Кинозал (тизер/AVM) -->
     <div id="cinema" hidden>

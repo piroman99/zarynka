@@ -117,6 +117,33 @@ button:active{transform:translateY(1px)}
 }
 .tg:hover{filter:brightness(1.15)}
 .tg.off{opacity:.42; text-decoration:line-through}
+.tg.wide{width:auto; padding:0 1em; border-radius:999px; font-size:clamp(11px,1.7vmin,15px);
+  letter-spacing:.02em}
+.tg.on{background:linear-gradient(180deg,var(--red2),var(--red));
+  border-color:rgba(255,90,77,.9); box-shadow:0 6px 18px rgba(220,38,38,.4)}
+
+/* навигация: назад / далее */
+#nav{position:absolute; inset:0; pointer-events:none; z-index:9}
+#nav button{
+  position:absolute; top:50%; transform:translateY(-50%); pointer-events:auto;
+  margin:0; padding:0; width:clamp(38px,6vmin,56px); height:clamp(58px,9vmin,86px);
+  border-radius:14px; background:rgba(12,14,20,.44);
+  border:1px solid rgba(255,255,255,.13); color:#fff;
+  font-size:clamp(20px,3.6vmin,32px); line-height:1;
+  font-family:"Trebuchet MS",Verdana,sans-serif; box-shadow:none; opacity:.55;
+}
+#prev{left:1.4%}
+#next{right:1.4%}
+#nav button:hover{opacity:1}
+#nav button:disabled{opacity:.13}
+#stage.notext #nav button{opacity:.35}
+
+/* экран конца серии */
+.endkicker{color:var(--dim); letter-spacing:.3em; text-transform:uppercase;
+  font-size:clamp(10px,1.6vmin,15px)}
+.endttl{font-size:clamp(26px,5vmin,60px); letter-spacing:.06em; margin:.35em 0 .2em;
+  font-weight:700; text-shadow:0 4px 24px rgba(0,0,0,.6)}
+.endbtns{display:flex; gap:.6em; justify-content:center; flex-wrap:wrap}
 
 /* кинозал */
 #cinema{position:absolute; inset:0; z-index:30; background:#000;
