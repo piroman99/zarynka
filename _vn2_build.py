@@ -137,7 +137,7 @@ for name, texts, vo in PROLOG:
     node = {'t': 'scene', 'id': name, 'bg': f'img/prolog/{name}.png',
             'music': 'prolog', 'pages': pgs}
     if vo:
-        node['vo'] = f'../assets/audio/vo_prolog2/{vo}_0.wav'
+        node['vo'] = f'audio/{vo}.mp3'      # плейсхолдер (ужатый клип) — см. vn2/README
     nodes.append(node)
 
 # приёмная: фон + спрайты + дословный текст, с говорящими
