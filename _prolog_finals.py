@@ -70,10 +70,10 @@ for n, desc in PLATES.items():
                                      outdir="assets/gen", name='prologfin_%s' % n, max_price_rub=12)
     print('plate %s -> %s  price=%s' % (n, os.path.relpath(files[0], HERE), st.get('priceRub')))
 
-PLATE_FILE = {'s1': 'prolog_s1_cin_0.jpg',
-              's2': 'prolog_s2_cin_0.jpg',
-              's3': 'prologfin_s3_0.jpg',
-              's4': 'prologfin_s4_0.jpg',
+PLATE_FILE = {'s1': 'prologfin_s1_b_0.jpg',   # B: котобус мелом ВПЕЧЁН в кадр (не наклейка)
+              's2': 'prologfin2_s2a_0.jpg',    # цех сборки (номер 410 отменён, космодром не берём)
+              's3': 'prologfin3_s3_d_0.jpg',  # D: светлый зал, озабоченные-но-не-грустные лица
+              's4': 'prologfin4_s4_d_0.jpg',  # D: комната 2061, станция у Марса на экране, без букв
               's5': 'prologfin_s5_0.jpg',
               's6': 'prologfin_s6_0.jpg',
               's7': 'prologfin_s7_0.jpg'}
@@ -114,8 +114,14 @@ def vignette(im, strength=0.75):
 
 def build(n):
     base = load_plate(n)
-    if n == 's2':
-        base = tag(base, 'КОСМОДРОМ · 2061')
+    if n == 's1':
+        # котобус мелом уже ВПЕЧЁН в плашку flux-2; сверху — только текстовый слой
+        base = soft(base, (620, 990, 1780, 1120), (6, 8, 14), 175, blur=18)
+        ImageDraw.Draw(base).text((1200, 1055), 'МАРС — ДЕЛО ОБЩЕЕ?',
+                                  font=F(GOTHIC, 58), fill=(238, 214, 150), anchor='mm')
+        base = tag(base, 'ПОДВОРОТНЯ · 06:07')
+    elif n == 's2':
+        base = tag(base, 'ЦЕХ · СБОРКА')
     elif n == 's3':
         base = soft(base, (620, 330, 1780, 1010), (6, 8, 14), 150, blur=26)
         d = ImageDraw.Draw(base)
