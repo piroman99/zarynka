@@ -21,6 +21,7 @@ body{
 .bg{
   position:absolute; inset:0; background-position:center; background-size:cover;
   transition:opacity .6s ease; opacity:0;
+  will-change:transform;
 }
 .bg.on{opacity:1}
 

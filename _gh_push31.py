@@ -8,8 +8,8 @@ ENV = dict(os.environ, GIT_SSH_COMMAND=(
     "-o UserKnownHostsFile=/home/ivan/.nanobot/workspace/.ssh/known_hosts "
     "-o StrictHostKeyChecking=no"))
 
-MSG = ("VN эп1 (vn2): пролог S1..S4 закрыты (flux-2 тёплый фотореализм + текст-слой), "
-       "S4 комната-панель 2061 без букв, журнал PROLOG_FIXES.md")
+MSG = ("VN эп1 (vn2): S4 «двухбит одним кадром» — наезд камеры на Марс "
+       "(pg.cam в _vn2_build.py + applyCam/clearCam в app.js), лист review_94, журнал")
 
 
 def sh(cmd, t=1800):

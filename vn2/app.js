@@ -45,12 +45,41 @@
   function setBg(url) {
     if (url === curBg) return;
     curBg = url;
+    clearCam();                         // при смене фона гасим наезд камеры
     other.style.backgroundImage = url ? `url("${url}")` : "none";
     other.classList.add("on");
     if (INSTANT) { other.style.transition = "none"; other.style.opacity = 1; }
     bgActive.classList.remove("on");
     if (INSTANT) bgActive.style.opacity = 0;
     [bgActive, other] = [other, bgActive];
+  }
+
+  // ---------- камера: «наезд» = ДВУХБИТ ОДНИМ КАДРОМ (широкий → врезка) ----------
+  // pg.cam = {from,to,x,y,hold,dur}: start wide, then push in to (x,y) over dur s.
+  let camTimer = null;
+  function clearCam() {
+    clearTimeout(camTimer); camTimer = null;
+    [bgA, bgB].forEach((el) => {
+      el.style.transition = ""; el.style.transform = ""; el.style.transformOrigin = "";
+    });
+  }
+  function applyCam(pg) {
+    clearTimeout(camTimer); camTimer = null;
+    const el = bgActive; if (!el) return;
+    const c = pg && pg.cam;
+    if (!c) { el.style.transition = ""; el.style.transform = ""; el.style.transformOrigin = ""; return; }
+    const x = (c.x != null ? c.x : 0.5) * 100, y = (c.y != null ? c.y : 0.5) * 100;
+    const from = (c.from != null ? c.from : 1), to = (c.to != null ? c.to : 1.4);
+    el.style.transition = "none";
+    el.style.transformOrigin = x + "% " + y + "%";
+    el.style.transform = "scale(" + from + ")";
+    void el.offsetWidth;                 // зафиксировать «широкий» кадр (бит 1)
+    if (INSTANT) { el.style.transform = "scale(" + to + ")"; return; }
+    const hold = (c.hold != null ? c.hold : 0.9) * 1000, dur = (c.dur != null ? c.dur : 3.4);
+    camTimer = setTimeout(() => {        // бит 2: плавный наезд
+      el.style.transition = "opacity .6s ease, transform " + dur + "s ease-in-out";
+      el.style.transform = "scale(" + to + ")";
+    }, hold);
   }
   // ---------- персонажи: ДВА слота, эмоции, кроссфейд, говорящий ярко ----------
   // Слот 0 = левый, слот 1 = правый. Кто на сцене — из pg.cast {l,r,speak},
@@ -154,6 +183,7 @@
       curNode = s.n;
     }
     renderCast(pg.cast);
+    applyCam(pg);
     if (pg.name) { nameEl.style.visibility = "visible"; nameEl.textContent = pg.name; }
     else nameEl.style.visibility = "hidden";
     playVoice(pg, nd);
@@ -202,6 +232,7 @@
     playToken++;
     curNode = -1;
     clearCast();
+    clearCam();
     paused = false; tyPaused = false;
     showHud(false);
     vlayer.hidden = true;
@@ -215,6 +246,7 @@
     playToken++;
     curNode = -1;
     clearCast();
+    clearCam();
     paused = false; tyPaused = false;
     showHud(false); hideScreens();
     setBg("");

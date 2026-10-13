@@ -202,6 +202,8 @@ nodes.append({'t': 'znak', 'video': '../out/znak3d_rot_draft.mp4',
               'caption': 'Зарянка'})
 
 # пролог: кадр + страницы дословного текста + закадр (существующий vo_prolog2)
+# камера «двухбит одним кадром» — плавный наезд без склейки (S4 → Марс на панели)
+PROLOG_CAM = {'s4': {'from': 1.0, 'to': 1.5, 'x': 0.44, 'y': 0.30, 'hold': 0.9, 'dur': 3.4}}
 PROLOG = [('s1', [prolog_par[0]], 's1'),
           ('s2', [prolog_par[1]], 's2'),
           ('s3', [SEG9[0]], 's3'),
@@ -214,6 +216,9 @@ for name, texts, vo in PROLOG:
     for tx in texts:
         for p in pages(tx):
             pgs.append({'tx': p, 'vo': f'audio/vo/{name}_{len(pgs):02d}.mp3'})
+    for pg in pgs:
+        if name in PROLOG_CAM:
+            pg['cam'] = PROLOG_CAM[name]
     node = {'t': 'scene', 'id': name, 'bg': f'img/prolog/{name}.png',
             'music': 'prolog', 'pages': pgs}
     nodes.append(node)
