@@ -219,7 +219,7 @@ def pages(text, maxn=2):
 
 nodes = []
 nodes.append({'t': 'title'})
-nodes.append({'t': 'znak', 'video': '../out/znak3d_rot_draft.mp4',
+nodes.append({'t': 'znak', 'video': '../out/znak3d_rot.mp4',
               'caption': 'Зарянка'})
 
 # пролог: кадр + страницы дословного текста + закадр (существующий vo_prolog2)

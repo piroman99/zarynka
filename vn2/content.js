@@ -28,7 +28,7 @@ window.VN = {
   },
   {
    "t": "znak",
-   "video": "../out/znak3d_rot_draft.mp4",
+   "video": "../out/znak3d_rot.mp4",
    "caption": "Зарянка"
   },
   {

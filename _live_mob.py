@@ -5,7 +5,7 @@ import json, time, urllib.request
 BASE = 'https://piroman99.github.io/zarynka/vn2/'
 NEED = {
     'index.html': ['manifest.webmanifest', 'apple-mobile-web-app-capable', 'id="t-full"', 'id="toast"'],
-    'style.css': ['max-aspect-ratio', '100dvh', 'safe-area-inset-top', '#chint'],
+    'style.css': ['max-aspect-ratio', '100dvh', 'safe-area-inset-top', '#chint', 'max-height:520px'],
     'app.js': ['fitScreens', 'requestFullscreen', 'webkitEnterFullscreen', 'swipedAt'],
     'manifest.webmanifest': ['fullscreen'],
     'sw.js': ["self.addEventListener('fetch'"],
