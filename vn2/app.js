@@ -41,6 +41,128 @@
   SCENES.forEach((s, i) => { if (!(s.n in scriptStart)) scriptStart[s.n] = i; });
   let pos = 0;
 
+  // ---------- ПРЕДЗАГРУЗКА ----------
+  // Кадры/голос качаются ЗАРАНЕЕ, чтобы не мигали во время просмотра.
+  // Список берём из content.js (nd.bg / pg.cast / pg.vo / D.chars / D.music) —
+  // ручной манифест не нужен, будущий контент подхватится сам.
+  // ?preload=0 — выключить (и авто-отключка в режиме скриншотов ?node=N,
+  // если явно не сказано ?node=N&preload=1).
+  const PRELOAD_OFF = qp.get("preload") === "0" || (SHOT && qp.get("preload") !== "1");
+  const PL_CONC = 4;                    // одновременных запросов (не душим канал)
+  const plImg = new Map();              // url -> HTMLImageElement (держит декод)
+  const plAud = new Map();              // url -> blob: (мгновенный старт без сети)
+  const plVid = new Map();
+  const plMiss = new Set();             // 404 — второй раз не просим
+  const plSeen = new Map();             // "kind|url" -> задача (чтобы не дублировать)
+  let plQ = [], plActive = 0, plDone = 0, plTotal = 0, plSeq = 0;
+
+  function plStat() {
+    const el = $("pl"), bar = $("plbar"), txt = $("pltext");
+    const pct = plTotal ? Math.round(plDone * 100 / plTotal) : 100;
+    if (bar) bar.style.width = pct + "%";
+    const fin = plTotal > 0 && plDone >= plTotal;
+    if (txt) { txt.textContent = fin ? "" : (plTotal ? "загрузка " + pct + "%" : ""); txt.classList.toggle("done", fin); }
+    if (el) el.classList.toggle("done", fin);
+  }
+
+  function plPush(url, kind, prio) {
+    if (PRELOAD_OFF || !url) return;
+    if (kind === "img" && (plImg.has(url) || plMiss.has(url))) return;
+    const key = kind + "|" + url, ex = plSeen.get(key);
+    if (ex) { if (prio < ex.prio) ex.prio = prio; return; }   // уже в очереди — только поднимаем приоритет
+    const t = { url: url, kind: kind, prio: prio, seq: plSeq++ };
+    plSeen.set(key, t); plQ.push(t); plTotal++; plStat(); plPump();
+  }
+
+  function plRun(t) {
+    const url = t.url;
+    if (t.kind === "img") {
+      return new Promise((res) => {
+        const im = new Image();
+        plImg.set(url, im);
+        im.decoding = "async";
+        const fin = () => res();
+        im.onload = () => { (im.decode ? im.decode() : Promise.resolve()).then(fin, fin); };
+        im.onerror = () => { plImg.delete(url); plMiss.add(url); fin(); };
+        im.src = url;
+      });
+    }
+    const store = t.kind === "audio" ? plAud : plVid;
+    if (store.has(url) || plMiss.has(url)) return Promise.resolve();
+    return fetch(url, { cache: "force-cache" })
+      .then((r) => (r.ok ? r.blob() : Promise.reject(new Error(r.status))))
+      .then((b) => { store.set(url, URL.createObjectURL(b)); })
+      .catch(() => { plMiss.add(url); });
+  }
+
+  function plPump() {
+    while (plActive < PL_CONC && plQ.length) {
+      let bi = 0;
+      for (let i = 1; i < plQ.length; i++) {
+        const a = plQ[i], b = plQ[bi];
+        if (a.prio < b.prio || (a.prio === b.prio && a.seq < b.seq)) bi = i;
+      }
+      const t = plQ.splice(bi, 1)[0];
+      plActive++;
+      plRun(t).then(() => {}, () => {}).then(() => { plActive--; plDone++; plStat(); plPump(); });
+    }
+  }
+
+  function plPage(i, prio) {
+    const s = SCENES[i]; if (!s) return;
+    const nd = NODES[s.n], pg = nd.pages[s.p];
+    if (s.p === 0) plPush(nd.bg, "img", prio);
+    if (pg.cast) [pg.cast.l, pg.cast.r].forEach((c) => {
+      if (!c) return;
+      plPush(charUrl(c[0], c[1]), "img", prio);
+      plPush(charUrl(c[0], "neutral"), "img", prio);
+    });
+    plPush(pg.vo || nd.vo, "audio", prio);
+  }
+  function plNode(ni, prio) {
+    const nd = NODES[ni]; if (!nd || nd.t !== "scene") return;
+    plPush(nd.bg, "img", prio);
+    plPush(nd.vo, "audio", prio);
+  }
+
+  // весь эп1 в очередь: сначала ближние страницы, в конце — музыка и тизер
+  function plBuild() {
+    if (PRELOAD_OFF) return;
+    plPush("img/logo.png", "img", 0);
+    NODES.forEach((nd) => { if (nd.t === "znak") plPush(nd.video, "video", 0); });
+    SCENES.forEach((_, i) => plPage(i, i < 2 ? 0 : 1 + Math.floor(i / 6)));
+    Object.keys(D.chars || {}).forEach((w) => {
+      const ch = D.chars[w];
+      plPush(ch.base, "img", 90);
+      Object.keys(ch.emos || {}).forEach((e) => plPush(ch.emos[e], "img", 90));
+    });
+    Object.keys(D.music || {}).forEach((k) => plPush(D.music[k], "audio", 95));
+    plPush(AVM, "video", 99);
+  }
+
+  // при входе на страницу — поднять вперёд следующие 6
+  function plWarm(from) {
+    if (PRELOAD_OFF) return;
+    for (let i = from; i < Math.min(SCENES.length, from + 6); i++) plPage(i, 0);
+  }
+
+  // ждём готовности конкретных url (только для старейшего запуска)
+  function plWhen(list, ms) {
+    const lim = Math.ceil((ms || 15000) / 100);
+    return Promise.all(list.map((u) => new Promise((res) => {
+      let n = 0;
+      const tick = () => {
+        if (plMiss.has(u)) return res();
+        const im = plImg.get(u);
+        if (im && im.complete && im.naturalWidth) return res();
+        if (plAud.has(u) || plVid.has(u)) return res();
+        if (n++ > lim) return res();   // не держим зрителя бесконечно
+        setTimeout(tick, 100);
+      };
+      tick();
+    })));
+  }
+
   // ---------- фон / спрайт ----------
   function setBg(url) {
     if (url === curBg) return;
@@ -122,7 +244,7 @@
     musicKey = key;
     const src = D.music[key];
     if (!src) return;
-    music.src = src;
+    music.src = plAud.get(src) || src;   // предзагруженный blob — стартует мгновенно
     if (musicOn && started) music.play().catch(() => {});
   }
 
@@ -135,7 +257,7 @@
     const src = (pg && pg.vo) || (nd && nd.vo);   // страница → узел (совместимость)
     if (!src) return;
     curVo = src;
-    voice.src = src;
+    voice.src = plAud.get(src) || src;    // предзагруженный blob — без сетевой паузы
     voice.volume = 1.0;
     voice.play().catch(() => {});
   }
@@ -184,6 +306,7 @@
     }
     renderCast(pg.cast);
     applyCam(pg);
+    plWarm(i);                       // заранее тянем следующие страницы
     if (pg.name) { nameEl.style.visibility = "visible"; nameEl.textContent = pg.name; }
     else nameEl.style.visibility = "hidden";
     playVoice(pg, nd);
@@ -264,7 +387,7 @@
     showHud(false); hideScreens();
     setMusic("prolog");
     vlayer.hidden = false;
-    znak.src = nd.video;
+    znak.src = plVid.get(nd.video) || nd.video;   // предзагруженный blob — без чёрного кадра
     znak.currentTime = 0;
     znak.play().catch(() => {});
     const done = () => { vlayer.hidden = true; try { znak.pause(); } catch (e) {} znak.onended = null; enterPos(0); };
@@ -272,18 +395,45 @@
     vskip.onclick = (e) => { e.stopPropagation(); done(); };
   }
 
+  let starting = false, pendingGo = null;
   function start() {
-    started = true;
-    hideScreens();
-    if (music.src && musicOn) music.play().catch(() => {});
-    enterZnak(NODES[1]);
+    if (started) return;
+    if (starting) {                       // повторный клик — не ждать загрузку
+      const g = pendingGo; pendingGo = null; starting = false;
+      if (g) g();
+      return;
+    }
+    starting = true;
+    const btn = $("start");
+    const go = () => {
+      if (started) return;
+      started = true; starting = false; pendingGo = null;
+      btn.textContent = "Начать";
+      hideScreens();
+      if (music.src && musicOn) music.play().catch(() => {});
+      enterZnak(NODES[1]);
+    };
+    if (PRELOAD_OFF) return go();
+    // ждём только КРИТИЧНОЕ (значок + S1 + его голос), не весь эп1
+    const crit = [];
+    NODES.forEach((nd) => { if (nd.t === "znak") crit.push(nd.video); });
+    const first = SCENES[0];
+    if (first) {
+      const nd = NODES[first.n];
+      crit.push(nd.bg);
+      crit.push(nd.pages[first.p].vo || nd.vo);
+    }
+    pendingGo = go;
+    btn.textContent = "Загрузка…";
+    btn.title = "Клик — начать, не дожидаясь загрузки";
+    plWhen(crit.filter(Boolean), 12000).then(() => { if (pendingGo) pendingGo(); });
   }
 
   // ---------- кинозал ----------
   function playCinema(src) {
     clearTimeout(autoTimer);
     cinemaOpen = true;
-    avm.src = src; cinema.hidden = false;
+    avm.src = plVid.get(src) || src; cinema.hidden = false;
     requestAnimationFrame(() => cinema.classList.add("on"));
     music.pause();
     const done = () => {
@@ -413,6 +563,12 @@
     if (curVo && ((pg && pg.vo) || nd.vo) === curVo) scheduleAuto();
   });
   syncToggles();
+  plBuild();                       // запускаем фоновую предзагрузку с гл. экрана
+  // отладочные хуки для автотестов движка (без влияния на работу)
+  window.__PL = { img: plImg, aud: plAud, vid: plVid, miss: plMiss,
+                  queue: () => plQ.length, off: () => PRELOAD_OFF };
+  window.__DBG = { get pos() { return pos; }, get node() { return curNode; },
+                   get typing() { return !!typing; } };
   if (SHOT) {                      // режим скриншота: сразу к нужному узлу
     started = true;
     const ni = parseInt(qp.get("node"), 10);

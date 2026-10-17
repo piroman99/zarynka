@@ -31,3 +31,6 @@ out/prolog_animatic_*.mp4
 out/prolog_grade_ab.mp4
 
 _tmp_sprite_review/
+
+# скретч-снимки тестов движка (регенерируемые: _pl_slow.py / _pl_verify2.py)
+assets/review/_pl_*.png
