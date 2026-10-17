@@ -25,6 +25,27 @@ STORY = os.path.join(HERE, 'assets', 'story.txt')
 
 W, H = 1920, 1080
 
+# ---- формат раздачи -----------------------------------------------------
+# СЛОЙ РАЗДАЧИ — WebP q92 (в 7–9× легче PNG, разница на глаз не видна:
+# MAE 1.5–2.3 из 255, см. лист review_100_webp_ab.png).
+# НЕ трогаем: оригиналы генерации assets/gen/*.jpg и мастера assets/final/prolog/*.png —
+# они остаются без потерь, пересборка идёт всегда от них.
+WEBP_Q = 92
+CLIENT_EXT = '.webp'
+
+
+def save_client(im, folder, name, **kw):
+    """Сохранить картинку для клиента в WebP и убрать устаревший .png/.jpg рядом."""
+    p = os.path.join(folder, name + CLIENT_EXT)
+    im.save(p, 'WEBP', quality=WEBP_Q, method=6, **kw)
+    for old in (name + '.png', name + '.jpg'):
+        q = os.path.join(folder, old)
+        if os.path.exists(q):
+            os.remove(q)
+            print('   удалён устаревший', old)
+    return p
+
+
 for d in (os.path.join(IMG, 'prolog'), os.path.join(IMG, 'bg'),
           os.path.join(IMG, 'char'), os.path.join(VN2, 'icons')):
     os.makedirs(d, exist_ok=True)
@@ -70,8 +91,8 @@ for n, ovls in PROLOG_OVL.items():
         base = b.convert('RGB')
         src = 'mock'
     im = grade(base).resize((W, H), Image.LANCZOS)
-    im.save(os.path.join(IMG, 'prolog', n + '.png'))
-    print('prolog', n, '(%s)' % src, '->', os.path.relpath(os.path.join(IMG, 'prolog', n + '.png'), HERE))
+    save_client(im, os.path.join(IMG, 'prolog'), n)
+    print('prolog', n, '(%s)' % src, '->', os.path.relpath(os.path.join(IMG, 'prolog', n + CLIENT_EXT), HERE))
 
 # ---- вырезка фона (плоский фон) для спрайтов ---------------------------
 def cutout(im, tol=34):
@@ -113,8 +134,8 @@ def cutout(im, tol=34):
 
 # ---- 2) фон приёмной + спрайты -----------------------------------------
 bg_src = os.path.join(GEN, 'ok_office_clean_0.jpg')   # пустой кабинет (без фигур)
-Image.open(bg_src).convert('RGB').resize((W, H), Image.LANCZOS).save(
-    os.path.join(IMG, 'bg', 'reception.jpg'))
+save_client(Image.open(bg_src).convert('RGB').resize((W, H), Image.LANCZOS),
+            os.path.join(IMG, 'bg'), 'reception')
 print('bg reception OK')
 
 # базовые спрайты + готовые эмоции (отсутствующие файлы пропускаем;
@@ -129,7 +150,7 @@ for dst, src in CHAR_SRC.items():
         print('char SKIP (нет источника):', dst)
         continue
     out = cutout(Image.open(src))
-    out.save(os.path.join(IMG, 'char', dst))
+    save_client(out, os.path.join(IMG, 'char'), dst.rsplit('.', 1)[0], lossless=False)
     print('char', dst, out.size, out.mode)
 
 
@@ -143,7 +164,7 @@ def char_manifest():
     for who, k in key_of.items():
         emos = {}
         for em in known:
-            fn = k + ('' if em == 'neutral' else '_' + em) + '.png'
+            fn = k + ('' if em == 'neutral' else '_' + em) + CLIENT_EXT
             if fn in have:
                 emos[em] = 'img/char/' + fn
         if emos:
@@ -219,7 +240,7 @@ for name, texts, vo in PROLOG:
     for pg in pgs:
         if name in PROLOG_CAM:
             pg['cam'] = PROLOG_CAM[name]
-    node = {'t': 'scene', 'id': name, 'bg': f'img/prolog/{name}.png',
+    node = {'t': 'scene', 'id': name, 'bg': f'img/prolog/{name}{CLIENT_EXT}',
             'music': 'prolog', 'pages': pgs}
     nodes.append(node)
 
@@ -279,7 +300,7 @@ for i, pg in enumerate(raw):
     if last: cast['speak'] = last
     pg['cast'] = cast
 
-nodes.append({'t': 'scene', 'id': 'reception', 'bg': 'img/bg/reception.jpg',
+nodes.append({'t': 'scene', 'id': 'reception', 'bg': 'img/bg/reception' + CLIENT_EXT,
               'music': 'reception', 'pages': raw})
 
 
