@@ -128,12 +128,18 @@ def build(n):
                                   font=F(LATO_B, 52), fill=CREAM, anchor='mm')
         base = tag(base, 'ВИДЕОРОЛИК · НАРЕЗКА')
     elif n == 's5':
-        base = soft(base, (300, 500, 2100, 780), (168, 40, 34), 232, blur=10)
+        # ВАРИАНТ A (выбран заказчиком 2026-10-17): полоса лозунга на фасаде.
+        # Геометрия и кегли = лист review_97_s5_banner_ab.png (_prolog_s5_banner_ab.py, CONF['A']).
+        band = (300, 500, 2100, 780)
+        base = soft(base, band, (168, 40, 34), 232, blur=10)
         d = ImageDraw.Draw(base)
-        d.text((1200, 580), 'МАРС — ДЕЛО ОБЩЕЕ!', font=F(GOTHIC, 92), fill=CREAM, anchor='ma')
-        d.text((1200, 700), 'ДАЁШЬ МАРС ДЛЯ ВСЕХ!', font=F(GOTHIC, 76), fill=(252, 226, 170), anchor='ma')
-        base = soft(base, (820, 830, 1580, 920), (6, 8, 14), 150, blur=14)
-        ImageDraw.Draw(base).text((1200, 876), '2 МЕСТА «С УЛИЦЫ»', font=F(GOTHIC, 54), fill=(255, 210, 120), anchor='mm')
+        cx, y0 = (band[0] + band[2]) / 2, band[1]
+        d.text((cx, y0 + 50), 'МАРС — ДЕЛО ОБЩЕЕ!', font=F(GOTHIC, 76), fill=CREAM, anchor='ma')
+        d.text((cx, y0 + 142), 'ДАЁШЬ МАРС ДЛЯ ВСЕХ!', font=F(GOTHIC, 62), fill=(252, 226, 170), anchor='ma')
+        chip = (600, 830, 1320, 920)
+        base = soft(base, chip, (6, 8, 14), 150, blur=14)
+        ImageDraw.Draw(base).text(((chip[0] + chip[2]) / 2, (chip[1] + chip[3]) / 2),
+                                  '2 МЕСТА «С УЛИЦЫ»', font=F(GOTHIC, 46), fill=(255, 210, 120), anchor='mm')
         base = tag(base, 'ЛОЗУНГ · СТРАНА')
     elif n == 's6':
         base = soft(base, (1880, 84, 2310, 214), (8, 10, 14), 200, blur=12)
