@@ -223,6 +223,21 @@ button:active{transform:translateY(1px)}
   transition:opacity .25s ease, transform .25s ease}
 #toast.on{opacity:1; transform:translate(-50%,0)}
 
+/* ---- короткий экран (телефон в альбомной): титул жмётся по вертикали ----
+   иначе блок 458 px выше вьюпорта 390 px и его приходится уменьшать целиком;
+   с поджатыми отступами кегль кнопок остаётся читаемым. */
+@media (max-height:520px){
+  .title-inner{padding:2.5%}
+  .logo{width:min(18vmin,120px)}
+  h1{margin:.12em 0 .04em}
+  .ep{margin-top:.7em}
+  button{margin-top:.9em; padding:.5em 1.9em}
+  .ghost{margin-top:.6em; padding:.45em 1.7em}
+  .pl{margin-top:8px}
+  .pltext{margin-top:4px; min-height:11px}
+  .by{margin-top:.9em}
+}
+
 /* ---- ПOРТРЕТ: арт 16:9 сверху, подстрочник — во всю ширину ниже ----
    Без этого в портрете сцена = полоска ~56vw и текст в ней нечитаем. */
 @media (max-aspect-ratio:1/1){
