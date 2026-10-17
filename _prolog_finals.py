@@ -123,19 +123,27 @@ def build(n):
         d.text((1200, 860), 'а что же обычных людей нет?', font=F(LATO_B, 52), fill=CREAM, anchor='ma')
         base = tag(base, 'ЗАЛ · ВОПРОС')
     elif n == 's4':
-        # ПРАВКА 2026-10-17 (Иван): подпись уходила под подстрочник при наезде камеры
-        # (scale 1.0->1.5, origin 44%/30%). Теперь она МЕЛЬЧЕ и ВЫШЕ — сразу под нижней
-        # кромкой ТВ, чтобы на наезде увеличиться и читаться, но не лезть в #box.
-        # Экран ТВ в пространстве 2400x1350: x 731..1666, y 195..666 (замер по s4.png).
-        txt = 'а что же обычных людей нет?'
-        fnt = F(LATO_B, 42)
-        tw = ImageDraw.Draw(base).textlength(txt, font=fnt)
-        cx, by0 = 1199, 684          # центр по ТВ, верх плашки — 6 px под кромкой
-        pad_x, pad_y = 40, 18
+        # ПРАВКА 2026-10-17 (Иван): сначала подпись уходила под подстрочник при наезде
+        # (scale 1.0->1.5, origin x .44 y .30) — поднята к телевизору. Затем «слишком мелко» —
+        # кегль подгоняется ПОД ШИРИНУ ЭКРАНА ТВ (замер по s4.png, 2400-пространство:
+        # экран ТВ x 733..1650 (ширина 917), y 197..666).
+        TXT = 'а что же обычных людей нет?'
+        TV_L, TV_R, TV_B = 733, 1650, 666      # экран ТВ в 2400x1350
+        TARGET = int((TV_R - TV_L) * 0.94)      # 94% ширины экрана -> поля по краям
+        size = 40
+        d = ImageDraw.Draw(base)
+        while d.textlength(TXT, font=F(LATO_B, size)) < TARGET:
+            size += 1
+        fnt = F(LATO_B, size)
+        tw = d.textlength(TXT, font=fnt)
+        cx, by0 = (TV_L + TV_R) // 2, TV_B + 18   # по центру экрана, чуть ниже кромки
+        pad_x, pad_y = 22, 16
         bx0, bx1 = int(cx - tw / 2 - pad_x), int(cx + tw / 2 + pad_x)
-        by1 = int(by0 + 42 + 2 * pad_y)
+        by1 = int(by0 + size + 2 * pad_y)
         base = soft(base, (bx0, by0, bx1, by1), (4, 5, 10), 180, blur=14)
-        ImageDraw.Draw(base).text((cx, (by0 + by1) / 2), txt, font=fnt, fill=CREAM, anchor='mm')
+        ImageDraw.Draw(base).text((cx, (by0 + by1) / 2), TXT, font=fnt, fill=CREAM, anchor='mm')
+        print('   s4 caption: size=%d tw=%.0f (экран %d) band=%s' % (size, tw, TV_R - TV_L,
+                                                               (bx0, by0, bx1, by1)))
         base = tag(base, 'ВИДЕОРОЛИК · НАРЕЗКА')
     elif n == 's5':
         # ВАРИАНТ A (выбран заказчиком 2026-10-17): полоса лозунга на фасаде.

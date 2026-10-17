@@ -9,7 +9,9 @@ sys.path.insert(0, HERE)
 from _cdp import Browser
 
 # доля кадра, которую занимает плашка (из _prolog_finals.build('s4'), 2400x1350)
-CX0, CY0, CX1, CY1 = 862 / 2400.0, 684 / 1350.0, 1535 / 2400.0, 762 / 1350.0
+CX0, CY0, CX1, CY1 = 738 / 2400.0, 684 / 1350.0, 1643 / 2400.0, 777 / 1350.0
+# экран ТВ (для справки): 733..1650 по x, 197..666 по y
+TV = (733 / 2400.0, 197 / 1350.0, 1650 / 2400.0, 666 / 1350.0)
 
 JS = '''(() => {
   const r = (el) => { const b = el.getBoundingClientRect();
@@ -40,6 +42,12 @@ for tag, extra in (('zoom', '&instant=1'), ('wide', '')):
         print('  stage h=%.0f  bg rect w=%.0f h=%.0f' % (d['stage']['h'], bg['w'], bg['h']))
         print('  плашка: x %.0f..%.0f  y %.0f..%.0f  (h=%.0f px)' %
               (cap['l'], cap['r'], cap['t'], cap['b'], cap['b'] - cap['t']))
+        tvr = dict(l=bg['l'] + TV[0] * bg['w'], t=bg['t'] + TV[1] * bg['h'],
+                   r=bg['l'] + TV[2] * bg['w'], b=bg['t'] + TV[3] * bg['h'])
+        print('  экран ТВ: x %.0f..%.0f (w=%.0f)  y %.0f..%.0f' %
+              (tvr['l'], tvr['r'], tvr['r'] - tvr['l'], tvr['t'], tvr['b']))
+        print('  ширина подписи / ширина экрана = %.1f%%' %
+              (100.0 * (cap['r'] - cap['l']) / (tvr['r'] - tvr['l'])))
         print('  #box:   верх %.0f  (#text верх %.0f)' % (d['box']['t'], d['text']['t']))
         print('  зазор плашка->#box: %.0f px' % (d['box']['t'] - cap['b']))
         print('  плашка внутри сцены: %s (сцена %.0f..%.0f)' %
