@@ -3,10 +3,13 @@
 Заказчик: «ничего интересного» -> добавляем живые клипы (корабль, станция, Екатерина
 в скафандре), динамичный монтаж, титры. Всё локально (ffmpeg), денег не тратит.
 
-Пропорции: каждый источник укладывается в 16:9 «contain» поверх размытой копии
-(blur-pad), чтобы ничего не растягивалось.
+Пропорции: каждый источник укладывается в 16:9 «contain» поверх тёмного
+градиента с виньеткой (2026-10-17, вместо blur-pad — Иван: «полосы не смотрятся»).
+Логотип — в круге (logo_b, вырезаем диск по альфе), приёмная — готовый 16:9
+kate_reception_vn_0.png (комбинезон, канон).
 """
 import os, glob, subprocess, json
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -33,6 +36,25 @@ def font(sz):
             return ImageFont.truetype(p, sz)
     return ImageFont.load_default()
 
+# ------------------------------------------------------------------ тёмный фон (вместо blur-pad)
+_BG_CACHE = os.path.join(TMP, "bg_dark_%dx%d.png" % (1920, 1080))
+
+def bg_dark():
+    """Тёмный холодный градиент с виньеткой — фон для вертикальных кадров."""
+    if os.path.exists(_BG_CACHE):
+        return _BG_CACHE
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    cx, cy = W * 0.5, H * 0.46
+    r = np.sqrt(((xx - cx) / (W * 0.62)) ** 2 + ((yy - cy) / (H * 0.72)) ** 2)
+    r = np.clip(r, 0.0, 1.0) ** 1.35
+    inner = np.array([30, 33, 41], np.float32)
+    outer = np.array([7, 8, 11], np.float32)
+    img = inner * (1 - r)[..., None] + outer * r[..., None]
+    noise = np.random.default_rng(7).normal(0.0, 0.9, (H, W, 1))
+    img = np.clip(img + noise, 0, 255).astype(np.uint8)
+    Image.fromarray(img).save(_BG_CACHE)
+    return _BG_CACHE
+
 # ------------------------------------------------------------------ still -> 16:9 png
 def _cover(im, w, h):
     r = max(w / im.width, h / im.height)
@@ -49,8 +71,7 @@ def fit16_still(src):
     if abs(im.width / im.height - W / H) < 0.02:
         out = im.resize((W, H), Image.LANCZOS)
     else:
-        bg = _cover(im, W, H).filter(ImageFilter.GaussianBlur(46))
-        bg = Image.eval(bg, lambda v: int(v * 0.5))
+        bg = Image.open(bg_dark()).convert("RGB").copy()
         fg = _contain(im, W, H)
         bg.paste(fg, ((W - fg.width) // 2, (H - fg.height) // 2))
         out = bg
@@ -58,16 +79,42 @@ def fit16_still(src):
     out.save(p)
     return p
 
+# ------------------------------------------------------------------ логотип в круге
+_LOGO_CACHE = {}
+
+def logo_circle(name="logo_b_0.jpg", diam=460):
+    """Квадрат логотипа -> RGBA-круг: вырезаем сам кремовый диск (с золотым кантом)."""
+    key = (name, diam)
+    if key in _LOGO_CACHE:
+        return _LOGO_CACHE[key]
+    src = os.path.join(HERE, "assets", "gen", name)
+    if not os.path.exists(src):
+        return None
+    im = Image.open(src).convert("RGB")
+    a = np.asarray(im)
+    ys, xs = np.nonzero(a.min(axis=2) < 246)   # белое поле 255 -> кремовый диск
+    cx, cy = (xs.min() + xs.max()) / 2.0, (ys.min() + ys.max()) / 2.0
+    rad = min(xs.max() - xs.min(), ys.max() - ys.min()) / 2.0 - 1.5
+    sz = int(round(rad * 2))
+    sq = im.crop((round(cx - rad), round(cy - rad), round(cx - rad) + sz, round(cy - rad) + sz))
+    S = 4                                     # суперсэмплинг маски — гладкий край
+    m = Image.new("L", (sz * S, sz * S), 0)
+    ImageDraw.Draw(m).ellipse((2 * S, 2 * S, sz * S - 2 * S, sz * S - 2 * S), fill=255)
+    m = m.resize((sz, sz), Image.LANCZOS)
+    rgba = sq.convert("RGBA")
+    rgba.putalpha(m)
+    rgba = rgba.resize((diam, diam), Image.LANCZOS)
+    _LOGO_CACHE[key] = rgba
+    return rgba
+
 # ------------------------------------------------------------------ cards
-def card(title, subtitle=None, logo="logo_a_0.jpg", tsize=118):
-    im = Image.new("RGB", (W, H), (11, 13, 18))
+def card(title, subtitle=None, logo="logo_b_0.jpg", tsize=118):
+    im = Image.open(bg_dark()).convert("RGB").copy()
     d = ImageDraw.Draw(im)
     if logo:
-        lp = os.path.join(HERE, "assets", "gen", logo)
-        if os.path.exists(lp):
-            lg = Image.open(lp).convert("RGB")
-            lg = lg.resize((360, round(lg.height * 360 / lg.width)), Image.LANCZOS)
-            im.paste(lg, ((W - lg.width) // 2, 205))
+        lg = logo_circle(logo, 460)
+        if lg is not None:
+            im.paste(lg, ((W - lg.width) // 2, 118), lg)
     f1, f2 = font(tsize), font(38)
     d.text(((W - d.textlength(title, font=f1)) / 2, 655), title, fill=(240, 238, 232), font=f1)
     if subtitle:
@@ -99,16 +146,14 @@ def kb(src, dst, secs, mode="in"):
 
 # ------------------------------------------------------------------ video -> 16:9 clip
 def v_fit16(src, dst, secs):
-    """Клип: размытый фон-копия на весь кадр + сам клип целиком по центру (без искажений)."""
+    """Клип: тёмный градиент на весь кадр + сам клип целиком по центру (без искажений)."""
     vf = (
-        f"split=2[bg][fg];"
-        f"[bg]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
-        f"boxblur=42:2,eq=brightness=-0.18[bgb];"
-        f"[fg]scale={W}:{H}:force_original_aspect_ratio=decrease[fgs];"
-        f"[bgb][fgs]overlay=(W-w)/2:(H-h)/2,setsar=1,fps={FPS},{'trim=duration=%.3f,' % secs}"
+        f"[1:v]scale={W}:{H}:force_original_aspect_ratio=decrease[fgs];"
+        f"[0:v][fgs]overlay=(W-w)/2:(H-h)/2:shortest=1,setsar=1,fps={FPS},"
         f"format=yuv420p[out]"
     )
-    r = subprocess.run([FF, "-y", "-i", src, "-filter_complex", vf, "-map", "[out]",
+    r = subprocess.run([FF, "-y", "-loop", "1", "-t", f"{secs:.3f}", "-i", bg_dark(),
+                        "-i", src, "-filter_complex", vf, "-map", "[out]",
                         "-t", f"{secs:.3f}", "-c:v", "libx264", "-preset", "medium",
                         "-crf", "19", "-r", str(FPS), dst], capture_output=True, text=True)
     if r.returncode:
@@ -124,7 +169,7 @@ shots = [
     ("video", os.path.join(VID, "i2v_ship_0.mp4"), 5.4, None),
     ("still", os.path.join(GEN, "ok_space_station_0.jpg"), 3.2, "in"),
     ("video", os.path.join(VID, "i2v_station_0.mp4"), 5.2, None),
-    ("still", os.path.join(GEN, "ok_reception_fix2_0.jpg"), 3.6, "in"),
+    ("still", os.path.join(GEN, "kate_reception_vn_0.png"), 3.6, "in"),
     ("video", os.path.join(VID, "i2v_kate_suit_0.mp4"), 5.2, None),
     ("still", os.path.join(GEN, "ok_x_kate_moon_0.jpg"), 4.0, "out"),
     ("still", card("Скоро", "по рассказу Александра «Котобус» Горбова"), 4.2, "in"),
