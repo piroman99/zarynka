@@ -9,16 +9,16 @@ window.VN = {
  },
  "chars": {
   "Сергей": {
-   "base": "img/char/sergey.png",
+   "base": "img/char/sergey.webp",
    "emos": {
-    "neutral": "img/char/sergey.png"
+    "neutral": "img/char/sergey.webp"
    }
   },
   "Екатерина": {
-   "base": "img/char/kate.png",
+   "base": "img/char/kate.webp",
    "emos": {
-    "neutral": "img/char/kate.png",
-    "sad": "img/char/kate_sad.png"
+    "neutral": "img/char/kate.webp",
+    "sad": "img/char/kate_sad.webp"
    }
   }
  },
@@ -34,7 +34,7 @@ window.VN = {
   {
    "t": "scene",
    "id": "s1",
-   "bg": "img/prolog/s1.png",
+   "bg": "img/prolog/s1.webp",
    "music": "prolog",
    "pages": [
     {
@@ -50,7 +50,7 @@ window.VN = {
   {
    "t": "scene",
    "id": "s2",
-   "bg": "img/prolog/s2.png",
+   "bg": "img/prolog/s2.webp",
    "music": "prolog",
    "pages": [
     {
@@ -70,7 +70,7 @@ window.VN = {
   {
    "t": "scene",
    "id": "s3",
-   "bg": "img/prolog/s3.png",
+   "bg": "img/prolog/s3.webp",
    "music": "prolog",
    "pages": [
     {
@@ -82,7 +82,7 @@ window.VN = {
   {
    "t": "scene",
    "id": "s4",
-   "bg": "img/prolog/s4.png",
+   "bg": "img/prolog/s4.webp",
    "music": "prolog",
    "pages": [
     {
@@ -102,7 +102,7 @@ window.VN = {
   {
    "t": "scene",
    "id": "s5",
-   "bg": "img/prolog/s5.png",
+   "bg": "img/prolog/s5.webp",
    "music": "prolog",
    "pages": [
     {
@@ -118,7 +118,7 @@ window.VN = {
   {
    "t": "scene",
    "id": "s6",
-   "bg": "img/prolog/s6.png",
+   "bg": "img/prolog/s6.webp",
    "music": "prolog",
    "pages": [
     {
@@ -134,7 +134,7 @@ window.VN = {
   {
    "t": "scene",
    "id": "s7",
-   "bg": "img/prolog/s7.png",
+   "bg": "img/prolog/s7.webp",
    "music": "prolog",
    "pages": [
     {
@@ -146,7 +146,7 @@ window.VN = {
   {
    "t": "scene",
    "id": "reception",
-   "bg": "img/bg/reception.jpg",
+   "bg": "img/bg/reception.webp",
    "music": "reception",
    "pages": [
     {
