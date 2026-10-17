@@ -1,0 +1,16 @@
+{
+  "name": "Зарянка — визуальная новелла",
+  "short_name": "Зарянка",
+  "description": "Визуальная новелла «Зарянка». Эпизод 1: Пролог. Приёмная комиссия.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "background_color": "#05070b",
+  "theme_color": "#0d1117",
+  "lang": "ru",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

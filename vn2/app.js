@@ -546,18 +546,71 @@
     }
   });
 
-  // свайп (тач)
-  let sx = 0, sy = 0, sw = false;
+  // свайп (тач) — слушаем весь документ: в портрете текст живёт вне 16:9-сцены
+  let sx = 0, sy = 0, sw = false, swipedAt = 0;
   const stage = document.getElementById("stage");
-  stage.addEventListener("touchstart", (e) => {
+  document.body.addEventListener("touchstart", (e) => {
     if (e.touches.length !== 1) return; sx = e.touches[0].clientX; sy = e.touches[0].clientY; sw = true;
   }, { passive: true });
-  stage.addEventListener("touchend", (e) => {
+  document.body.addEventListener("touchend", (e) => {
     if (!sw) return; sw = false;
     const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
     if (cinemaOpen || title.classList.contains("show") || endScr.classList.contains("show")) return;
-    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) { dx < 0 ? next() : prev(); }
+    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) {
+      swipedAt = Date.now();
+      dx < 0 ? next() : prev();
+    }
   }, { passive: true });
+
+  // ---------- вписать экраны в высоту (короткий ландшафт / портрет) ----------
+  // Контент титула в em/процентах — на телефоне он выше вьюпорта, поэтому
+  // масштабируем блок целиком, а не режем кнопки (раньше так терялся «Тизер»).
+  let fitT = null;
+  function fitScreens() {
+    ["title", "end"].forEach((id) => {
+      const sc = $(id); if (!sc) return;
+      const inner = sc.querySelector(".title-inner"); if (!inner) return;
+      inner.style.transform = "none";
+      const avail = sc.clientHeight * 0.94;
+      const h = inner.scrollHeight;
+      if (avail > 0 && h > avail) inner.style.transform = "scale(" + (avail / h).toFixed(4) + ")";
+    });
+  }
+  addEventListener("resize", () => { clearTimeout(fitT); fitT = setTimeout(fitScreens, 80); });
+  addEventListener("orientationchange", () => setTimeout(fitScreens, 200));
+
+  // ---------- полный экран (убрать адресную строку) ----------
+  const fsBtn = $("t-full"), toastEl = $("toast");
+  let toastT = null;
+  function toast(msg, ms) {
+    toastEl.textContent = msg; toastEl.classList.add("on");
+    clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove("on"), ms || 4500);
+  }
+  const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+  function fsSync() { if (fsBtn) fsBtn.classList.toggle("on", !!fsEl()); }
+  function toggleFs() {
+    if (fsEl()) { (document.exitFullscreen || document.webkitExitFullscreen || function () {}).call(document); return; }
+    const root = document.documentElement;
+    const req = root.requestFullscreen || root.webkitRequestFullscreen;
+    if (req) { try { const p = req.call(root); if (p && p.catch) p.catch(() => {}); return; } catch (e) {} }
+    const v = cinemaOpen ? avm : (!vlayer.hidden ? znak : null);   // iPhone: фуллскрин только для <video>
+    if (v && v.webkitEnterFullscreen) { v.webkitEnterFullscreen(); return; }
+    toast("На iPhone страницу во весь экран не развернуть: адресную строку убирает только запуск с иконки «На экран Домой».");
+  }
+  if (fsBtn) fsBtn.onclick = (e) => { e.stopPropagation(); toggleFs(); };
+  document.addEventListener("fullscreenchange", fsSync);
+  document.addEventListener("webkitfullscreenchange", fsSync);
+  fsSync();
+
+  // в портрете подстрочник живёт ВНЕ 16:9-сцены → тап по нему тоже листает
+  // (после свайпа клик игнорируем, иначе страница уезжает на две вперёд)
+  $("box").addEventListener("click", (e) => {
+    if (cinemaOpen || !vlayer.hidden) return;
+    if (title.classList.contains("show") || endScr.classList.contains("show")) return;
+    e.stopPropagation();
+    if (Date.now() - swipedAt < 450) return;
+    next();
+  });
 
   // ---------- init ----------
   if (INSTANT) stage.classList.add("nofx");
@@ -574,6 +627,11 @@
   });
   syncToggles();
   plBuild();                       // запускаем фоновую предзагрузку с гл. экрана
+  fitScreens();                    // титул/конец серии — вписать в высоту экрана
+  if (location.protocol === "http:" || location.protocol === "https:") {
+    // без service worker Chrome не ставит «на Домой» в режиме без адресной строки
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
   // отладочные хуки для автотестов движка (без влияния на работу)
   window.__PL = { img: plImg, aud: plAud, vid: plVid, miss: plMiss,
                   queue: () => plQ.length, off: () => PRELOAD_OFF };

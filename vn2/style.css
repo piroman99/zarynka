@@ -16,6 +16,14 @@ body{
   height:min(100vh, calc(100vw * 9 / 16));
   overflow:hidden; background:#05070b; cursor:pointer;
 }
+/* на мобильных 100vh = высота БЕЗ адресной строки → низ уезжал под неё.
+   dvh считает по реально видимой области. */
+@supports (height: 1dvh){
+  #stage{
+    width:min(100vw, calc(100dvh * 16 / 9));
+    height:min(100dvh, calc(100vw * 9 / 16));
+  }
+}
 
 /* фоны (кроссфейд) */
 .bg{
@@ -67,6 +75,9 @@ body{
   opacity:0; pointer-events:none; transition:opacity .5s ease; z-index:20; text-align:center;
 }
 .screen.show{opacity:1; pointer-events:auto}
+/* экраны (титул / конец серии) живут во ВСЁМ вьюпорте, а не в 16:9-полосе сцены:
+   в портрете полоса всего ~56vw высотой, и кнопки (тизер) обрезались. */
+#title,#end{position:fixed}
 .title-inner{padding:5%}
 .logo{width:min(26vmin,168px); border-radius:50%;
   filter:drop-shadow(0 10px 30px rgba(220,38,38,.35))}
@@ -98,7 +109,7 @@ button:active{transform:translateY(1px)}
   color:#ffd9d4; box-shadow:none; margin-top:.9em}
 
 /* видео-узел (значок) */
-#vlayer{position:absolute; inset:0; z-index:25; background:#000;
+#vlayer{position:fixed; inset:0; z-index:25; background:#000;
   display:flex; align-items:center; justify-content:center}
 #vlayer[hidden]{display:none}
 #vlayer video{width:100%; height:100%; object-fit:contain; background:#000}
@@ -179,7 +190,7 @@ button:active{transform:translateY(1px)}
 .endbtns{display:flex; gap:.6em; justify-content:center; flex-wrap:wrap}
 
 /* кинозал */
-#cinema{position:absolute; inset:0; z-index:30; background:#000;
+#cinema{position:fixed; inset:0; z-index:30; background:#000;
   display:flex; align-items:center; justify-content:center;
   opacity:0; transition:opacity .4s ease}
 #cinema[hidden]{display:none}
@@ -187,3 +198,47 @@ button:active{transform:translateY(1px)}
 #cinema video{width:100%; height:100%; object-fit:contain; background:#000}
 #skip{position:absolute; bottom:4%; right:4%; z-index:31; margin:0;
   padding:.5em 1.4em; font-size:clamp(12px,1.8vmin,16px)}
+/* подсказка в кинозале: в портрете 16:9-кадр — узкая полоса */
+#chint{position:absolute; left:50%; transform:translateX(-50%);
+  bottom:calc(4% + 3.2em); z-index:31; display:none;
+  color:#c8cfdc; font-size:clamp(12px,3.6vw,16px); letter-spacing:.04em;
+  background:rgba(12,14,20,.7); border:1px solid rgba(255,255,255,.14);
+  border-radius:999px; padding:.45em 1.1em; white-space:nowrap}
+@media (max-aspect-ratio:1/1){ #chint{display:block} }
+
+/* выноски под «чёлку»/скруглённые углы телефонов */
+#tools{top:max(2.6%, env(safe-area-inset-top)); right:max(3.4%, env(safe-area-inset-right))}
+#vskip,#skip{bottom:max(4%, env(safe-area-inset-bottom)); right:max(4%, env(safe-area-inset-right))}
+#prev{left:max(1.4%, env(safe-area-inset-left))}
+#next{right:max(1.4%, env(safe-area-inset-right))}
+
+/* всплывающая подсказка (напр. «на iPhone полный экран — только с экрана Домой») */
+#toast{position:fixed; left:50%; z-index:60; max-width:min(92vw,540px);
+  bottom:calc(16px + env(safe-area-inset-bottom));
+  transform:translate(-50%,10px); opacity:0; pointer-events:none;
+  padding:.7em 1.1em; border-radius:12px; text-align:center;
+  background:rgba(12,14,20,.94); border:1px solid rgba(255,255,255,.16);
+  color:#e8ecf5; font-size:clamp(12px,3.5vw,15px); line-height:1.35;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+  transition:opacity .25s ease, transform .25s ease}
+#toast.on{opacity:1; transform:translate(-50%,0)}
+
+/* ---- ПOРТРЕТ: арт 16:9 сверху, подстрочник — во всю ширину ниже ----
+   Без этого в портрете сцена = полоска ~56vw и текст в ней нечитаем. */
+@media (max-aspect-ratio:1/1){
+  #stage{
+    top:0; right:0; bottom:auto; left:0; margin:0;
+    width:100vw; height:calc(100vw * 9 / 16);
+  }
+  #hud{position:fixed; inset:0}
+  #box{
+    top:calc(100vw * 9 / 16); bottom:0; left:0; right:0;
+    display:flex; align-items:center; pointer-events:auto;
+    border:0; border-top:2px solid rgba(220,60,60,.85); border-radius:0;
+    background:linear-gradient(180deg, rgba(10,12,18,.97), rgba(5,7,11,1));
+    padding:0 5vw;
+  }
+  #text{font-size:clamp(16px,4.6vw,26px); line-height:1.5}
+  #name{top:-1.1em; left:5vw; font-size:clamp(14px,3.9vw,20px)}
+  #hint{display:none}
+}

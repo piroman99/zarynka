@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0d1117">
+<!-- бета: убирает адресную строку при запуске с иконки «На экран Домой» (iOS/Android) -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Зарянка">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>Зарянка — визуальная новелла</title>
 <link rel="icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="style.css">
@@ -25,6 +32,7 @@
       <button id="t-text"  class="tg" title="Текст (подстрочник)">Aa</button>
       <button id="t-voice" class="tg" title="Голос закадра">🎙</button>
       <button id="t-music" class="tg" title="Музыка">♪</button>
+      <button id="t-full"  class="tg" title="Полный экран">⛶</button>
     </div>
 
     <!-- Титры -->
@@ -80,10 +88,12 @@
     <!-- Кинозал (тизер/AVM) -->
     <div id="cinema" hidden>
       <video id="avm" playsinline preload="none"></video>
+      <div id="chint">Разверните телефон — кадр станет больше</div>
       <button id="skip">Пропустить ▸</button>
     </div>
   </div>
 
+  <div id="toast" role="status"></div>
   <audio id="music" loop preload="auto"></audio>
   <audio id="voice" preload="auto"></audio>
   <script src="content.js"></script>
