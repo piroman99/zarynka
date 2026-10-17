@@ -123,9 +123,19 @@ def build(n):
         d.text((1200, 860), 'а что же обычных людей нет?', font=F(LATO_B, 52), fill=CREAM, anchor='ma')
         base = tag(base, 'ЗАЛ · ВОПРОС')
     elif n == 's4':
-        base = soft(base, (360, 880, 2040, 1030), (4, 5, 10), 190, blur=18)
-        ImageDraw.Draw(base).text((1200, 956), 'а что же обычных людей нет?',
-                                  font=F(LATO_B, 52), fill=CREAM, anchor='mm')
+        # ПРАВКА 2026-10-17 (Иван): подпись уходила под подстрочник при наезде камеры
+        # (scale 1.0->1.5, origin 44%/30%). Теперь она МЕЛЬЧЕ и ВЫШЕ — сразу под нижней
+        # кромкой ТВ, чтобы на наезде увеличиться и читаться, но не лезть в #box.
+        # Экран ТВ в пространстве 2400x1350: x 731..1666, y 195..666 (замер по s4.png).
+        txt = 'а что же обычных людей нет?'
+        fnt = F(LATO_B, 42)
+        tw = ImageDraw.Draw(base).textlength(txt, font=fnt)
+        cx, by0 = 1199, 684          # центр по ТВ, верх плашки — 6 px под кромкой
+        pad_x, pad_y = 40, 18
+        bx0, bx1 = int(cx - tw / 2 - pad_x), int(cx + tw / 2 + pad_x)
+        by1 = int(by0 + 42 + 2 * pad_y)
+        base = soft(base, (bx0, by0, bx1, by1), (4, 5, 10), 180, blur=14)
+        ImageDraw.Draw(base).text((cx, (by0 + by1) / 2), txt, font=fnt, fill=CREAM, anchor='mm')
         base = tag(base, 'ВИДЕОРОЛИК · НАРЕЗКА')
     elif n == 's5':
         # ВАРИАНТ A (выбран заказчиком 2026-10-17): полоса лозунга на фасаде.
@@ -168,6 +178,7 @@ def build(n):
     print('final', n, '->', os.path.relpath(p, HERE))
 
 
-for n in ('s1', 's2', 's3', 's4', 's5', 's6', 's7'):
+ONLY = sys.argv[1:] or ('s1', 's2', 's3', 's4', 's5', 's6', 's7')
+for n in ONLY:
     build(n)
 print('готово')
