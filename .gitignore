@@ -34,3 +34,4 @@ _tmp_sprite_review/
 
 # скретч-снимки тестов движка (регенерируемые: _pl_slow.py / _pl_verify2.py)
 assets/review/_pl_*.png
+assets/review/_live_*.png
