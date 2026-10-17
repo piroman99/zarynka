@@ -364,6 +364,9 @@
     prevBtn.disabled = true;
     voice.pause();
   }
+  // Возврат в меню = сброс к «первому запуску». Без сброса started/starting
+  // кнопка «Начать» после прохождения молчала (start() упирался в started=true),
+  // работал только «Тизер».
   function goMenu() {
     clearTimeout(autoTimer);
     playToken++;
@@ -371,9 +374,16 @@
     clearCast();
     clearCam();
     paused = false; tyPaused = false;
+    pos = 0;
+    started = false; starting = false; pendingGo = null;
+    const btn = $("start");
+    if (btn) { btn.textContent = "Начать"; btn.title = ""; }
+    plStat();                        // вернуть полосу загрузки в актуальное состояние
+    try { znak.onended = null; znak.pause(); } catch (err) {}
     showHud(false); hideScreens();
     setBg("");
     music.pause(); voice.pause();
+    musicKey = null;                 // иначе setMusic() на рестарте решит «уже играет»
     title.classList.add("show");
     autoOn = false; syncToggles();
   }
