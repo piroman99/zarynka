@@ -94,6 +94,18 @@ def tag(base, txt):
     return base
 
 
+# ДИЕГЕТИЧЕСКОЕ ТАБЛО (правка Ивана 2026-10-17): плавающие часы «06:07» убраны как
+# немотивированные. Время имеет смысл только как реальный предмет в кадре — электронное
+# табло на проходной. None = без часов; (x0,y0,x1,y1) в пространстве 2400x1350.
+CLOCK = None
+CLOCK_TEXT = '06:07'
+
+
+def draw_clock(base, x0, y0, x1, y1):
+    import _s6_clock_ab as _C
+    return _C.clock(base, (x0, y0, x1, y1), text=CLOCK_TEXT)
+
+
 def vignette(im, strength=0.75):
     w, h = im.size
     mask = Image.new('L', (w, h), 0)
@@ -110,7 +122,7 @@ def build(n):
         base = soft(base, (620, 990, 1780, 1120), (6, 8, 14), 175, blur=18)
         ImageDraw.Draw(base).text((1200, 1055), 'МАРС — ДЕЛО ОБЩЕЕ?',
                                   font=F(GOTHIC, 58), fill=(238, 214, 150), anchor='mm')
-        base = tag(base, 'ПОДВОРОТНЯ · 06:07')
+        base = tag(base, 'ПОДВОРОТНЯ')
     elif n == 's2':
         base = tag(base, 'ЦЕХ · СБОРКА')
     elif n == 's3':
@@ -159,8 +171,10 @@ def build(n):
                                   '2 МЕСТА «С УЛИЦЫ»', font=F(GOTHIC, 46), fill=(255, 210, 120), anchor='mm')
         base = tag(base, 'ЛОЗУНГ · СТРАНА')
     elif n == 's6':
-        base = soft(base, (1880, 84, 2310, 214), (8, 10, 14), 200, blur=12)
-        ImageDraw.Draw(base).text((2095, 150), '06:07', font=F(GOTHIC, 72), fill=(238, 176, 84), anchor='mm')
+        # ПРАВКА 2026-10-17 (Иван): плавающие часы «06:07» убраны — «не к селу не к городу».
+        # Время имеет смысл только ДИЕГЕТИЧЕСКИ (электронное табло в кадре), см. CLOCK ниже.
+        if CLOCK:
+            base = draw_clock(base, *CLOCK)
         base = tag(base, 'ОЧЕРЕДЬ · ПРИЁМНАЯ')
     elif n == 's7':
         px0, py0, px1, py1 = 1760, 250, 2250, 640
