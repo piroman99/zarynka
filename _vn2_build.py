@@ -151,10 +151,10 @@ CHAR_SRC = {
     'kate.png':     os.path.join(GEN, 'kate_overalls_0.png'),
     'sergey.png':   os.path.join(GEN, 'sergey_eng_old__flux-2_0.jpg'),
     'kate_sad.png': os.path.join(GEN, 'kate_sad_0.png'),
-    'sergey_smile.png':     first_existing(os.path.join(GEN, 'sergey_smile_0.jpg'),
-                                           os.path.join(GEN, 'sergey_smile_0.png')),
-    'sergey_concerned.png': first_existing(os.path.join(GEN, 'sergey_concerned_0.jpg'),
-                                           os.path.join(GEN, 'sergey_concerned_0.png')),
+    'sergey_smile.png':     first_existing(os.path.join(GEN, 'sergey_smile_0.png'),
+                                           os.path.join(GEN, 'sergey_smile_0.jpg')),
+    'sergey_concerned.png': first_existing(os.path.join(GEN, 'sergey_concerned_0.png'),
+                                           os.path.join(GEN, 'sergey_concerned_0.jpg')),
     'starik_stern.png': os.path.join(SPR, 'starik_stern.png'),
 }
 for dst, src in CHAR_SRC.items():
