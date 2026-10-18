@@ -276,7 +276,22 @@
 - **Пролог S1–S7 закрыт целиком** — все семь кадров приняты Иваном.
 
 ### Репозиторий GitHub
-- Публичный `github.com/piroman99/zarynka`: `master` = нетронутый архив 2016 (`24d9d598`), вся новая работа в ветке **`rebuild`** (последний HEAD **`9b73a0b`**, дерево чистое; пуш-хелперы `_gh_push*.py` до `_gh_push16.py`; цепочка `57bfe8b` → `7f173ab` → `fa3bc28` → `a37c326` → `7dd766f` → `9b73a0b`). GitHub Pages включён Иваном для браузерной VN-демки https://piroman99.github.io/zarynka/ (корень редиректит на `/vn/`). Репо ~239 MB (в истории остались старые `.tmp*` блобы — вариант force-push / LFS / Releases). SSH-ключ `workspace/.ssh/github_ed25519` (комментарий `nanobot-github`, пользователь `piroman99`); пуш через `GIT_SSH_COMMAND="ssh -i …/github_ed25519 -o IdentitiesOnly=yes -o UserKnownHostsFile=…/workspace/.ssh/known_hosts -o StrictHostKeyChecking=no"`; git identity Ivan Karpukhin <piroman99@yandex.ru>; `core.quotepath false`; без `insteadOf`.
+- Публичный `github.com/piroman99/zarynka`: **три ветки (2026-10-18)** — `master` = актуальная работа
+  (зеркало `rebuild`, ветка по умолчанию → репо-страница сразу показывает проект), `rebuild` = рабочая
+  ветка (сюда идут коммиты), `old` = **нетронутый архив 2016** (`24d9d598`, 11 коммитов: LICENSE,
+  Original text, Scenes, Sprites). `master` был переписан на `rebuild` (`--force`), старый HEAD сохранён
+  в `old` — история 2016 не потеряна. Раскладка описана в `README.md`.
+- Пуш — только через Python-хелпер с `GIT_SSH_COMMAND` и ключом `workspace/.ssh/github_ed25519`
+  (shell `git push` падает на `Host key verification failed`); после каждого пуша `master` обновлять
+  `git push origin rebuild:master --force`, иначе репо-страница отстаёт.
+- GitHub Pages включён для браузерной VN-демки **https://piroman99.github.io/zarynka/vn2/** (корень
+  редиректит на `/vn2/`). Pages раздаётся из `rebuild`, но деревья `master` и `rebuild` идентичны —
+  разницы нет. Проверка после пуша: md5 `index.html` (574 B) и `vn2/index.html` (4108 B) — скрипт
+  `_git_pages_check.py`; задержка Pages ~70–100 с.
+- Старое (2026-10): HEAD `9b73a0b`, пуш-хелперы `_gh_push*.py` до `_gh_push16.py`; цепочка `57bfe8b` →
+  `7f173ab` → `fa3bc28` → `a37c326` → `7dd766f` → `9b73a0b`. Репо ~239 MB (в истории остались старые
+  `.tmp*` блобы — вариант force-push / LFS / Releases). git identity Ivan Karpukhin <piroman99@yandex.ru>;
+  `core.quotepath false`; без `insteadOf`.
 
 ### VK-сообщество (дополнение к разделу выше)
 - https://vk.ru/zaryanka_vn, id **242173785**. Готово: обложка (вариант B, `assets/vk/cover_b.png` 1920×768) ✅ + первый пост (текст A, `post_id 3`) ✅; аватар/описание/клипы Иван ставил сам (мобильная обложка = видео). Групповой токен `novella/zaryanka/.vk_token` (600, git-ignored) умеет только обложку + текстовые посты (wall.post/edit); аватар/фото-в-посте/видео — только **пользовательский** токен (ошибка 27/5), и групповой не может читать стену (ошибка 27) → проверять визуально. Публикация **ТОЛЬКО в VK**; VK Клипы API требует user-токен, иначе ручная загрузка `out/avm_v3_epic_9x16.mp4`. **Открыто: второй пост** (текст B короткий / C опрос). Инструменты: `vk.py`, `vk_publish.py`, `vk_cover.py`, `vk_review.py`, `vk_share.py`/`vk_links.py`, тексты в `VK_POST.md`.
