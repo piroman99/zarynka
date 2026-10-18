@@ -1,0 +1,171 @@
+OK   3d     hunyuan3d                          {"ok": true, "priceRub": 20.11, "isEstimate": false, "breakdown": {"base": 20.11}, "chargeBasis": "quote", "qu
+OK   3d     hunyuan3d-2                        {"ok": true, "priceRub": 13.67, "isEstimate": true, "unavailableReason": "Replicate GPU-runtime generation вре
+OK   3d     hunyuan3d-2mv                      {"ok": true, "priceRub": 11.39, "isEstimate": true, "unavailableReason": "Replicate GPU-runtime generation вре
+OK   3d     meshy                              {"ok": true, "priceRub": 100.57, "isEstimate": false, "breakdown": {"base": 100.57}, "chargeBasis": "quote", "
+OK   3d     rodin                              {"ok": true, "priceRub": 50.29, "isEstimate": false, "breakdown": {"endpoint_speed": 50.29, "tier": 0}, "charg
+OK   3d     trellis                            {"ok": true, "priceRub": 2.51, "isEstimate": false, "breakdown": {"base": 2.51}, "chargeBasis": "quote", "quot
+OK   3d     tripo                              {"ok": true, "priceRub": 37.71, "isEstimate": false, "breakdown": {"texture": 37.71}, "chargeBasis": "quote", 
+FAIL audio  elevenlabs-dubbing                 bs-dubbing: нужен исходный файл — video_url или audio_url (публичная https-ссылка или id из POST /v1/files)."}
+FAIL audio  elevenlabs-voice-changer           ьности. Пришлите wav или mp3 до 5 минут — повреждённый или слишком длинный файл отклонён и НЕ тарифицирован."}
+FAIL audio  forced-alignment                   422 POST /api/media/price: {"ok":false,"message":"Для forced-alignment требуется audio_url или audio_base64."}
+FAIL audio  nemotron-3-diarization             e,"message":"Не передан звук: укажите opts.audio_url (публичная https-ссылка на файл) или opts.audio_base64."}
+FAIL audio  nemotron-asr-multilingual          e,"message":"Не передан звук: укажите opts.audio_url (публичная https-ссылка на файл) или opts.audio_base64."}
+FAIL audio  qwen3-asr-1.7b                     e,"message":"Не передан звук: укажите opts.audio_url (публичная https-ссылка на файл) или opts.audio_base64."}
+FAIL audio  speech-to-text                     e,"message":"Не передан звук: укажите opts.audio_url (публичная https-ссылка на файл) или opts.audio_base64."}
+FAIL audio  tts                                T /api/media/price: {"ok":false,"message":"Параметр «Голос» несовместим с выбранными настройками модели tts."}
+FAIL audio  universal-2                        e,"message":"Не передан звук: укажите opts.audio_url (публичная https-ссылка на файл) или opts.audio_base64."}
+FAIL audio  voice-clone-tts                    :false,"message":"Параметр «Стабильность (0–1)» несовместим с выбранными настройками модели voice-clone-tts."}
+FAIL audio  voxtral-small-24b-2507             e,"message":"Не передан звук: укажите opts.audio_url (публичная https-ссылка на файл) или opts.audio_base64."}
+FAIL audio  whisper-large-v3                   e,"message":"Не передан звук: укажите opts.audio_url (публичная https-ссылка на файл) или opts.audio_base64."}
+FAIL audio  whisper-large-v3-turbo             e,"message":"Не передан звук: укажите opts.audio_url (публичная https-ссылка на файл) или opts.audio_base64."}
+OK   audio  chatterbox-tts                     {"ok": true, "priceRub": 0.03, "isEstimate": true, "breakdown": {"base": 0.03}, "chargeBasis": "supplier_chara
+OK   audio  chatterbox-turbo                   {"ok": true, "priceRub": 0.01, "isEstimate": true, "breakdown": {"base": 0.01}, "chargeBasis": "supplier_chara
+OK   audio  elevenlabs-dialogue                {"ok": true, "priceRub": 0.14, "isEstimate": false, "breakdown": {"base": 0.14}, "chargeBasis": "quote", "quot
+OK   audio  elevenlabs-sound-effects-v2        {"ok": true, "priceRub": 1.36, "isEstimate": false, "breakdown": {"base": 1.36}, "chargeBasis": "quote", "quot
+OK   audio  elevenlabs-v4-tts                  {"ok": true, "priceRub": 0.12, "isEstimate": false, "breakdown": {"base": 0.12}, "chargeBasis": "quote", "quot
+OK   audio  gemini-3.8-flash-tts               {"ok": true, "priceRub": 0.04, "isEstimate": false, "breakdown": {"base": 0.04}, "chargeBasis": "quote", "quot
+OK   audio  gemini-3.8-flash-tts-lite          {"ok": true, "priceRub": 0.02, "isEstimate": false, "breakdown": {"base": 0.02}, "chargeBasis": "quote", "quot
+OK   audio  gemini-tts                         {"ok": true, "priceRub": 2.65, "isEstimate": true, "breakdown": {"engine": 2.65}, "chargeBasis": "supplier_cre
+OK   audio  gpt-4o-mini-tts                    {"ok": true, "priceRub": 0.01, "isEstimate": false, "breakdown": {"base": 0.01}, "chargeBasis": "quote", "quot
+OK   audio  grok-tts                           {"ok": true, "priceRub": 0.03, "isEstimate": false, "breakdown": {"base": 0.03}, "chargeBasis": "quote", "quot
+OK   audio  inworld-realtime-tts-1-5-max       {"ok": true, "priceRub": 0.07, "isEstimate": true, "priceUsd": 0.000917, "breakdown": {"base": 0.07}, "chargeB
+OK   audio  inworld-realtime-tts-1-5-mini      {"ok": true, "priceRub": 0.03, "isEstimate": true, "priceUsd": 0.000458, "breakdown": {"base": 0.03}, "chargeB
+OK   audio  kokoro-tts                         {"ok": true, "priceRub": 0.03, "isEstimate": true, "breakdown": {"base": 0.03}, "chargeBasis": "supplier_chara
+OK   audio  mimo-v2-5-tts                      {"ok": true, "priceRub": 0.01, "isEstimate": true, "priceUsd": 0.01, "breakdown": {"base": 0.01}, "chargeBasis
+OK   audio  mimo-v2-5-tts-voiceclone           {"ok": true, "priceRub": 0.01, "isEstimate": true, "priceUsd": 0.01, "breakdown": {"base": 0.01}, "chargeBasis
+OK   audio  mimo-v2-5-tts-voicedesign          {"ok": true, "priceRub": 0.01, "isEstimate": true, "priceUsd": 0.01, "breakdown": {"base": 0.01}, "chargeBasis
+OK   audio  qwen3-tts                          {"ok": true, "priceRub": 0.03, "isEstimate": true, "breakdown": {"base": 0.03}, "chargeBasis": "supplier_chara
+OK   audio  suno-lyrics                        {"ok": true, "priceRub": 2, "isEstimate": true, "estimateReason": "Для этого сочетания параметров нет опублико
+OK   audio  suno-midi                          {"ok": true, "priceRub": 0.25, "isEstimate": false, "breakdown": {"tier": 0.25}, "chargeBasis": "quote", "quot
+OK   audio  suno-persona                       {"ok": true, "priceRub": 0.25, "isEstimate": false, "breakdown": {"tier": 0.25}, "chargeBasis": "quote", "quot
+OK   audio  suno-sfx                           {"ok": true, "priceRub": 15.71, "isEstimate": false, "breakdown": {"version": 15.71, "sound_loop": 0}, "charge
+OK   audio  suno-stem                          {"ok": true, "priceRub": 6.29, "isEstimate": false, "breakdown": {"type": 6.29}, "chargeBasis": "quote", "quot
+OK   audio  suno-style-boost                   {"ok": true, "priceRub": 0.36, "isEstimate": false, "breakdown": {"tier": 0.36}, "chargeBasis": "quote", "quot
+OK   audio  suno-timestamped-lyrics            {"ok": true, "priceRub": 0.45, "isEstimate": false, "breakdown": {"tier": 0.45}, "chargeBasis": "quote", "quot
+FAIL image  grok-imagine-2.0-ext               incompatible_params
+FAIL image  ideogram-character                  /api/media/price: {"ok":false,"message":"Для режима «Создание персонажа» требуется изображение (image_url)."}
+FAIL image  ideogram-v3                        requires_provider_pin
+FAIL image  midjourney                         incompatible_params
+FAIL image  topaz-denoise                      e HTTP 422 POST /api/media/price: {"ok":false,"message":"Topaz pricing requires a non-empty image_url value."}
+FAIL image  topaz-sharpen                      e HTTP 422 POST /api/media/price: {"ok":false,"message":"Topaz pricing requires a non-empty image_url value."}
+FAIL image  topaz-upscale-generative           e HTTP 422 POST /api/media/price: {"ok":false,"message":"Topaz pricing requires a non-empty image_url value."}
+OK   image  flux-1.1-pro                       {"ok": true, "priceRub": 5.03, "isEstimate": false, "breakdown": {"base": 5.03}, "chargeBasis": "quote", "quot
+OK   image  flux-2                             {"ok": true, "priceRub": 3.38, "isEstimate": false, "breakdown": {"mode": 0, "tier": 3.38}, "chargeBasis": "qu
+OK   image  flux-2-max                         {"ok": true, "priceRub": 7.59, "isEstimate": false, "breakdown": {"base": 7.59}, "chargeBasis": "quote", "quot
+OK   image  flux-3-image                       {"ok": true, "priceRub": 4.83, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_f1658272564b2f5ebc4
+OK   image  flux-fill                          {"ok": true, "priceRub": 5.03, "isEstimate": false, "breakdown": {"tier": 5.03}, "chargeBasis": "quote", "quot
+OK   image  flux-kontext                       {"ok": true, "priceRub": 3.14, "isEstimate": true, "breakdown": {"tier": 3.14}, "chargeBasis": "supplier_credi
+OK   image  gpt-image-1-5                      {"ok": true, "priceRub": 2.51, "isEstimate": false, "breakdown": {"quality": 2.51, "mode": 0}, "chargeBasis": 
+OK   image  gpt-image-2                        {"ok": true, "priceRub": 2.7, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_0336222ad71abd8367d6
+OK   image  gpt-image-2-5                      {"ok": true, "priceRub": 4.07, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_94697b5a1eb854c957e
+OK   image  grok-imagine                       {"ok": true, "priceRub": 2.02, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_72656e551371eada322
+OK   image  grok-imagine-image-2-0             {"ok": true, "priceRub": 2.71, "isEstimate": false, "breakdown": {"tier": 2.71}, "chargeBasis": "quote", "quot
+OK   image  grok-imagine-image-2.0             {"ok": true, "priceRub": 4.02, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_eb474203c890022753a
+OK   image  grok-imagine-image-quality         {"ok": true, "priceRub": 5.03, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_2af267d2d0ca826809d
+OK   image  ideogram-4-5                       {"ok": true, "priceRub": 8.13, "isEstimate": false, "breakdown": {"base": 8.13}, "chargeBasis": "quote", "quot
+OK   image  ideogram-4-5-precise-edit          {"ok": true, "priceRub": 8.13, "isEstimate": false, "breakdown": {"base": 8.13}, "chargeBasis": "quote", "quot
+OK   image  ideogram-v4                        {"ok": true, "priceRub": 8.13, "isEstimate": false, "breakdown": {"base": 8.13}, "chargeBasis": "quote", "quot
+OK   image  imagen4                            {"ok": true, "priceRub": 5.03, "isEstimate": true, "breakdown": {"tier": 5.03}, "chargeBasis": "supplier_credi
+OK   image  krea-2                             {"ok": true, "priceRub": 1.89, "isEstimate": false, "breakdown": {"tier": 1.89}, "chargeBasis": "quote", "quot
+OK   image  krea-3                             {"ok": true, "priceRub": 3.39, "isEstimate": false, "breakdown": {"base": 3.39}, "chargeBasis": "quote", "quot
+OK   image  nano-banana                        {"ok": true, "priceRub": 1.58, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_7e726d62743da862744
+OK   image  nano-banana-2                      {"ok": true, "priceRub": 1.89, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_8bbe9760e17ad8d86c3
+OK   image  nano-banana-2.1                    {"ok": true, "priceRub": 2.71, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_5c766be864bf3ab70ca
+OK   image  nano-banana-pro                    {"ok": true, "priceRub": 4.06, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_f8aabe9f95b85ce7160
+OK   image  qwen-image                         {"ok": true, "priceRub": 6, "isEstimate": true, "estimateReason": "Для этого сочетания параметров нет опублико
+OK   image  qwen-image-2-1                     {"ok": true, "priceRub": 2.51, "isEstimate": false, "breakdown": {"mode": 0, "enhance_prompt": 0, "tier": 2.51
+OK   image  qwen3-image                        {"ok": true, "priceRub": 2.59, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_15e41eca7ace1ef876e
+OK   image  qwen3-pro                          {"ok": true, "priceRub": 4.33, "isEstimate": true, "breakdown": {"resolution": 4.33, "mode": 0}, "chargeBasis"
+OK   image  recraft                            {"ok": true, "priceRub": 0.63, "isEstimate": true, "breakdown": {"mode": 0.63}, "chargeBasis": "supplier_credi
+OK   image  recraft-v4-1                       {"ok": true, "priceRub": 4.74, "isEstimate": false, "breakdown": {"base": 4.74}, "chargeBasis": "quote", "quot
+OK   image  seedream                           {"ok": true, "priceRub": 4.09, "isEstimate": false, "breakdown": {"version": 4.09, "mode": 0}, "chargeBasis": 
+OK   image  seedream-4-5                       {"ok": true, "priceRub": 4.09, "isEstimate": true, "breakdown": {"mode": 4.09}, "chargeBasis": "supplier_credi
+OK   image  seedream-5                         {"ok": true, "priceRub": 3.72, "isEstimate": false, "breakdown": {"mode": 0, "tier": 3.72}, "chargeBasis": "qu
+OK   image  seedream-5-0-flash                 {"ok": true, "priceRub": 1.86, "isEstimate": false, "breakdown": {"base": 1.86}, "chargeBasis": "quote", "quot
+OK   image  seedream-5-0-pro                   {"ok": true, "priceRub": 3.68, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_cadabe2d98e72b96abd
+OK   image  seedream-layer                     {"ok": true, "priceRub": 23.69, "isEstimate": false, "breakdown": {"tier": 23.69}, "chargeBasis": "quote", "qu
+OK   image  topaz-upscale                      {"ok": true, "priceRub": 6.29, "isEstimate": true, "breakdown": {"upscale_factor": 6.29}, "chargeBasis": "supp
+OK   image  wan-2-7-image                      {"ok": true, "priceRub": 2.72, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_b9814df44bbb43e5920
+OK   image  wan2.7-image-pro                   {"ok": true, "priceRub": 6.84, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_8cb3db2b952d96eccba
+OK   image  z-image                            {"ok": true, "priceRub": 1, "isEstimate": true, "estimateReason": "Для этого сочетания параметров нет опублико
+OK   image  z-image-turbo                      {"ok": true, "priceRub": 1.26, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_892e9ca534a82e3a2ac
+OK   music  acestep-v15-xl-sft                 {"ok": true, "priceRub": 4.21, "isEstimate": false, "priceUsd": 0.05, "breakdown": {"base": 4.21}, "chargeBasi
+OK   music  elevenlabs-music                   {"ok": true, "priceRub": 40.62, "isEstimate": false, "breakdown": {"base": 40.62}, "chargeBasis": "quote", "qu
+OK   music  lyria-3-5                          {"ok": true, "priceRub": 8.13, "isEstimate": false, "breakdown": {"base": 8.13}, "chargeBasis": "quote", "quot
+OK   music  suno                               {"ok": true, "priceRub": 10.82, "isEstimate": false, "breakdown": {"version": 10.82, "instrumental": 0}, "char
+OK   music  suno-add-instrumental              {"ok": true, "priceRub": 10.82, "isEstimate": false, "breakdown": {"tier": 10.82}, "chargeBasis": "quote", "qu
+OK   music  suno-add-vocals                    {"ok": true, "priceRub": 10.82, "isEstimate": false, "breakdown": {"tier": 10.82}, "chargeBasis": "quote", "qu
+OK   music  suno-cover-audio                   {"ok": true, "priceRub": 10.82, "isEstimate": false, "breakdown": {"instrumental": 0, "custom_mode": 0, "tier"
+OK   music  suno-cover-generate                {"ok": true, "priceRub": 7.54, "isEstimate": false, "breakdown": {"tier": 7.54}, "chargeBasis": "quote", "quot
+OK   music  suno-extend-audio                  {"ok": true, "priceRub": 10.82, "isEstimate": false, "breakdown": {"instrumental": 0, "tier": 10.82}, "chargeB
+OK   music  suno-mashup                        {"ok": true, "priceRub": 10.82, "isEstimate": false, "breakdown": {"instrumental": 0, "custom_mode": 0, "tier"
+OK   music  suno-replace-section               {"ok": true, "priceRub": 4.51, "isEstimate": false, "breakdown": {"tier": 4.51}, "chargeBasis": "quote", "quot
+FAIL video  MiniMax-H3-Context-IR              incompatible_params
+FAIL video  MiniMax-H3-Regeneration            incompatible_params
+FAIL video  hailuo-2-3                         PlusVibe HTTP 422 POST /api/media/price: {"ok":false,"message":"Для Hailuo 2.3 I2V требуется image_url."}
+FAIL video  happyhorse                         : {"ok":false,"message":"Параметр «Аудио (для Edit)» несовместим с выбранными настройками модели happyhorse."}
+FAIL video  happyhorse-1.1                     incompatible_params
+FAIL video  p-video-edit                       price: {"ok":false,"message":"Для p-video-edit требуется video_url (видео для редактирования, до 15 секунд)."}
+FAIL video  seedance-2.0-face                  incompatible_params
+FAIL video  vidu-q4                            ia/price: {"ok":false,"message":"Параметр «Соотношение» несовместим с выбранными настройками модели vidu-q4."}
+FAIL video  volcengine-lipsync                 етр «Сегментация сцен и определение спикера» несовместим с выбранными настройками модели volcengine-lipsync."}
+FAIL video  wan-2-7                            ice: {"ok":false,"message":"Параметр «Аудио (для Edit)» несовместим с выбранными настройками модели wan-2-7."}
+FAIL video  wan2.7-r2v                         incompatible_params
+FAIL video  wan2.7-videoedit                   incompatible_params
+OK   video  MiniMax-Hailuo-02                  {"ok": true, "priceRub": 25.14, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_421438588cf32c0e6b
+OK   video  flux-3                             {"ok": true, "priceRub": 106.85, "isEstimate": false, "breakdown": {"generate_audio": 0, "tier": 106.85}, "cha
+OK   video  gemini-omni-flash-1-1              {"ok": true, "priceRub": 71.08, "isEstimate": false, "breakdown": {"tier": 71.08}, "chargeBasis": "quote", "qu
+OK   video  gemini-omni-flash-1-1-flow         {"ok": true, "priceRub": 62.86, "isEstimate": false, "breakdown": {"duration": 5, "resolution": 0.1}, "chargeB
+OK   video  gemini-omni-video                  {"ok": true, "priceRub": 71.08, "isEstimate": false, "breakdown": {"tier": 71.08}, "chargeBasis": "quote", "qu
+OK   video  grok-imagine-extend                {"ok": true, "priceRub": 18.28, "isEstimate": false, "breakdown": {"tier": 18.28}, "chargeBasis": "quote", "qu
+OK   video  grok-imagine-upscale               {"ok": true, "priceRub": 12.57, "isEstimate": true, "breakdown": {"resolution": 12.57}, "chargeBasis": "suppli
+OK   video  grok-imagine-video                 {"ok": true, "priceRub": 18.3, "isEstimate": false, "breakdown": {"input": 0, "tier": 18.3}, "chargeBasis": "q
+OK   video  heygen-avatar-4                    {"ok": true, "priceRub": 12.57, "isEstimate": true, "chargeBasis": "output_duration", "estimateReason": "Цена 
+OK   video  kling-ai-avatar                    {"ok": true, "priceRub": 5.03, "isEstimate": true, "breakdown": {"tier": 5.03}, "chargeBasis": "source_duratio
+OK   video  kling-motion-control               {"ok": true, "priceRub": 62.85, "isEstimate": true, "breakdown": {"tier": 62.85}, "chargeBasis": "source_durat
+OK   video  kling-v2-5-turbo                   {"ok": true, "priceRub": 26.4, "isEstimate": true, "breakdown": {"input": 0, "tier": 26.4}, "chargeBasis": "su
+OK   video  kling-v2.6                         {"ok": true, "priceRub": 37.23, "isEstimate": false, "breakdown": {"input": 0, "tier": 37.23}, "chargeBasis": 
+OK   video  kling-v3-omni                      {"ok": true, "priceRub": 47.4, "isEstimate": false, "breakdown": {"input": 0, "tier": 47.4}, "chargeBasis": "q
+OK   video  kling-v3-turbo                     {"ok": true, "priceRub": 56.55, "isEstimate": true, "breakdown": {"resolution": 11.31, "input": 0, "duration":
+OK   video  kling-v3.0                         {"ok": true, "priceRub": 64.3, "isEstimate": false, "breakdown": {"tier": 64.3}, "chargeBasis": "quote", "quot
+OK   video  kling-video-o1                     {"ok": true, "priceRub": 42.24, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_c7a6c576e0985d8bd2
+OK   video  lipsync-2-pro                      {"ok": true, "priceRub": 10.5, "isEstimate": true, "chargeBasis": "output_duration", "estimateReason": "Цена у
+OK   video  ltx-2.5-audio-to-video             {"ok": true, "priceRub": 21.37, "isEstimate": true, "chargeBasis": "output_duration", "estimateReason": "Цена 
+OK   video  luma-ray-3-2                       {"ok": true, "priceRub": 40.62, "isEstimate": false, "breakdown": {"base": 40.62}, "chargeBasis": "quote", "qu
+OK   video  minimax-h3                         {"ok": true, "priceRub": 32.52, "isEstimate": false, "breakdown": {"input": 0, "tier": 32.52}, "chargeBasis": 
+OK   video  minimax-h3-max                     {"ok": true, "priceRub": 48.21, "isEstimate": false, "breakdown": {"duration": 48.21}, "chargeBasis": "quote",
+OK   video  minimax-h3-max-lipsync             {"ok": true, "priceRub": 10.06, "isEstimate": true, "chargeBasis": "output_duration", "estimateReason": "Цена 
+OK   video  minimax-h3-max-turbo               {"ok": true, "priceRub": 15.71, "isEstimate": false, "breakdown": {"duration": 5, "resolution": 0.025}, "charg
+OK   video  omnihuman-1-5                      {"ok": true, "priceRub": 30, "isEstimate": true, "estimateReason": "Для этого сочетания параметров нет опублик
+OK   video  omnihuman-v1.5                     {"ok": true, "priceRub": 603.43, "isEstimate": true, "breakdown": {"duration": 603.43}, "chargeBasis": "output
+OK   video  omnihuman-v2                       {"ok": true, "priceRub": 13.2, "isEstimate": true, "chargeBasis": "output_duration", "estimateReason": "Цена у
+OK   video  p-video-2                          {"ok": true, "priceRub": 20.31, "isEstimate": false, "breakdown": {"base": 20.31}, "chargeBasis": "quote", "qu
+OK   video  p-video-2-pro                      {"ok": true, "priceRub": 23.7, "isEstimate": false, "breakdown": {"base": 23.7}, "chargeBasis": "quote", "quot
+OK   video  p-video-avatar                     {"ok": true, "priceRub": 17.57, "isEstimate": false, "priceUsd": 0.208333, "breakdown": {"base": 17.57}, "char
+OK   video  pika                               {"ok": true, "priceRub": 25.14, "isEstimate": false, "breakdown": {"base": 25.14, "resolution": 0}, "chargeBas
+OK   video  pixverse-v6                        {"ok": true, "priceRub": 24.35, "isEstimate": true, "breakdown": {"mode": 0, "multi_clip": 0, "tier": 24.35}, 
+OK   video  react-1                            {"ok": true, "priceRub": 21, "isEstimate": true, "chargeBasis": "output_duration", "estimateReason": "Цена ука
+OK   video  runway-gen-4-5                     {"ok": true, "priceRub": 81.24, "isEstimate": false, "breakdown": {"base": 81.24}, "chargeBasis": "quote", "qu
+OK   video  runway-gen4                        {"ok": true, "priceRub": 7.54, "isEstimate": true, "breakdown": {"tier": 7.54}, "chargeBasis": "supplier_credi
+OK   video  seedance-2-0-mini                  {"ok": true, "priceRub": 32.15, "isEstimate": false, "breakdown": {"input": 0, "audio": 0, "tier": 32.15}, "ch
+OK   video  seedance-2.0                       {"ok": true, "priceRub": 89.26, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_e8aab6c3a64d2fce2c
+OK   video  seedance-2.0-fast-face             {"ok": true, "priceRub": 50.29, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_cf15f0e686e3e6e8f0
+OK   video  seedance-2.5                       {"ok": true, "priceRub": 213.25, "isEstimate": false, "breakdown": {"input": 0, "audio": 0, "tier": 213.25}, "
+OK   video  skyreels-v4-fast                   {"ok": true, "priceRub": 40.23, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_20d3a86313ce2dacc9
+OK   video  skyreels-v4-std                    {"ok": true, "priceRub": 55.31, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_f4560ccc4759441cae
+OK   video  suno-music-video                   {"ok": true, "priceRub": 1.35, "isEstimate": false, "breakdown": {"tier": 1.35}, "chargeBasis": "quote", "quot
+OK   video  sync-3                             {"ok": true, "priceRub": 16.8, "isEstimate": true, "chargeBasis": "output_duration", "estimateReason": "Цена у
+OK   video  sync-3-avatar                      {"ok": true, "priceRub": 16.76, "isEstimate": true, "chargeBasis": "output_duration", "estimateReason": "Цена 
+OK   video  topaz-video-upscale                {"ok": true, "priceRub": 5.03, "isEstimate": true, "breakdown": {"upscale_factor": 5.03}, "chargeBasis": "sour
+OK   video  veed-fabric-1.0                    {"ok": true, "priceRub": 18.86, "isEstimate": true, "chargeBasis": "output_duration", "estimateReason": "Цена 
+OK   video  veo-3.1                            {"ok": true, "priceRub": 17.6, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_ffbda527c20334bdea6
+OK   video  vidu-q2                            {"ok": true, "priceRub": 12.05, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_065042dd110e563db3
+OK   video  vidu-q3                            {"ok": true, "priceRub": 20.11, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_3787e064ec5d8c2f89
+OK   video  wan-2-2                            {"ok": true, "priceRub": 50.29, "isEstimate": true, "breakdown": {"input": 0, "tier": 50.29}, "chargeBasis": "
+OK   video  wan-2-5                            {"ok": true, "priceRub": 37.71, "isEstimate": true, "breakdown": {"enable_prompt_expansion": 0, "nsfw_checker"
+OK   video  wan-2-6                            {"ok": true, "priceRub": 44, "isEstimate": true, "breakdown": {"input": 0, "tier": 44}, "chargeBasis": "suppli
+OK   video  wan-3-0                            {"ok": true, "priceRub": 31.45, "isEstimate": false, "breakdown": {"resolution": 6.29, "mode": 0, "prompt_exte
+OK   video  wan-3-0-prime                      {"ok": true, "priceRub": 69.63, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_3d5e78af348a19cb44
+OK   video  wan-animate                        {"ok": true, "priceRub": 39.3, "isEstimate": true, "breakdown": {"resolution": 7.86, "mode": 0, "duration": 31
+OK   video  wan-speech-to-video                {"ok": true, "priceRub": 60.5, "isEstimate": false, "breakdown": {"resolution": 60.5}, "chargeBasis": "quote",
+OK   video  wan3.0-video                       {"ok": true, "priceRub": 21.55, "isEstimate": false, "chargeBasis": "quote", "quoteId": "mq_991f8b9533e081f41b

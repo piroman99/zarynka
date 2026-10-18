@@ -1,0 +1,5 @@
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/starik_Algenib.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/_sil.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/starik_Orus.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/_sil.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/starik_Fenrir.mp3'

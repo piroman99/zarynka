@@ -1,0 +1,86 @@
+[
+  {
+    "who": "Старик",
+    "key": "starik",
+    "voice": "Fenrir",
+    "file": "assets/audio/vo_cast/starik_fenrir.mp3",
+    "price": 0.27
+  },
+  {
+    "who": "Старик",
+    "key": "starik",
+    "voice": "Orus",
+    "file": "assets/audio/vo_cast/starik_orus.mp3",
+    "price": 0.27
+  },
+  {
+    "who": "Старик",
+    "key": "starik",
+    "voice": "Iapetus",
+    "file": "assets/audio/vo_cast/starik_iapetus.mp3",
+    "price": 0.27
+  },
+  {
+    "who": "Старик",
+    "key": "starik",
+    "voice": "Algenib",
+    "file": "assets/audio/vo_cast/starik_algenib.mp3",
+    "price": 0.27
+  },
+  {
+    "who": "Сергей",
+    "key": "sergey",
+    "voice": "Charon",
+    "file": "assets/audio/vo_cast/sergey_charon.mp3",
+    "price": 0.47
+  },
+  {
+    "who": "Сергей",
+    "key": "sergey",
+    "voice": "Schedar",
+    "file": "assets/audio/vo_cast/sergey_schedar.mp3",
+    "price": 0.47
+  },
+  {
+    "who": "Сергей",
+    "key": "sergey",
+    "voice": "Umbriel",
+    "file": "assets/audio/vo_cast/sergey_umbriel.mp3",
+    "price": 0.47
+  },
+  {
+    "who": "Сергей",
+    "key": "sergey",
+    "voice": "Achird",
+    "file": "assets/audio/vo_cast/sergey_achird.mp3",
+    "price": 0.47
+  },
+  {
+    "who": "Екатерина",
+    "key": "kate",
+    "voice": "Kore",
+    "file": "assets/audio/vo_cast/kate_kore.mp3",
+    "price": 0.35
+  },
+  {
+    "who": "Екатерина",
+    "key": "kate",
+    "voice": "Leda",
+    "file": "assets/audio/vo_cast/kate_leda.mp3",
+    "price": 0.35
+  },
+  {
+    "who": "Екатерина",
+    "key": "kate",
+    "voice": "Aoede",
+    "file": "assets/audio/vo_cast/kate_aoede.mp3",
+    "price": 0.35
+  },
+  {
+    "who": "Екатерина",
+    "key": "kate",
+    "voice": "Callirrhoe",
+    "file": "assets/audio/vo_cast/kate_callirrhoe.mp3",
+    "price": 0.35
+  }
+]

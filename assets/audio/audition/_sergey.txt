@@ -1,0 +1,5 @@
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/sergey_Iapetus.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/_sil.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/sergey_Achird.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/_sil.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/sergey_Umbriel.mp3'

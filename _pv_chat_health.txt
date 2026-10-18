@@ -1,0 +1,306 @@
+OK	anthropic/claude-opus-4.8	cost=0.00197462 out='po'
+OK	anthropic/claude-opus-5	cost=0.010209 out="pong — I'm here. Wha"
+OK	claude-opus-4.6	cost=0.01797882 out='pong 🏓'
+OK	claude-opus-4.7	cost=0.02633212 out='pong. What can I hel'
+OK	anthropic/claude-sonnet-4.6	cost=0.000986 out='po'
+OK	anthropic/claude-sonnet-5	cost=0.001128 out='po'
+OK	claude-sonnet-5.5	cost=0.000884 out='po'
+OK	claude-haiku-5.5	cost=0.000043 out='po'
+OK	claude-fable-5-1	cost=0.008021 out='po'
+OK	openai/gpt-5.6-luna	cost=0.00003008 out='pong'
+OK	openai/gpt-5.6-terra	cost=0.00024511 out='pong'
+OK	openai/gpt-5.6-sol	cost=0.000543 out='pong'
+OK	gpt-6-astra	cost=0.00422655 out='Pong.'
+OK	gpt-6-luna	cost=0.00014635 out='pong'
+OK	gpt-6-sol	cost=0.000462 out='pong'
+OK	gpt-6.1-sol	cost=0.00024991 out=' pong'
+OK	claude-opus-5.5	cost=0.00171 out='po'
+OK	deepseek/deepseek-v4-flash-0731	cost=0.00014334 out=''
+OK	deepseek-v4.1-flash	cost=0.00010306 out=''
+OK	deepseek/deepseek-v4-pro-0813	cost=0.00117504 out=''
+OK	google/gemini-3.1-pro-preview	cost=0.00076319 out='pong! How can I help'
+OK	google/gemini-3.5-flash	cost=0.00058132 out='pong!'
+OK	google/gemini-3.8-flash	cost=0.00525251 out='pong'
+OK	qwen/qwen3.7-plus	cost=0.00041104 out='pong'
+OK	qwen3.8-flash	cost=0.00003366 out='P'
+OK	qwen3.8-omni-flash	cost=0.00013271 out='pong'
+OK	hy4-preview	cost=0.00051373 out=''
+OK	qwen/qwen3.8-max	cost=0.00064416 out='pong'
+OK	moonshotai/kimi-k2.7-code	cost=0.007641 out='P'
+FAIL	nemotron-3-super-120b-a12b	PlusVibe HTTP 429 POST /v1/chat/completions: {"error":{"message":"Все провайдеры этой модели временно недоступны. Повторите запрос через несколько сек
+OK	nemotron-3.5-lightning	cost=0.00016715 out='P'
+OK	llama-4-maverick	cost=0.00050994 out='Pong'
+OK	openai/gpt-oss-120b	cost=0.00136103 out='pong'
+OK	qwen3.8-27b	cost=0.00070628 out='pong'
+OK	moonshotai/kimi-k2.6	cost=0.00201128 out=''
+OK	gemma-4	cost=0.00079514 out='pong! 🏓  How can I h'
+OK	glm-5.1	cost=0.00258291 out='pong 🏓  有什么可以帮您的吗？'
+OK	z-ai/glm-5.2	cost=0.00033608 out='pong'
+OK	z-ai/glm-5.3	cost=0.00697188 out='Pong'
+OK	z-ai/glm-5.3-flash	cost=0.00029164 out=''
+OK	glm-5.3-flashx	cost=0.00122906 out='pong'
+OK	qwen3.6-35b	cost=0.00021424 out='P'
+OK	perplexity/sonar	cost=0.00146342 out='**Ping** can mean se'
+OK	perplexity/sonar-pro	cost=0.0206976 out='“**Ping**” can mean '
+FAIL	perplexity/sonar-reasoning-pro	PlusVibe HTTP 502 POST /v1/chat/completions: {"error":{"message":"Поставщик вернул ответ без текста: модель потратила весь заданный вами max_tokens на
+OK	grok-4.3	cost=0.00068642 out='你好。'
+OK	x-ai/grok-4.6	cost=0.00057083 out='P'
+OK	grok-4.7	cost=0.01008523 out="Pong! 🏓  What's the "
+FAIL	x-ai/grok-build-0.1	The read operation timed out
+OK	google/gemini-3.1-flash-lite	cost=0.0016889 out='pong! 🏓 How can I he'
+OK	minimax/minimax-m3	cost=0.00282679 out=''
+OK	minimax/minimax-m2.7	cost=0.00039176 out="pong! 👋 I'm here and"
+OK	minimax/minimax-m2.5	cost=0.0011847 out="pong 🏓  I'm here and"
+OK	xiaomi/mimo-v2.5-pro	cost=0.00111104 out="pong 🏓 I'm here and "
+OK	xiaomi/mimo-v2.5	cost=0.00054218 out='MiMo-V2.5 已收到 "ping"'
+OK	mimo-v2.6-pro	cost=0.00422323 out='Pong. Ada yang bisa '
+OK	mimo-v2.6-flash	cost=0.00363012 out="pong! I'm here and r"
+OK	moonshotai/kimi-k3	cost=0.006786 out=''
+OK	deepseek-v4-flash-0731:free	cost={'completion_tokens': 64, 'prompt_tokens': 84, 'total_tokens': 148} out='pong! 🏓 pong! 🏓 pong'
+FAIL	qwen3-embedding-8b	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"Запрошенная модель недоступна.","type":"not_found_error","code":404,"request_id":"20
+FAIL	text-embedding-3-small	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"Запрошенная модель недоступна.","type":"not_found_error","code":404,"request_id":"ae
+FAIL	bge-m3	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"Запрошенная модель недоступна.","type":"not_found_error","code":404,"request_id":"9a
+FAIL	multilingual-e5-large	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"Запрошенная модель недоступна.","type":"not_found_error","code":404,"request_id":"85
+FAIL	embeddinggemma-300m	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"Запрошенная модель недоступна.","type":"not_found_error","code":404,"request_id":"2c
+FAIL	nemotron-embed-vl	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"Запрошенная модель недоступна.","type":"not_found_error","code":404,"request_id":"0d
+FAIL	qwen3-embedding-0.6b	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"Запрошенная модель недоступна.","type":"not_found_error","code":404,"request_id":"2e
+FAIL	frida	PlusVibe HTTP 400 POST /v1/chat/completions: {"error":{"message":"Некорректный запрос: параметр \"model\" имеет недопустимое значение.","type":"invali
+FAIL	giga-embeddings	PlusVibe HTTP 400 POST /v1/chat/completions: {"error":{"message":"Некорректный запрос: параметр \"model\" имеет недопустимое значение.","type":"invali
+FAIL	jina-embeddings-v4	PlusVibe HTTP 400 POST /v1/chat/completions: {"error":{"message":"Некорректный запрос: параметр \"model\" имеет недопустимое значение.","type":"invali
+FAIL	qwen3-embedding-4b	PlusVibe HTTP 400 POST /v1/chat/completions: {"error":{"message":"Некорректный запрос: параметр \"model\" имеет недопустимое значение.","type":"invali
+FAIL	qwen3-embedding-8b-rus1	PlusVibe HTTP 400 POST /v1/chat/completions: {"error":{"message":"Некорректный запрос: параметр \"model\" имеет недопустимое значение.","type":"invali
+FAIL	qwen3-reranker-8b-rus1	PlusVibe HTTP 503 POST /v1/chat/completions: {"error":{"message":"Модель временно недоступна, попробуйте позже или другую модель.","type":"upstream_un
+FAIL	seedance-2.0-fast-face	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2.0-fast-face» не найдена. Укажите id реальной модели, например «an
+FAIL	seedance-2.0-fast-face:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2.0-fast-face:white» не найдена. Укажите id реальной модели, наприм
+FAIL	seedream-5-0-pro	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedream-5-0-pro» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	seedream-5-0-pro:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedream-5-0-pro:white» не найдена. Укажите id реальной модели, например «an
+FAIL	grok-imagine-image-2.0	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «grok-imagine-image-2.0» не найдена. Укажите id реальной модели, например «an
+FAIL	grok-imagine-image-2.0:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «grok-imagine-image-2.0:white» не найдена. Укажите id реальной модели, наприм
+FAIL	grok-imagine-image-quality	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «grok-imagine-image-quality» не найдена. Укажите id реальной модели, например
+FAIL	grok-imagine-image-quality:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «grok-imagine-image-quality:white» не найдена. Укажите id реальной модели, на
+FAIL	kling-video-o1	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-video-o1» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	kling-video-o1:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-video-o1:white» не найдена. Укажите id реальной модели, например «anth
+FAIL	MiniMax-Hailuo-02	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «MiniMax-Hailuo-02» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	MiniMax-Hailuo-02:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «MiniMax-Hailuo-02:white» не найдена. Укажите id реальной модели, например «a
+FAIL	skyreels-v4-fast	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «skyreels-v4-fast» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	skyreels-v4-fast:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «skyreels-v4-fast:white» не найдена. Укажите id реальной модели, например «an
+FAIL	skyreels-v4-std	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «skyreels-v4-std» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	skyreels-v4-std:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «skyreels-v4-std:white» не найдена. Укажите id реальной модели, например «ant
+FAIL	wan2.7-image-pro	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan2.7-image-pro» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	wan2.7-image-pro:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan2.7-image-pro:white» не найдена. Укажите id реальной модели, например «an
+FAIL	wan3.0-video	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan3.0-video» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	wan3.0-video:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan3.0-video:white» не найдена. Укажите id реальной модели, например «anthro
+FAIL	seedream-5-0-flash	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedream-5-0-flash» не найдена. Укажите id реальной модели, например «anthro
+FAIL	seedream-5-0-flash:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedream-5-0-flash:white» не найдена. Укажите id реальной модели, например «
+FAIL	seedream-5-0-flash:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedream-5-0-flash:flow» не найдена. Укажите id реальной модели, например «a
+FAIL	flux-2-max	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «flux-2-max» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	flux-2-max:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «flux-2-max:white» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	flux-2-max:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «flux-2-max:flow» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	lyria-3-5	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «lyria-3-5» не найдена. Укажите id реальной модели, например «anthropic/claud
+FAIL	lyria-3-5:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «lyria-3-5:white» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	lyria-3-5:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «lyria-3-5:flow» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	qwen3-tts	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «qwen3-tts» не найдена. Укажите id реальной модели, например «anthropic/claud
+FAIL	qwen3-tts:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «qwen3-tts:flow» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	gpt-4o-mini-tts	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gpt-4o-mini-tts» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	elevenlabs-v4-tts	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «elevenlabs-v4-tts» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	grok-tts	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «grok-tts» не найдена. Укажите id реальной модели, например «anthropic/claude
+FAIL	elevenlabs-music	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «elevenlabs-music» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	elevenlabs-sound-effects-v2	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «elevenlabs-sound-effects-v2» не найдена. Укажите id реальной модели, наприме
+FAIL	recraft-v4-1	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «recraft-v4-1» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	ideogram-v4	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «ideogram-v4» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	ideogram-4-5	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «ideogram-4-5» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	ideogram-4-5-precise-edit	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «ideogram-4-5-precise-edit» не найдена. Укажите id реальной модели, например 
+FAIL	krea-3	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «krea-3» не найдена. Укажите id реальной модели, например «anthropic/claude-o
+FAIL	runway-gen-4-5	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «runway-gen-4-5» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	p-video-2	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «p-video-2» не найдена. Укажите id реальной модели, например «anthropic/claud
+FAIL	p-video-2-pro	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «p-video-2-pro» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	p-video-edit	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «p-video-edit» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	luma-ray-3-2	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «luma-ray-3-2» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	gpt-image-2	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gpt-image-2» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	gpt-image-2:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gpt-image-2:white» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	gpt-image-2:network	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gpt-image-2:network» не найдена. Укажите id реальной модели, например «anthr
+FAIL	gpt-image-2-5	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gpt-image-2-5» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	gpt-image-2-5:network	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gpt-image-2-5:network» не найдена. Укажите id реальной модели, например «ant
+FAIL	gpt-image-1-5	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gpt-image-1-5» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	nano-banana-pro	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «nano-banana-pro» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	nano-banana-pro:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «nano-banana-pro:white» не найдена. Укажите id реальной модели, например «ant
+FAIL	nano-banana	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «nano-banana» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	nano-banana:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «nano-banana:white» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	imagen4	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «imagen4» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	nano-banana-2.1	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «nano-banana-2.1» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	nano-banana-2	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «nano-banana-2» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	nano-banana-2:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «nano-banana-2:white» не найдена. Укажите id реальной модели, например «anthr
+FAIL	grok-imagine	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «grok-imagine» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	grok-imagine:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «grok-imagine:white» не найдена. Укажите id реальной модели, например «anthro
+FAIL	ideogram-v3:pixel	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «ideogram-v3:pixel» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	ideogram-v3:rep	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «ideogram-v3:rep» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	ideogram-character	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «ideogram-character» не найдена. Укажите id реальной модели, например «anthro
+FAIL	ideogram-character:rep	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «ideogram-character:rep» не найдена. Укажите id реальной модели, например «an
+FAIL	flux-kontext	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «flux-kontext» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	flux-2	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «flux-2» не найдена. Укажите id реальной модели, например «anthropic/claude-o
+FAIL	flux-2:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «flux-2:flow» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	flux-3-image	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «flux-3-image» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	flux-3-image:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «flux-3-image:white» не найдена. Укажите id реальной модели, например «anthro
+FAIL	krea-2	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «krea-2» не найдена. Укажите id реальной модели, например «anthropic/claude-o
+FAIL	flux-1.1-pro	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «flux-1.1-pro» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	flux-fill	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «flux-fill» не найдена. Укажите id реальной модели, например «anthropic/claud
+FAIL	seedream	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedream» не найдена. Укажите id реальной модели, например «anthropic/claude
+FAIL	seedream-5	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedream-5» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	seedream-layer	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedream-layer» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	seedream-4-5	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedream-4-5» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	qwen-image	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «qwen-image» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	qwen3-image	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «qwen3-image» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	qwen3-image:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «qwen3-image:white» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	qwen3-pro	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «qwen3-pro» не найдена. Укажите id реальной модели, например «anthropic/claud
+FAIL	qwen-image-2-1	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «qwen-image-2-1» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	recraft	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «recraft» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	topaz-upscale	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «topaz-upscale» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	z-image	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «z-image» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	z-image-turbo	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «z-image-turbo» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	z-image-turbo:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «z-image-turbo:white» не найдена. Укажите id реальной модели, например «anthr
+FAIL	wan-2-7-image	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-2-7-image» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	wan-2-7-image:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-2-7-image:white» не найдена. Укажите id реальной модели, например «anthr
+FAIL	grok-imagine-image-2-0	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «grok-imagine-image-2-0» не найдена. Укажите id реальной модели, например «an
+FAIL	veo-3.1	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «veo-3.1» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	veo-3.1:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «veo-3.1:white» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	veo-3.1:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «veo-3.1:flow» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	kling-v2.6	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-v2.6» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	kling-v2.6:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-v2.6:flow» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	kling-v2.6:prime	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-v2.6:prime» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	kling-v2.6:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-v2.6:white» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	kling-v3.0	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-v3.0» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	kling-v3.0:prime	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-v3.0:prime» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	kling-v3-omni	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-v3-omni» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	kling-v3-omni:prime	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-v3-omni:prime» не найдена. Укажите id реальной модели, например «anthr
+FAIL	kling-v3-turbo	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-v3-turbo» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	kling-v2-5-turbo	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-v2-5-turbo» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	kling-ai-avatar	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-ai-avatar» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	kling-motion-control	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kling-motion-control» не найдена. Укажите id реальной модели, например «anth
+FAIL	seedance-2.0	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2.0» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	seedance-2.0:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2.0:white» не найдена. Укажите id реальной модели, например «anthro
+FAIL	seedance-2.0:pixel	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2.0:pixel» не найдена. Укажите id реальной модели, например «anthro
+FAIL	seedance-2.0:prime	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2.0:prime» не найдена. Укажите id реальной модели, например «anthro
+FAIL	seedance-2.5	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2.5» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	seedance-2.5:pixel	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2.5:pixel» не найдена. Укажите id реальной модели, например «anthro
+FAIL	seedance-2.5:prime	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2.5:prime» не найдена. Укажите id реальной модели, например «anthro
+FAIL	seedance-2-0-mini	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2-0-mini» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	seedance-2-0-mini:pixel	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2-0-mini:pixel» не найдена. Укажите id реальной модели, например «a
+FAIL	seedance-2-0-mini:prime	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «seedance-2-0-mini:prime» не найдена. Укажите id реальной модели, например «a
+FAIL	pixverse-v6	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «pixverse-v6» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	pixverse-v6:pixel	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «pixverse-v6:pixel» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	pixverse-v6:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «pixverse-v6:white» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	wan-3-0	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-3-0» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	wan-3-0-prime	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-3-0-prime» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	wan-3-0-prime:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-3-0-prime:white» не найдена. Укажите id реальной модели, например «anthr
+FAIL	wan-3-0-prime:pixel	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-3-0-prime:pixel» не найдена. Укажите id реальной модели, например «anthr
+FAIL	wan-3-0-prime:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-3-0-prime:flow» не найдена. Укажите id реальной модели, например «anthro
+FAIL	flux-3	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «flux-3» не найдена. Укажите id реальной модели, например «anthropic/claude-o
+FAIL	wan-2-7	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-2-7» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	wan-2-7:pixel	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-2-7:pixel» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	wan-2-6	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-2-6» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	wan-2-5	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-2-5» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	wan-2-2	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-2-2» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	wan-animate	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-animate» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	wan-speech-to-video	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-speech-to-video» не найдена. Укажите id реальной модели, например «anthr
+FAIL	wan-speech-to-video:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «wan-speech-to-video:flow» не найдена. Укажите id реальной модели, например «
+FAIL	hailuo-2-3	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «hailuo-2-3» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	vidu-q3	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «vidu-q3» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	vidu-q3:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «vidu-q3:white» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	vidu-q2	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «vidu-q2» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	vidu-q4	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «vidu-q4» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	happyhorse	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «happyhorse» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	happyhorse:pixel	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «happyhorse:pixel» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	grok-imagine-video	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «grok-imagine-video» не найдена. Укажите id реальной модели, например «anthro
+FAIL	grok-imagine-upscale	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «grok-imagine-upscale» не найдена. Укажите id реальной модели, например «anth
+FAIL	grok-imagine-extend	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «grok-imagine-extend» не найдена. Укажите id реальной модели, например «anthr
+FAIL	minimax-h3-max	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «minimax-h3-max» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	minimax-h3-max-turbo	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «minimax-h3-max-turbo» не найдена. Укажите id реальной модели, например «anth
+FAIL	gemini-omni-flash-1-1-flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gemini-omni-flash-1-1-flow» не найдена. Укажите id реальной модели, например
+FAIL	minimax-h3	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «minimax-h3» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	minimax-h3:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «minimax-h3:white» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	gemini-omni-video	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gemini-omni-video» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	gemini-omni-flash-1-1	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gemini-omni-flash-1-1» не найдена. Укажите id реальной модели, например «ant
+FAIL	runway-gen4	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «runway-gen4» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	omnihuman-1-5	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «omnihuman-1-5» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	volcengine-lipsync	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «volcengine-lipsync» не найдена. Укажите id реальной модели, например «anthro
+FAIL	topaz-video-upscale	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «topaz-video-upscale» не найдена. Укажите id реальной модели, например «anthr
+FAIL	omnihuman-v2	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «omnihuman-v2» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	omnihuman-v2:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «omnihuman-v2:flow» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	omnihuman-v1.5	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «omnihuman-v1.5» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	omnihuman-v1.5:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «omnihuman-v1.5:flow» не найдена. Укажите id реальной модели, например «anthr
+FAIL	lipsync-2-pro	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «lipsync-2-pro» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	lipsync-2-pro:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «lipsync-2-pro:flow» не найдена. Укажите id реальной модели, например «anthro
+FAIL	sync-3	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «sync-3» не найдена. Укажите id реальной модели, например «anthropic/claude-o
+FAIL	sync-3:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «sync-3:flow» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	react-1	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «react-1» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	react-1:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «react-1:flow» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	minimax-h3-max-lipsync	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «minimax-h3-max-lipsync» не найдена. Укажите id реальной модели, например «an
+FAIL	minimax-h3-max-lipsync:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «minimax-h3-max-lipsync:flow» не найдена. Укажите id реальной модели, наприме
+FAIL	sync-3-avatar	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «sync-3-avatar» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	sync-3-avatar:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «sync-3-avatar:flow» не найдена. Укажите id реальной модели, например «anthro
+FAIL	heygen-avatar-4	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «heygen-avatar-4» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	heygen-avatar-4:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «heygen-avatar-4:flow» не найдена. Укажите id реальной модели, например «anth
+FAIL	veed-fabric-1.0	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «veed-fabric-1.0» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	veed-fabric-1.0:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «veed-fabric-1.0:flow» не найдена. Укажите id реальной модели, например «anth
+FAIL	ltx-2.5-audio-to-video	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «ltx-2.5-audio-to-video» не найдена. Укажите id реальной модели, например «an
+FAIL	ltx-2.5-audio-to-video:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «ltx-2.5-audio-to-video:flow» не найдена. Укажите id реальной модели, наприме
+FAIL	pika	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «pika» не найдена. Укажите id реальной модели, например «anthropic/claude-opu
+FAIL	tts	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «tts» не найдена. Укажите id реальной модели, например «anthropic/claude-opus
+FAIL	elevenlabs-dialogue	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «elevenlabs-dialogue» не найдена. Укажите id реальной модели, например «anthr
+FAIL	gemini-tts	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gemini-tts» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	gemini-3.8-flash-tts	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gemini-3.8-flash-tts» не найдена. Укажите id реальной модели, например «anth
+FAIL	gemini-3.8-flash-tts:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gemini-3.8-flash-tts:flow» не найдена. Укажите id реальной модели, например 
+FAIL	gemini-3.8-flash-tts-lite	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gemini-3.8-flash-tts-lite» не найдена. Укажите id реальной модели, например 
+FAIL	gemini-3.8-flash-tts-lite:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «gemini-3.8-flash-tts-lite:flow» не найдена. Укажите id реальной модели, напр
+FAIL	chatterbox-tts	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «chatterbox-tts» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	chatterbox-tts:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «chatterbox-tts:flow» не найдена. Укажите id реальной модели, например «anthr
+FAIL	kokoro-tts	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kokoro-tts» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	kokoro-tts:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «kokoro-tts:flow» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	speech-to-text	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «speech-to-text» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	speech-to-text:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «speech-to-text:flow» не найдена. Укажите id реальной модели, например «anthr
+FAIL	nemotron-3-diarization	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «nemotron-3-diarization» не найдена. Укажите id реальной модели, например «an
+FAIL	qwen3-asr-1.7b	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «qwen3-asr-1.7b» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	voxtral-small-24b-2507	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «voxtral-small-24b-2507» не найдена. Укажите id реальной модели, например «an
+FAIL	mimo-v2-5-tts	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «mimo-v2-5-tts» не найдена. Укажите id реальной модели, например «anthropic/c
+FAIL	mimo-v2-5-tts-voiceclone	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «mimo-v2-5-tts-voiceclone» не найдена. Укажите id реальной модели, например «
+FAIL	mimo-v2-5-tts-voicedesign	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «mimo-v2-5-tts-voicedesign» не найдена. Укажите id реальной модели, например 
+FAIL	inworld-realtime-tts-1-5-mini	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «inworld-realtime-tts-1-5-mini» не найдена. Укажите id реальной модели, напри
+FAIL	inworld-realtime-tts-1-5-max	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «inworld-realtime-tts-1-5-max» не найдена. Укажите id реальной модели, наприм
+FAIL	acestep-v15-xl-sft	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «acestep-v15-xl-sft» не найдена. Укажите id реальной модели, например «anthro
+FAIL	p-video-avatar	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «p-video-avatar» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	whisper-large-v3-turbo	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «whisper-large-v3-turbo» не найдена. Укажите id реальной модели, например «an
+FAIL	nemotron-asr-multilingual	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «nemotron-asr-multilingual» не найдена. Укажите id реальной модели, например 
+FAIL	whisper-large-v3	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «whisper-large-v3» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	universal-2	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «universal-2» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	forced-alignment	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «forced-alignment» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	chatterbox-turbo	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «chatterbox-turbo» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	voice-clone-tts	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «voice-clone-tts» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	elevenlabs-voice-changer	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «elevenlabs-voice-changer» не найдена. Укажите id реальной модели, например «
+FAIL	elevenlabs-dubbing	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «elevenlabs-dubbing» не найдена. Укажите id реальной модели, например «anthro
+FAIL	suno	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno» не найдена. Укажите id реальной модели, например «anthropic/claude-opu
+FAIL	suno:white	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno:white» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	suno-stem	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-stem» не найдена. Укажите id реальной модели, например «anthropic/claud
+FAIL	suno-sfx	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-sfx» не найдена. Укажите id реальной модели, например «anthropic/claude
+FAIL	suno-lyrics	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-lyrics» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	suno-mashup	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-mashup» не найдена. Укажите id реальной модели, например «anthropic/cla
+FAIL	suno-add-instrumental	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-add-instrumental» не найдена. Укажите id реальной модели, например «ant
+FAIL	suno-add-vocals	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-add-vocals» не найдена. Укажите id реальной модели, например «anthropic
+FAIL	suno-cover-audio	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-cover-audio» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	suno-extend-audio	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-extend-audio» не найдена. Укажите id реальной модели, например «anthrop
+FAIL	suno-replace-section	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-replace-section» не найдена. Укажите id реальной модели, например «anth
+FAIL	suno-music-video	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-music-video» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	suno-timestamped-lyrics	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-timestamped-lyrics» не найдена. Укажите id реальной модели, например «a
+FAIL	suno-style-boost	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-style-boost» не найдена. Укажите id реальной модели, например «anthropi
+FAIL	suno-cover-generate	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-cover-generate» не найдена. Укажите id реальной модели, например «anthr
+FAIL	suno-persona	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-persona» не найдена. Укажите id реальной модели, например «anthropic/cl
+FAIL	suno-midi	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «suno-midi» не найдена. Укажите id реальной модели, например «anthropic/claud
+FAIL	hunyuan3d	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «hunyuan3d» не найдена. Укажите id реальной модели, например «anthropic/claud
+FAIL	hunyuan3d:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «hunyuan3d:flow» не найдена. Укажите id реальной модели, например «anthropic/
+FAIL	tripo	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «tripo» не найдена. Укажите id реальной модели, например «anthropic/claude-op
+FAIL	tripo:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «tripo:flow» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	meshy	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «meshy» не найдена. Укажите id реальной модели, например «anthropic/claude-op
+FAIL	meshy:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «meshy:flow» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	rodin	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «rodin» не найдена. Укажите id реальной модели, например «anthropic/claude-op
+FAIL	rodin:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «rodin:flow» не найдена. Укажите id реальной модели, например «anthropic/clau
+FAIL	trellis	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «trellis» не найдена. Укажите id реальной модели, например «anthropic/claude-
+FAIL	trellis:flow	PlusVibe HTTP 404 POST /v1/chat/completions: {"error":{"message":"модель «trellis:flow» не найдена. Укажите id реальной модели, например «anthropic/cl

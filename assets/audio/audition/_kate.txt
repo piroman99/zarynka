@@ -1,0 +1,5 @@
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/kate_Gacrux.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/_sil.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/kate_Sulafat.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/_sil.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/audition/kate_Vindemiatrix.mp3'

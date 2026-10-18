@@ -140,10 +140,22 @@ print('bg reception OK')
 
 # базовые спрайты + готовые эмоции (отсутствующие файлы пропускаем;
 # остальные эмоции рисует _vn2_emo.py — движок подхватит их без правок)
+def first_existing(*cands):
+    for c in cands:
+        if os.path.exists(c):
+            return c
+    return cands[0]
+
+
 CHAR_SRC = {
     'kate.png':     os.path.join(GEN, 'kate_overalls_0.png'),
     'sergey.png':   os.path.join(GEN, 'sergey_eng_old__flux-2_0.jpg'),
     'kate_sad.png': os.path.join(GEN, 'kate_sad_0.png'),
+    'sergey_smile.png':     first_existing(os.path.join(GEN, 'sergey_smile_0.jpg'),
+                                           os.path.join(GEN, 'sergey_smile_0.png')),
+    'sergey_concerned.png': first_existing(os.path.join(GEN, 'sergey_concerned_0.jpg'),
+                                           os.path.join(GEN, 'sergey_concerned_0.png')),
+    'starik_stern.png': os.path.join(SPR, 'starik_stern.png'),
 }
 for dst, src in CHAR_SRC.items():
     if not os.path.exists(src):
@@ -263,18 +275,24 @@ EMO = {1:  ('Старик', 'stern'),
        24: ('Сергей', 'concerned'), 41: ('Сергей', 'concerned'),
        49: ('Сергей', 'smile')}
 # смена состава: страница -> сторона ('l' левый / 'r' правый) : (кто, эмоция)
-CAST_EV = {0: {'l': ('Сергей', 'neutral')},
-           1: {'l': ('Старик', 'stern')},
-           2: {'l': ('Сергей', 'neutral')},
-           7: {'r': ('Екатерина', 'neutral')}}
+# 0-2 — флешбэк в кабинете Старика (Сергей попался под горячую руку), 3-5 — уже
+# приёмная (Сергей один), 6 — входит Екатерина, 7 — её описывают (кадр на ней).
+CAST_EV = {0: {'l': ('Старик', 'stern')},
+           3: {'l': ('Сергей', 'neutral')},
+           6: {'r': ('Екатерина', 'neutral')}}
 
-# 1) текст + говорящие (имя — только у ПРЯМОЙ РЕЧИ, стр. начинается с тире)
+# 1) текст + говорящие
+# Голос получает ВЕСЬ абзац прямой речи, а не только страница, начинающаяся с тире:
+# иначе вторая-третья страницы длинной реплики уезжали в закадр, и голос
+# Кати/Сергея «пропадал» посреди диалога. NARR_OVERRIDE — страницы, где внутри
+# абзаца идёт авторский текст (мысли/пояснение), они читаются закадром.
+NARR_OVERRIDE = {11, 12, 25}
 raw = []
 for n in sorted(reception_par):
     who = SPEAK.get(n, '')
     for p in pages(reception_par[n], 2):
         pg = {'tx': p, 'vo': 'audio/vo/rec_%02d.mp3' % len(raw)}
-        if who and p.lstrip().startswith('—'):
+        if who and len(raw) not in NARR_OVERRIDE:
             pg['who'] = who
             pg['name'] = NAME[who]
         raw.append(pg)
@@ -292,12 +310,13 @@ for i, pg in enumerate(raw):
         who, em = e
         if lside and lside[0] == who: lside = [lside[0], em]
         if rside and rside[0] == who: rside = [rside[0], em]
-    if pg.get('who'):
-        last = pg['who']
     cast = {}
     if lside: cast['l'] = lside
     if rside: cast['r'] = rside
-    if last: cast['speak'] = last
+    # подсветка говорящего — только на странице с прямой речью: иначе закадровый
+    # текст «подсвечивал» персонажа, которого на сцене нет
+    if pg.get('who'):
+        cast['speak'] = pg['who']
     pg['cast'] = cast
 
 nodes.append({'t': 'scene', 'id': 'reception', 'bg': 'img/bg/reception' + CLIENT_EXT,

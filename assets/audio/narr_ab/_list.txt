@@ -1,0 +1,7 @@
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/narr_ab/00_charon_текущий.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/narr_ab/_sil.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/narr_ab/01_orus.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/narr_ab/_sil.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/narr_ab/02_alnilam.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/narr_ab/_sil.mp3'
+file '/home/ivan/.nanobot/workspace/novella/zaryanka/assets/audio/narr_ab/03_iapetus.mp3'

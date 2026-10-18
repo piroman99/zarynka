@@ -1,0 +1,56 @@
+[
+  {
+    "n": 1,
+    "voice": "Rachel",
+    "file": "assets/audio/vo_kate2/kate2_01_rachel.mp3",
+    "price": 1.24
+  },
+  {
+    "n": 2,
+    "voice": "Aria",
+    "file": "assets/audio/vo_kate2/kate2_02_aria.mp3",
+    "price": 1.24
+  },
+  {
+    "n": 3,
+    "voice": "Laura",
+    "file": "assets/audio/vo_kate2/kate2_03_laura.mp3",
+    "price": 1.24
+  },
+  {
+    "n": 4,
+    "voice": "Alice",
+    "file": "assets/audio/vo_kate2/kate2_04_alice.mp3",
+    "price": 1.24
+  },
+  {
+    "n": 5,
+    "voice": "Jessica",
+    "file": "assets/audio/vo_kate2/kate2_05_jessica.mp3",
+    "price": 1.24
+  },
+  {
+    "n": 6,
+    "voice": "Lily",
+    "file": "assets/audio/vo_kate2/kate2_06_lily.mp3",
+    "price": 1.24
+  },
+  {
+    "n": 7,
+    "voice": "Sarah",
+    "file": "assets/audio/vo_kate2/kate2_07_sarah.mp3",
+    "price": 1.24
+  },
+  {
+    "n": 8,
+    "voice": "Matilda",
+    "file": "assets/audio/vo_kate2/kate2_08_matilda.mp3",
+    "price": 1.24
+  },
+  {
+    "n": 9,
+    "voice": "Charlotte",
+    "file": "assets/audio/vo_kate2/kate2_09_charlotte.mp3",
+    "price": 1.24
+  }
+]
