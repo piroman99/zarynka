@@ -20,6 +20,7 @@ window.VN = {
    "base": "img/char/kate.webp",
    "emos": {
     "neutral": "img/char/kate.webp",
+    "smile": "img/char/kate_smile.webp",
     "sad": "img/char/kate_sad.webp"
    }
   },
@@ -256,7 +257,7 @@ window.VN = {
      "cast": {
       "l": [
        "Сергей",
-       "neutral"
+       "smile"
       ],
       "r": [
        "Екатерина",
@@ -273,7 +274,7 @@ window.VN = {
      "cast": {
       "l": [
        "Сергей",
-       "neutral"
+       "smile"
       ],
       "r": [
        "Екатерина",
@@ -290,7 +291,7 @@ window.VN = {
      "cast": {
       "l": [
        "Сергей",
-       "neutral"
+       "smile"
       ],
       "r": [
        "Екатерина",
@@ -305,7 +306,7 @@ window.VN = {
      "cast": {
       "l": [
        "Сергей",
-       "neutral"
+       "smile"
       ],
       "r": [
        "Екатерина",
@@ -389,7 +390,7 @@ window.VN = {
      "cast": {
       "l": [
        "Сергей",
-       "neutral"
+       "concerned"
       ],
       "r": [
        "Екатерина",
@@ -571,7 +572,7 @@ window.VN = {
       ],
       "r": [
        "Екатерина",
-       "smile"
+       "neutral"
       ]
      }
     },
@@ -587,7 +588,7 @@ window.VN = {
       ],
       "r": [
        "Екатерина",
-       "smile"
+       "neutral"
       ],
       "speak": "Сергей"
      }
