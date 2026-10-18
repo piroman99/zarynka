@@ -16,12 +16,102 @@
   edit <message_id> "<текст|@file>"
   pin <message_id>
 """
-import os, sys, json, mimetypes, uuid
-import urllib.request, urllib.parse
+import os, sys, json, mimetypes, uuid, socket, ssl, time
+import urllib.request, urllib.error, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-API = "https://api.telegram.org/bot"
+API_HOST = "api.telegram.org"
+# Прямой DNS для api.telegram.org из этой сети режется (Errno 101 / timeout), но сами DC
+# Telegram открыты и отдают Bot API при правильном SNI. Соединение при этом флапает
+# (примерно 1 из 2 попыток) → ходим на IP с server_hostname=api.telegram.org и ретраим.
+# Проверено 2026-10-18. Переопределяется TG_API_IPS (список через запятую).
+API_IPS = [ip.strip() for ip in os.environ.get(
+    "TG_API_IPS", "149.154.167.220,149.154.167.197,149.154.175.50").split(",") if ip.strip()]
 CHANNEL = os.environ.get("TG_CHANNEL", "@zaryanka_vn")
+
+
+def _pinned(method_name, body, ctype, timeout=300, attempts=8):
+    """Запрос на IP с SNI/Host = api.telegram.org (обход блокировки по DNS), с ретраями."""
+    path = "/bot" + token() + "/" + method_name
+    last = None
+    for i in range(attempts):
+        ip = API_IPS[i % len(API_IPS)]
+        ctx = ssl.create_default_context()
+        try:
+            s = socket.create_connection((ip, 443), timeout=12)
+            ss = ctx.wrap_socket(s, server_hostname=API_HOST)
+        except Exception as e:
+            last = e
+            time.sleep(1.5 + i)
+            continue
+        head = ["%s %s HTTP/1.1" % ("POST" if body is not None else "GET", path),
+                "Host: " + API_HOST,
+                "Connection: close"]
+        if body is not None:
+            head.append("Content-Type: " + ctype)
+            head.append("Content-Length: %d" % len(body))
+        try:
+            ss.sendall(("\r\n".join(head) + "\r\n\r\n").encode() + (body or b""))
+            ss.settimeout(timeout)
+            raw = b""
+            while True:
+                try:
+                    chunk = ss.recv(65536)
+                except socket.timeout:
+                    break
+                if not chunk:
+                    break
+                raw += chunk
+        except Exception as e:
+            last = e
+            ss.close()
+            time.sleep(1.5 + i)
+            continue
+        ss.close()
+        head_b, _, payload = raw.partition(b"\r\n\r\n")
+        status = head_b.split(b"\r\n")[0].decode("latin-1")
+        if not payload:
+            last = RuntimeError("пустой ответ (%s)" % status)
+            time.sleep(1.5 + i)
+            continue
+        if b"chunked" in head_b.lower():
+            out, rest = b"", payload
+            while True:
+                line, _, rest = rest.partition(b"\r\n")
+                try:
+                    n = int(line.strip().split(b";")[0], 16)
+                except ValueError:
+                    break
+                if n == 0:
+                    break
+                out += rest[:n]
+                rest = rest[n + 2:]
+            payload = out
+        try:
+            return json.loads(payload.decode("utf-8"))
+        except Exception:
+            last = RuntimeError("не JSON (%s): %r" % (status, payload[:120]))
+            time.sleep(1.5 + i)
+    raise RuntimeError("%s: нет связи с Telegram после %d попыток (%s)"
+                       % (method_name, attempts, last))
+
+
+def _http(method_name, body=None, ctype="application/json", timeout=300):
+    """Сначала обычный https, при сетевой ошибке — запиненный IP."""
+    path = "/bot" + token() + "/" + method_name
+    url = "https://" + API_HOST + path
+    req = urllib.request.Request(url, data=body,
+                                 headers={"Content-Type": ctype} if body is not None else {})
+    try:
+        with urllib.request.urlopen(req, timeout=min(timeout, 10)) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        try:
+            return json.loads(e.read().decode("utf-8"))
+        except Exception:
+            raise RuntimeError("%s: HTTP %s" % (method_name, e.code))
+    except (urllib.error.URLError, socket.timeout, OSError):
+        return _pinned(method_name, body, ctype, timeout=timeout)
 
 
 def token():
@@ -38,12 +128,8 @@ def token():
 
 def call(method, **params):
     params = {k: v for k, v in params.items() if v is not None}
-    url = API + token() + "/" + method
-    data = json.dumps(params).encode() if params else None
-    req = urllib.request.Request(url, data=data,
-                                 headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=120) as r:
-        j = json.loads(r.read().decode("utf-8"))
+    body = json.dumps(params).encode() if params else b"{}"
+    j = _http(method, body, "application/json")
     if not j.get("ok"):
         raise RuntimeError("%s: %s" % (method, j.get("description")))
     return j["result"]
@@ -69,10 +155,7 @@ def _multipart(fields, file_field, file_path):
 
 def send_file(method, file_field, path, **fields):
     body, ctype = _multipart(fields, file_field, path)
-    req = urllib.request.Request(API + token() + "/" + method, data=body,
-                                 headers={"Content-Type": ctype})
-    with urllib.request.urlopen(req, timeout=600) as r:
-        j = json.loads(r.read().decode("utf-8"))
+    j = _http(method, body, ctype, timeout=600)
     if not j.get("ok"):
         raise RuntimeError("%s: %s" % (method, j.get("description")))
     return j["result"]
