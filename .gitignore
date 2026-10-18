@@ -1,6 +1,7 @@
 # Секреты — НИКОГДА не публиковать
 .pv_key
 .vk_token
+.tg_token
 .api_keys.json
 *.key
 .env
