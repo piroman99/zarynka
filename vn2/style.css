@@ -77,7 +77,7 @@ body{
 .screen.show{opacity:1; pointer-events:auto}
 /* экраны (титул / конец серии) живут во ВСЁМ вьюпорте, а не в 16:9-полосе сцены:
    в портрете полоса всего ~56vw высотой, и кнопки (тизер) обрезались. */
-#title,#end{position:fixed}
+#title,#end,#credits{position:fixed}
 .title-inner{padding:5%}
 .logo{width:min(26vmin,168px); border-radius:50%;
   filter:drop-shadow(0 10px 30px rgba(220,38,38,.35))}
@@ -217,6 +217,27 @@ button:active{transform:translateY(1px)}
 .endttl{font-size:clamp(26px,5vmin,60px); letter-spacing:.06em; margin:.35em 0 .2em;
   font-weight:700; text-shadow:0 4px 24px rgba(0,0,0,.6)}
 .endbtns{display:flex; gap:.6em; justify-content:center; flex-wrap:wrap}
+
+/* титры (благодарности) — отдельный экран поверх конца серии, прокручивается */
+#credits{z-index:25}
+.cr-inner{width:min(92vw,820px); max-height:88vh; max-height:88dvh; overflow-y:auto;
+  overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+  padding:3.2% 4% 2.4%; text-align:center}
+.crttl{font-size:clamp(20px,3.6vmin,38px); letter-spacing:.1em; margin:.32em 0 .5em;
+  font-weight:700; text-shadow:0 4px 24px rgba(0,0,0,.6)}
+.crlist{text-align:left; display:flex; flex-direction:column; gap:1.15em}
+.crgrp{border-top:1px solid rgba(255,255,255,.11); padding-top:.7em}
+.crgrp:first-child{border-top:0; padding-top:0}
+.crh{margin:0 0 .35em; color:var(--red2); letter-spacing:.2em; text-transform:uppercase;
+  font-size:clamp(9px,1.35vmin,12px)}
+.crrow{margin:.14em 0; font-size:clamp(12px,1.9vmin,17px); line-height:1.35;
+  color:#dfe5f0; display:flex; gap:.7em; justify-content:space-between;
+  align-items:baseline; flex-wrap:wrap}
+.crrole{color:#8d97ab; font-size:clamp(11px,1.7vmin,15px)}
+.crname{color:#f2f5fa; text-align:right; margin-left:auto; max-width:72%}
+.crnote{color:#7d879c; font-size:clamp(10px,1.55vmin,13px); font-style:italic;
+  margin:.45em 0 0}
+.crbtns{margin-top:1.4em}
 
 /* кинозал */
 #cinema{position:fixed; inset:0; z-index:30; background:#000;

@@ -12,6 +12,7 @@
   const music = $("music"), voice = $("voice");
   const cinema = $("cinema"), avm = $("avm"), skip = $("skip");
   const endScr = $("end"), prevBtn = $("prev"), nextBtn = $("next");
+  const creditsEl = $("credits"), crList = $("crlist");   // титры (благодарности)
   const brk = $("brk");                     // акварельная перебивка между сценами
   const AVM = "../out/avm_v3_epic.mp4";
 
@@ -445,6 +446,7 @@
   // работал только «Тизер».
   function goMenu() {
     clearTimeout(autoTimer);
+    closeCredits();
     clearTimeout(brkT); brkCb = null; inBreak = false;
     if (brk) brk.classList.remove("on");
     playToken++;
@@ -593,20 +595,65 @@
     syncToggles();
   }
 
+  // ---------- титры (благодарности) ----------
+  function crOpen() { return creditsEl.classList.contains("show"); }
+  function renderCredits() {
+    if (!crList || crList.dataset.done === "1") return;
+    (D.credits || []).forEach(function (g) {
+      const blk = document.createElement("div"); blk.className = "crgrp";
+      const h = document.createElement("p"); h.className = "crh"; h.textContent = g.h || "";
+      blk.appendChild(h);
+      (g.rows || []).forEach(function (r) {
+        const p = document.createElement("p"); p.className = "crrow";
+        const cut = r.indexOf("|");
+        if (cut > 0) {                       // «роль|исполнитель» → две колонки
+          const a = document.createElement("span"); a.className = "crrole"; a.textContent = r.slice(0, cut).trim();
+          const b = document.createElement("span"); b.className = "crname"; b.textContent = r.slice(cut + 1).trim();
+          p.appendChild(a); p.appendChild(b);
+        } else {
+          p.textContent = r;
+        }
+        blk.appendChild(p);
+      });
+      (g.notes || []).forEach(function (n) {
+        const q = document.createElement("p"); q.className = "crnote"; q.textContent = n;
+        blk.appendChild(q);
+      });
+      crList.appendChild(blk);
+    });
+    crList.dataset.done = "1";
+  }
+  function openCredits() {
+    renderCredits();
+    creditsEl.classList.add("show");
+    creditsEl.setAttribute("aria-hidden", "false");
+    if (crList) crList.parentElement.scrollTop = 0;
+  }
+  function closeCredits() {
+    creditsEl.classList.remove("show");
+    creditsEl.setAttribute("aria-hidden", "true");
+  }
+
   // ---------- ввод ----------
   $("start").onclick = (e) => { e.stopPropagation(); start(); };
   $("teaser").onclick = (e) => { e.stopPropagation(); playCinema(AVM); };
   $("e-menu").onclick = (e) => { e.stopPropagation(); goMenu(); };
+  $("e-credits").onclick = (e) => { e.stopPropagation(); openCredits(); };
+  $("cr-back").onclick = (e) => { e.stopPropagation(); closeCredits(); };
   $("e-teaser").onclick = (e) => { e.stopPropagation(); playCinema(AVM); };
   prevBtn.onclick = (e) => { e.stopPropagation(); prev(); };
   nextBtn.onclick = (e) => { e.stopPropagation(); next(); };
 
   document.getElementById("stage").addEventListener("click", () => {
-    if (cinemaOpen || !vlayer.hidden) return;
+    if (cinemaOpen || !vlayer.hidden || crOpen()) return;
     if (title.classList.contains("show") || endScr.classList.contains("show")) return;
     next();
   });
   addEventListener("keydown", (e) => {
+    if (crOpen()) {                      // титры: листаются колесом/стрелками сами
+      if (e.key === "Escape" || e.key === "Enter") { e.preventDefault(); closeCredits(); }
+      return;
+    }
     if (e.key === "Escape" && cinemaOpen) { skip.click(); return; }
     if (e.key === "Escape" && endScr.classList.contains("show")) { goMenu(); return; }
     if (cinemaOpen) return;
@@ -636,7 +683,7 @@
   document.body.addEventListener("touchend", (e) => {
     if (!sw) return; sw = false;
     const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
-    if (cinemaOpen || title.classList.contains("show") || endScr.classList.contains("show")) return;
+    if (cinemaOpen || crOpen() || title.classList.contains("show") || endScr.classList.contains("show")) return;
     if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) {
       swipedAt = Date.now();
       dx < 0 ? next() : prev();
@@ -728,5 +775,6 @@
     } else if (nd && nd.t === "znak") { enterZnak(nd); }
     else if (nd && nd.t === "title") { enterTitle(); }
     else { enterEnd(); }
+    if (qp.get("credits") === "1") openCredits();   // ?node=99&credits=1 — снимок титров
   }
 })();

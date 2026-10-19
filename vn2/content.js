@@ -3,6 +3,34 @@ window.VN = {
  "title": "ЗАРЯНКА",
  "episode": "Эпизод 1 · «Пролог. Приёмная комиссия»",
  "byline": "по рассказу Александра «Котобус» Горбова",
+ "credits": [
+  {
+   "h": "Рассказ",
+   "rows": [
+    "Автор|Александр «Котобус» Горбов"
+   ]
+  },
+  {
+   "h": "Первый билд · 2016",
+   "rows": [
+    "Спрайты персонажей|Алексей Стребков «Leonzo»"
+   ],
+   "notes": [
+    "Отдельное спасибо Алексею за спрайты 2016 года"
+   ]
+  },
+  {
+   "h": "Эпизод 1 · 2026",
+   "rows": [
+    "Кадры и графика|flux-2 · gpt-image-2 · nano-banana-2.1",
+    "Закадр и Лихнецкий|Gemini TTS «Charon»",
+    "Старик|Gemini TTS «Fenrir»",
+    "Екатерина Ивановна|ElevenLabs v4 «Charlotte»",
+    "Музыка|Lyria 3.5",
+    "Жетон-значок|собственная 3D-отрисовка"
+   ]
+  }
+ ],
  "music": {
   "prolog": "../assets/audio/sketch/prolog_bed_soft_0.mp3",
   "reception": "../assets/audio/sketch/vn_reception_soft_0.mp3"
