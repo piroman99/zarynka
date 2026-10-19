@@ -141,6 +141,22 @@ button:active{transform:translateY(1px)}
   box-shadow:0 6px 18px rgba(220,38,38,.35); visibility:hidden;
 }
 #text{font-size:clamp(15px,2.35vmin,25px); line-height:1.5}
+/* Буквы: каждая <span class="ch"> проявляется из размытия и оседает на место.
+   Вставка идёт по одной в тик печати — поэтому стаггер получается сам, без задержек. */
+#text .ch{
+  display:inline-block; white-space:pre;
+  animation:chIn .38s cubic-bezier(.2,.7,.3,1) both;
+  will-change:opacity, transform, filter;
+}
+@keyframes chIn{
+  from{opacity:0; transform:translateY(.16em) scale(1.06); filter:blur(3px)}
+  to{opacity:1; transform:none; filter:none}
+}
+/* пауза (P) замораживает и буквы, а не только таймер */
+#stage.paused #text .ch{animation-play-state:paused}
+@media (prefers-reduced-motion: reduce){
+  #text .ch{animation:none}
+}
 #hint{
   position:absolute; right:clamp(14px,2.2vmin,22px); bottom:clamp(6px,1.2vmin,12px);
   color:#79839a; font-size:clamp(10px,1.4vmin,13px);

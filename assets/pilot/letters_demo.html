@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>демо: буквы</title>
+<link rel="stylesheet" href="../../vn2/style.css">
+<style>
+  body{margin:0;background:#0b0d12}
+  #stage{position:relative;width:1600px;height:900px;margin:0 auto;overflow:hidden}
+  .demo-bg{position:absolute;inset:0;background:url(pilot_s_enter_0.png) center/cover no-repeat}
+  .demo-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,rgba(0,0,0,.72))}
+  #hud{opacity:1}
+  #box{position:absolute}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="demo-bg"></div>
+  <div id="hud">
+    <div id="chapter"></div>
+    <div id="box">
+      <div id="name">Лихнецкий Сергей</div>
+      <div id="text"></div>
+    </div>
+  </div>
+</div>
+<script>
+const S = "Она вошла тихо и остановилась на пороге, будто ждала, что её попросят выйти.";
+const el = document.getElementById("text");
+let i = 0;
+// намеренно медленно (120 мс на букву) — чтобы эффект был видно на снимке
+const t = setInterval(() => {
+  if (i >= S.length) { clearInterval(t); return; }
+  const ch = S[i++];
+  if (ch === " ") { el.appendChild(document.createTextNode(" ")); return; }
+  const sp = document.createElement("span");
+  sp.className = "ch";
+  sp.textContent = ch;
+  el.appendChild(sp);
+}, 120);
+</script>
+</body>
+</html>

@@ -271,6 +271,11 @@
   }
 
   // ---------- печать ----------
+  // LETTERS: каждая буква — <span> со своей анимацией (проявляется из размытия и оседает).
+  // Это не PNG-спрайты букв: вес нулевой, чётко на любом экране, работает с подстрочником.
+  // Отключается адресом: ?letters=0
+  const LETTERS = qp.get("letters") !== "0";
+
   function typeText(s, cb) {
     clearInterval(typing);
     ty = { full: s, i: 0, cb: cb };
@@ -281,7 +286,15 @@
   }
   function typeTick() {
     if (tyPaused || !ty) return;
-    textEl.textContent += ty.full[ty.i++];
+    const ch = ty.full[ty.i++];
+    if (LETTERS && ch !== " ") {
+      const sp = document.createElement("span");
+      sp.className = "ch";
+      sp.textContent = ch;
+      textEl.appendChild(sp);
+    } else {
+      textEl.appendChild(document.createTextNode(ch));
+    }
     if (ty.i >= ty.full.length) { clearInterval(typing); typing = null; if (ty.cb) ty.cb(); }
   }
   function typingDone() { return !ty || ty.i >= ty.full.length; }
@@ -480,6 +493,7 @@
     $("t-pause").textContent = paused ? "▶" : "⏸";
     $("t-pause").classList.toggle("on", paused);
     document.getElementById("stage").classList.toggle("notext", !textOn);
+    document.getElementById("stage").classList.toggle("paused", paused);
   }
   $("t-text").onclick = (e) => { e.stopPropagation(); textOn = !textOn; syncToggles(); };
   $("t-voice").onclick = (e) => {
@@ -517,6 +531,7 @@
       }
       scheduleAuto();
     }
+    stage.classList.toggle("paused", paused);   // замораживает анимацию букв
     syncToggles();
   }
 
