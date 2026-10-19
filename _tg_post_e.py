@@ -29,11 +29,27 @@ https://piroman99.github.io/zaryanka/
 #Зарянка #визуальнаяновелла #космос"""
 
 if __name__ == "__main__":
+    import time
     print("chars:", len(TEXT))
     if "--text" in sys.argv:
-        res = tg.post(TEXT)
+        send = lambda: tg.post(TEXT)
     else:
         video = os.path.join(HERE, "out", "avm_v3_epic.mp4")
         print("video:", os.path.basename(video), os.path.getsize(video) // 1024, "KB")
-        res = tg.post(TEXT, video=video)
+        send = lambda: tg.post(TEXT, video=video)
+
+    # Сеть до Telegram флапает (РКН/DPI): одна неудача внутри tg.py не решает —
+    # повторяем весь запрос, пока не пройдёт.
+    res = None
+    for attempt in range(5):
+        try:
+            res = send()
+            break
+        except RuntimeError as e:
+            msg = str(e)
+            if "нет связи" in msg and attempt < 4:
+                print("retry %d: %s" % (attempt + 1, msg[:120]))
+                time.sleep(3 + attempt * 2)
+                continue
+            raise
     print("message_id:", res.get("message_id"))

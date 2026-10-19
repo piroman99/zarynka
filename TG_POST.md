@@ -13,13 +13,14 @@
    printf '%s' 'ВСТАВИТЬ_ТОКЕН' > ~/.nanobot/workspace/novella/zaryanka/.tg_token
    chmod 600 ~/.nanobot/workspace/novella/zaryanka/.tg_token
    ```
-4. **Сеть для агента — РЕШЕНО без allowlist (2026-10-18).** Имя `api.telegram.org` из песочницы
-   не открывается (`Errno 101`/timeout), но сами DC Telegram доступны напрямую:
-   `149.154.167.220:443` отвечает Bot API, если поднять TLS с `server_hostname=api.telegram.org`
-   и `Host: api.telegram.org` (проверено: `401 Unauthorized: invalid token specified`).
-   Соединение флапает (~1 из 2 попыток) → `tg.py` сам ретраит и ротирует IP
-   (`149.154.167.220`, `149.154.167.197`, `149.154.175.50`; переопределяется `TG_API_IPS`).
+4. **Сеть для агента — РЕШЕНО, allowlist не нужен (проверено 2026-10-19).** Это блокировка
+   РКН/DPI у провайдера, а не песочница: DNS `api.telegram.org` резолвится (149.154.166.110),
+   локального прокси/файрвола нет, в nanobot нет egress-allowlist — добавлять некуда и нечего.
+   Симптом ровно один: TCP до DC Telegram флапает (таймаут, со второй попытки TLS 1.3 OK).
+   `tg.py` ходит на IP с `server_hostname=api.telegram.org` + `Host: api.telegram.org`
+   и ретраит (`149.154.167.220`, `149.154.167.197`, `149.154.175.50`; переопределяется `TG_API_IPS`).
    Никакой VPN/SSH-туннель/Browsec не нужен — расширения помогают только твоему браузеру.
+   Настоящий обход (если флап достанет) — прокси/VPN на хосте, а не запись в allowlist.
 
 ## Команды
 

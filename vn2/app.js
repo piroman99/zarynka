@@ -29,7 +29,14 @@
   let autoTimer = null, playToken = 0;
   let paused = qp.get("pause") === "1";
   let ty = null, tyPaused = false;
-  const AUTO_BASE = 450, AUTO_PER_CHAR = 20, AUTO_GAP = 500;   // ~1.1–2.4 с на страницу
+  // PACE = общий темп новеллы. 1.0 — как было, 0.8 = на 20% быстрее (решение Ивана 2026-10-19).
+  // Можно переопределить из адреса: ?pace=0.9 — для сравнения на глаз.
+  const PACE = (function () {
+    const v = parseFloat(qp.get("pace"));
+    return isFinite(v) && v >= 0.3 && v <= 2 ? v : 0.8;
+  })();
+  const AUTO_BASE = 450 * PACE, AUTO_PER_CHAR = 20 * PACE, AUTO_GAP = 500 * PACE;
+  const TYPE_MS = Math.max(6, Math.round(18 * PACE));
 
   const NODES = D.nodes;
   // плоский список страниц всех сцен → единая навигация вперёд/назад
@@ -197,7 +204,8 @@
     el.style.transform = "scale(" + from + ")";
     void el.offsetWidth;                 // зафиксировать «широкий» кадр (бит 1)
     if (INSTANT) { el.style.transform = "scale(" + to + ")"; return; }
-    const hold = (c.hold != null ? c.hold : 0.9) * 1000, dur = (c.dur != null ? c.dur : 3.4);
+    const hold = (c.hold != null ? c.hold : 0.9) * 1000 * PACE,
+          dur = (c.dur != null ? c.dur : 3.4) * PACE;
     camTimer = setTimeout(() => {        // бит 2: плавный наезд
       el.style.transition = "opacity .6s ease, transform " + dur + "s ease-in-out";
       el.style.transform = "scale(" + to + ")";
@@ -269,7 +277,7 @@
     tyPaused = false;
     textEl.textContent = "";
     if (INSTANT) { textEl.textContent = s; ty.i = s.length; typing = null; if (cb) cb(); return; }
-    typing = setInterval(typeTick, 18);
+    typing = setInterval(typeTick, TYPE_MS);
   }
   function typeTick() {
     if (tyPaused || !ty) return;
