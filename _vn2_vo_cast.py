@@ -23,7 +23,7 @@ FF = os.path.join(WS, '.probe', '.lib', 'imageio_ffmpeg',
                   'binaries', 'ffmpeg-linux-x86_64-v7.0.2')
 OUTDIR = os.path.join(HERE, 'vn2', 'audio', 'vo')
 MANIFEST = os.path.join(OUTDIR, '_voices.json')
-CAP_RUB = 30.0
+CAP_RUB = 40.0
 DRY = '--dry' in sys.argv
 
 NARR_STYLE = (
@@ -61,7 +61,36 @@ man = {}
 if os.path.exists(MANIFEST):
     man = json.load(open(MANIFEST, encoding='utf-8'))
 
-todo, done = [], []
+
+def norm(tx):
+    """Текст страницы в том виде, в каком он уходит в TTS (для сравнения и кэша)."""
+    t = re.sub(r'^[\u2014\u2013-]+\s*', '', tx.strip())
+    return re.sub(r'\s+', ' ', t).strip()
+
+
+# --- переиспользование уже оплаченной озвучки -------------------------------
+# Разбивка на страницы меняется (реплики/авторский текст разведены), поэтому номера
+# файлов сдвигаются. Чтобы не платить за тот же текст дважды, ищем совпадение
+# (голос + текст) в предыдущей сборке content.js из git HEAD и копируем готовый файл.
+REUSE = {}
+try:
+    old = subprocess.run(['git', 'show', 'HEAD:vn2/content.js'], cwd=HERE,
+                         capture_output=True, text=True).stdout
+    if old:
+        oD = json.loads(old[old.index('=') + 1:].strip().rstrip(';'))
+        for ond in oD['nodes']:
+            for opg in ond.get('pages', []):
+                ovo = opg.get('vo')
+                if not ovo:
+                    continue
+                ok = opg.get('who') or 'narr'
+                if ok not in VOICES:
+                    ok = 'narr'
+                REUSE[(ok, norm(opg['tx']))] = ovo
+except Exception as e:
+    print('reuse: пропущено (%s)' % e)
+
+todo, done, reused = [], [], 0
 for pg in nd['pages']:
     vo = pg.get('vo')
     if not vo:
@@ -71,32 +100,45 @@ for pg in nd['pages']:
         key = 'narr'
     name = os.path.basename(vo)[:-4]
     dst = os.path.join(OUTDIR, name + '.mp3')
-    have = man.get(vo, {}).get('voice')
-    if have == key and os.path.exists(dst) and os.path.getsize(dst) > 2000:
+    tx = norm(pg['tx'])
+    rec = man.get(vo, {})
+    if (rec.get('voice') == key and rec.get('text') == tx
+            and os.path.exists(dst) and os.path.getsize(dst) > 2000):
         done.append(name)
         continue
-    todo.append((vo, name, key, pg['tx'].strip()))
+    # тот же голос + тот же текст уже озвучен в предыдущей сборке → копируем файл
+    src_vo = REUSE.get((key, tx))
+    if src_vo:
+        sp = os.path.join(OUTDIR, os.path.basename(src_vo)[:-4] + '.mp3')
+        if os.path.exists(sp) and os.path.getsize(sp) > 2000 and sp != dst:
+            with open(sp, 'rb') as fi, open(dst, 'wb') as fo:
+                fo.write(fi.read())
+            man[vo] = {'voice': key, 'text': tx, 'chars': len(tx), 'price': 0,
+                       'reused_from': os.path.basename(src_vo)}
+            reused += 1
+            continue
+    todo.append((vo, name, key, pg['tx'].strip(), tx))
 
 chars = {}
-for _, _, key, tx in todo:
+for _, _, key, _, tx in todo:
     chars[key] = chars.get(key, 0) + len(tx)
-cost = sum(len(tx) * VOICES[key][2] / 1000 for _, _, key, tx in todo)
-print('страниц: %d, к переозвучке: %d, уже в нужном голосе: %d'
-      % (len(nd['pages']), len(todo), len(done)))
+cost = sum(len(tx) * VOICES[key][2] / 1000 for _, _, key, _, tx in todo)
+print('страниц: %d, к переозвучке: %d, уже в нужном голосе: %d, переиспользовано: %d'
+      % (len(nd['pages']), len(todo), len(done), reused))
 for k, n in sorted(chars.items(), key=lambda x: -x[1]):
     print('  %-10s %5d зн.  ~%.2f ₽  (%s)'
           % (k, n, n * VOICES[k][2] / 1000, VOICES[k][0]))
 print('смета: ~%.2f ₽' % cost)
 if DRY or not todo:
+    json.dump(man, open(MANIFEST, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     sys.exit(0)
 
 spent = 0.0
-for vo, name, key, tx in todo:
+for vo, name, key, tx, ntx in todo:
     if spent >= CAP_RUB:
         print('STOP: cap %.0f ₽' % CAP_RUB); break
     model, opts, _ = VOICES[key]
-    say = re.sub(r'^[\u2014\u2013-]+\s*', '', tx)
-    say = re.sub(r'\s+', ' ', say)
+    say = ntx
     try:
         files, st = pv.generate_to_files(model, say, opts, outdir=OUTDIR,
                                          name=name, max_price_rub=8)
@@ -113,7 +155,7 @@ for vo, name, key, tx in todo:
         price = float(st.get('priceRub') or 0)
         spent += price
         man[vo] = {'voice': key, 'model': model, 'chars': len(say),
-                   'price': price}
+                   'price': price, 'text': ntx}
         json.dump(man, open(MANIFEST, 'w', encoding='utf-8'),
                   ensure_ascii=False, indent=1)
         print('  OK %-8s %-10s %4d зн.  %.2f ₽' % (name, key, len(say), price))

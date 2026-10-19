@@ -133,10 +133,23 @@ def cutout(im, tol=34):
 
 
 # ---- 2) фон приёмной + спрайты -----------------------------------------
-bg_src = os.path.join(GEN, 'ok_office_clean_0.jpg')   # пустой кабинет (без фигур)
+# Приёмная — акварель (новая манера, решение Ивана 2026-10-19); если нового кадра нет,
+# берём прежний «чистый кабинет», чтобы сборка не падала.
+bg_new = os.path.join(HERE, 'assets', 'pilot', 'pilot_reception_0.png')
+bg_src = bg_new if os.path.exists(bg_new) else os.path.join(GEN, 'ok_office_clean_0.jpg')
 save_client(Image.open(bg_src).convert('RGB').resize((W, H), Image.LANCZOS),
             os.path.join(IMG, 'bg'), 'reception')
 print('bg reception OK')
+
+# кабинет Старика (флешбэк в начале приёмной): акварель, пустая комната,
+# спрайт Старика движок кладёт сверху
+cab_src = os.path.join(HERE, 'assets', 'pilot', 'pilot_cabinet_0.png')
+if os.path.exists(cab_src):
+    save_client(Image.open(cab_src).convert('RGB').resize((W, H), Image.LANCZOS),
+                os.path.join(IMG, 'bg'), 'cabinet')
+    print('bg cabinet OK')
+else:
+    print('bg cabinet SKIP (нет', cab_src, ')')
 
 # базовые спрайты + готовые эмоции (отсутствующие файлы пропускаем;
 # остальные эмоции рисует _vn2_emo.py — движок подхватит их без правок)
@@ -218,8 +231,67 @@ SEG9 = [p9[:cut], p9[cut:cut2], p9[cut2:cut3], p9[cut3:cut4], p9[cut4:]]
 SENT = re.compile(r'(?<=[.!?…])\s+(?=[А-ЯA-Z«—])')
 
 
+def segments(par):
+    """Абзац -> [('speech'|'narr', текст)].
+
+    Маркер диалога — «— » в начале абзаца или после , . ? ! … : ;
+    (тире ВНУТРИ фразы без знака перед ним — обычное тире, не маркер).
+    Авторская вставка, кончающаяся ЗАПЯТОЙ, — это пауза внутри реплики
+    («— Простите, — Сергей чувствовал себя палачом, — я не могу...»):
+    приклеиваем её обратно к реплике, голос остаётся персонажа.
+    Вставка, кончающаяся ТОЧКОЙ, — отдельная АВТОРСКАЯ страница (голос закадра).
+
+    Зачем: раньше голос ставился на весь абзац, и авторский текст между
+    фразами Екатерины читался её же голосом (баг от 2026-10-19).
+    """
+    starts = []
+    for m in re.finditer(r'—\s', par):
+        i = m.start()
+        if i == 0:
+            starts.append((i, m.end()))
+            continue
+        prev = par[:i].rstrip()
+        if prev and prev[-1] in ',.?!…:;':
+            starts.append((i, m.end()))
+    if not starts:
+        return [('narr', par.strip())]
+    out = []
+    if starts[0][0] > 0:
+        head = par[:starts[0][0]].strip()
+        if head:
+            out.append(('narr', head))
+    for k, (i, end) in enumerate(starts):
+        stop = starts[k + 1][0] if k + 1 < len(starts) else len(par)
+        seg = par[end:stop].strip()
+        if seg:
+            out.append(('speech' if k % 2 == 0 else 'narr', seg))
+    merged = []
+    for kind, tx in out:
+        if (merged and kind == 'narr' and tx.rstrip().endswith(',')
+                and merged[-1][0] == 'speech'):
+            merged[-1] = ('speech', merged[-1][1] + ' — ' + tx)
+        else:
+            merged.append((kind, tx))
+    return merged
+
+
+def pages_of(segs, maxn=2):
+    """Сегменты -> страницы по 1-2 предложения, НИКОГДА не смешивая
+    реплику и авторский текст в одной странице."""
+    out = []
+    for kind, tx in segs:
+        cur = []
+        for s in [x.strip() for x in SENT.split(tx) if x.strip()]:
+            cur.append(s)
+            if len(cur) >= maxn:
+                out.append((kind, ' '.join(cur))); cur = []
+        if cur:
+            out.append((kind, ' '.join(cur)))
+    return out
+
+
 def pages(text, maxn=2):
-    """абзац -> страницы по 1-2 предложения (не «полотно»)."""
+    """абзац -> страницы по 1-2 предложения (не «полотно»). Без разбора на голоса."""
     parts = [s.strip() for s in SENT.split(text) if s.strip()]
     out, cur = [], []
     for s in parts:
@@ -268,54 +340,69 @@ NAME = {'Сергей': 'Лихнецкий Сергей', 'Екатерина':
 
 # --- приёмная: страницы, каст (кто и где стоит) и эмоции ---
 # Эмоции/появления проставлены РУЧНО по смыслу текста (в тексте эмоций нет).
-# Точки СМЕНЫ эмоции: действует с этой страницы до следующей смены.
-EMO = {
-    # Старик — единственная эмоция stern (флешбэк)
-    1:  ('Старик', 'stern'),
+# Привязка — К ТЕКСТУ, а не к номеру страницы: разбивка на страницы меняется
+# (с 2026-10-19 реплики и авторский текст разведены), а якоря остаются.
+# Якорь — фрагмент начала страницы; эмоция действует до следующей смены.
+EMO_ANCHOR = [
+    ('Лихнецкому не повезло', 'Старик', 'stern'),
     # Сергей: заученная улыбка на приветствии → озабоченность с «закрыл папку»
     # → тёплая улыбка, когда предлагает вакансии
-    8:  ('Сергей', 'smile'),
-    12: ('Сергей', 'neutral'),
-    17: ('Сергей', 'concerned'),
-    49: ('Сергей', 'smile'),
+    ('Добрый день. Добро пожаловать', 'Сергей', 'smile'),
+    ('Что она делает здесь?', 'Сергей', 'neutral'),
+    ('Сергей с сожалением закрыл папку', 'Сергей', 'concerned'),
+    ('Если вы так интересуетесь космосом', 'Сергей', 'smile'),
     # Екатерина: приветливая → нейтрально-недоумённая → поникшая → тёплая улыбка
-    10: ('Екатерина', 'smile'),
-    28: ('Екатерина', 'neutral'),
-    32: ('Екатерина', 'sad'),
-    50: ('Екатерина', 'smile'),
-}
-# смена состава: страница -> сторона ('l' левый / 'r' правый) : (кто, эмоция)
-# 0-2 — флешбэк в кабинете Старика (Сергей попался под горячую руку), 3-5 — уже
-# приёмная (Сергей один), 6 — входит Екатерина, 7 — её описывают (кадр на ней).
-CAST_EV = {0: {'l': ('Старик', 'stern')},
-           3: {'l': ('Сергей', 'neutral')},
-           6: {'r': ('Екатерина', 'neutral')}}
+    ('Здравствуйте, Сергей, вот, пожалуйста', 'Екатерина', 'smile'),
+    ('Женщина удивленно смотрела на него', 'Екатерина', 'neutral'),
+    ('Вы хотите сказать, что я слишком старая', 'Екатерина', 'sad'),
+    ('она внезапно тепло улыбнулась', 'Екатерина', 'smile'),
+]
+# смена состава: якорь -> сторона ('l' левый / 'r' правый) : (кто, эмоция)
+# Флешбэк в кабинете Старика (Сергей попался под горячую руку) → приёмная: Сергей один,
+# потом входит Екатерина.
+CAST_ANCHOR = [
+    ('Лихнецкому не повезло', 'l', 'Старик', 'stern'),
+    ('Так и пришлось долгих два месяца', 'l', 'Сергей', 'neutral'),
+    ('Образовалась пауза', 'r', 'Екатерина', 'neutral'),
+]
 
-# 1) текст + говорящие
-# Голос получает ВЕСЬ абзац прямой речи, а не только страница, начинающаяся с тире:
-# иначе вторая-третья страницы длинной реплики уезжали в закадр, и голос
-# Кати/Сергея «пропадал» посреди диалога. NARR_OVERRIDE — страницы, где внутри
-# абзаца идёт авторский текст (мысли/пояснение), они читаются закадром.
-NARR_OVERRIDE = {11, 12, 25}
+# 1) текст + говорящие: реплика и авторский текст разведены по СЕГМЕНТАМ
+# (старый баг: голос ставился на весь абзац, и авторский текст между фразами
+#  Екатерины читался её же голосом)
 raw = []
 for n in sorted(reception_par):
     who = SPEAK.get(n, '')
-    for p in pages(reception_par[n], 2):
+    for kind, p in pages_of(segments(reception_par[n]), 2):
         pg = {'tx': p, 'vo': 'audio/vo/rec_%02d.mp3' % len(raw)}
-        if who and len(raw) not in NARR_OVERRIDE:
+        if kind == 'speech' and who:
             pg['who'] = who
             pg['name'] = NAME[who]
         raw.append(pg)
 
+
+def anchor_index(frag):
+    """Номер страницы по фрагменту её текста (якорь для эмоций/каста)."""
+    for i, pg in enumerate(raw):
+        if frag in pg['tx']:
+            return i
+    raise SystemExit('не найден якорь: %r' % frag)
+
+
+edict = {}
+for frag, who, em in EMO_ANCHOR:
+    edict[anchor_index(frag)] = (who, em)
+cdict = {}
+for frag, side, who, em in CAST_ANCHOR:
+    cdict[anchor_index(frag)] = {side: (who, em)}
+
 # 2) каст и эмоции по страницам (детерминированно, устойчиво при листании назад)
 lside = rside = None
-last = None
 for i, pg in enumerate(raw):
-    ev = CAST_EV.get(i)
+    ev = cdict.get(i)
     if ev:
         if 'l' in ev and ev['l'][0] in CHARS_AVAIL: lside = list(ev['l'])
         if 'r' in ev and ev['r'][0] in CHARS_AVAIL: rside = list(ev['r'])
-    e = EMO.get(i)
+    e = edict.get(i)
     if e:
         who, em = e
         if lside and lside[0] == who: lside = [lside[0], em]
@@ -329,8 +416,14 @@ for i, pg in enumerate(raw):
         cast['speak'] = pg['who']
     pg['cast'] = cast
 
+# 3) две сцены вместо одного узла: флешбэк в кабинете и приёмная.
+# Нужно для перебивки на стыке (раньше фон щёлкал посреди абзаца, а музыка рвалась).
+cut = anchor_index('Сегодня первыми кандидатами')
+flash, present = raw[:cut], raw[cut:]
+nodes.append({'t': 'scene', 'id': 'starik', 'bg': 'img/bg/cabinet' + CLIENT_EXT,
+              'music': 'reception', 'pages': flash})
 nodes.append({'t': 'scene', 'id': 'reception', 'bg': 'img/bg/reception' + CLIENT_EXT,
-              'music': 'reception', 'pages': raw})
+              'music': 'reception', 'pages': present})
 
 
 data = {

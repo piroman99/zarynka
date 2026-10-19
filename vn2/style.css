@@ -164,6 +164,19 @@ button:active{transform:translateY(1px)}
 }
 @keyframes blink{0%,60%{opacity:.35}80%{opacity:1}100%{opacity:.35}}
 
+/* перебивка между сценами: акварельная «промокашка».
+   Нужна, чтобы смена фона/каста не выглядела рывком. Титр/подстрочник не трогает. */
+#brk{
+  position:absolute; inset:0; z-index:12; pointer-events:none; opacity:0;
+  transition:opacity .52s ease;
+  background:
+    radial-gradient(120% 92% at 18% 8%,  rgba(247,242,232,.97), rgba(247,242,232,0) 62%),
+    radial-gradient(110% 86% at 84% 92%, rgba(221,230,240,.96), rgba(221,230,240,0) 64%),
+    radial-gradient(90% 70% at 62% 22%,  rgba(236,229,214,.9),  rgba(236,229,214,0) 60%),
+    #efe9dd;
+}
+#brk.on{opacity:1; transition-duration:.2s}
+
 /* тулбар тумблеров */
 #tools{position:absolute; top:2.6%; right:3.4%; z-index:40; display:flex; gap:.5em}
 .tg{

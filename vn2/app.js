@@ -12,6 +12,7 @@
   const music = $("music"), voice = $("voice");
   const cinema = $("cinema"), avm = $("avm"), skip = $("skip");
   const endScr = $("end"), prevBtn = $("prev"), nextBtn = $("next");
+  const brk = $("brk");                     // акварельная перебивка между сценами
   const AVM = "../out/avm_v3_epic.mp4";
 
   const qp = new URLSearchParams(location.search);
@@ -247,13 +248,31 @@
   }));
 
   // ---------- музыка ----------
+  // Смена трека = короткий фейд-аут → подмена источника → фейд-ин.
+  // Без этого переход пролог→кабинет Старика начинался с резкого обрыва трека.
+  let fadeT = null;
+  function fadeTo(v, ms, done) {
+    clearInterval(fadeT);
+    const from = music.volume, t0 = performance.now();
+    fadeT = setInterval(() => {
+      const k = Math.min(1, (performance.now() - t0) / Math.max(1, ms));
+      music.volume = from + (v - from) * k;
+      if (k >= 1) { clearInterval(fadeT); music.volume = v; if (done) done(); }
+    }, 30);
+  }
   function setMusic(key) {
     if (key === musicKey) return;
     musicKey = key;
     const src = D.music[key];
     if (!src) return;
-    music.src = plAud.get(src) || src;   // предзагруженный blob — стартует мгновенно
-    if (musicOn && started) music.play().catch(() => {});
+    const swap = () => {
+      music.src = plAud.get(src) || src;   // предзагруженный blob — стартует мгновенно
+      music.volume = 0;
+      if (musicOn && started) music.play().catch(() => {});
+      fadeTo(1, 700);
+    };
+    if (musicOn && started && !music.paused) fadeTo(0, PACE * 380, swap);
+    else { swap(); music.volume = 1; }
   }
 
   // ---------- голос (постранично) ----------
@@ -310,9 +329,43 @@
     title.classList.remove("show"); endScr.classList.remove("show"); vlayer.hidden = true;
   }
 
-  function enterPos(i) {
+  // ---------- перебивка между сценами ----------
+  // Смена узла (пролог → кабинет Старика → приёмная) больше не рывок: фон уходит под
+  // акварельную «промокашку», под ней же меняются фон/каст/музыка, потом заливка тает.
+  let inBreak = false, brkT = null, brkCb = null;
+  function sceneBreak(cb) {
+    if (!brk) { cb(); return; }
+    brkCb = cb;
+    clearTimeout(brkT);
+    brk.classList.add("on");
+    brkT = setTimeout(() => {
+      const f = brkCb; brkCb = null;
+      if (f) f();
+      brkT = setTimeout(() => brk.classList.remove("on"), 120);
+    }, PACE * 220);
+  }
+  // клик во время перебивки = сразу пройти её (иначе на стыке сцен теряются нажатия)
+  function finishBreak() {
+    if (!brkCb) return;
+    const f = brkCb; brkCb = null;
+    clearTimeout(brkT);
+    if (brk) brk.classList.remove("on");
+    inBreak = false;
+    f();
+  }
+
+  function enterPos(i, skipBreak) {
     if (i < 0) i = 0;
     if (i > SCENES.length - 1) return enterEnd();
+    const s0 = SCENES[i];
+    if (!skipBreak && s0.n !== curNode && curNode >= 0 && !INSTANT && !inBreak) {
+      clearTimeout(autoTimer);
+      playToken++;                       // гасим отложенный автолист
+      inBreak = true;
+      sceneBreak(() => { inBreak = false; enterPos(i, true); });
+      return;
+    }
+    inBreak = false;
     playToken++;
     pos = i;
     const s = SCENES[i], nd = NODES[s.n], pg = nd.pages[s.p];
@@ -353,6 +406,7 @@
   // ---------- навигация ----------
   function next() {
     clearTimeout(autoTimer);
+    if (inBreak) { finishBreak(); return; }
     if (!vlayer.hidden) { vskip.click(); return; }   // идёт интро-значок → пропустить
     if (paused) { paused = false; tyPaused = false; syncToggles(); }
     if (!typingDone()) {                      // сперва дописать страницу
@@ -365,6 +419,7 @@
   }
   function prev() {
     clearTimeout(autoTimer);
+    if (inBreak) { finishBreak(); return; }
     if (cinemaOpen) return;
     if (!vlayer.hidden) return;
     if (paused) { paused = false; tyPaused = false; syncToggles(); }
@@ -390,6 +445,8 @@
   // работал только «Тизер».
   function goMenu() {
     clearTimeout(autoTimer);
+    clearTimeout(brkT); brkCb = null; inBreak = false;
+    if (brk) brk.classList.remove("on");
     playToken++;
     curNode = -1;
     clearCast();
@@ -504,7 +561,8 @@
   };
   $("t-music").onclick = (e) => {
     e.stopPropagation(); musicOn = !musicOn; syncToggles();
-    if (!musicOn) music.pause(); else if (started) music.play().catch(() => {});
+    if (!musicOn) { clearInterval(fadeT); music.volume = 1; music.pause(); }
+    else if (started) music.play().catch(() => {});
   };
   $("t-auto").onclick = (e) => {
     e.stopPropagation();

@@ -27,282 +27,392 @@
   "voice": "narr",
   "model": "gemini-3.8-flash-tts",
   "chars": 274,
-  "price": 0.78
+  "price": 0.78,
+  "text": "Сегодня первыми кандидатами оказались двое студентов и модель — Сергей с чистой совестью завернул их за отсутствие научной программы. Следующим оказался длинноволосый поэт, высокий, нескладный, с тоской в больших серых глазах, готовый долететь до Марса в поисках своей музы."
  },
  "audio/vo/rec_05.mp3": {
   "voice": "narr",
   "model": "gemini-3.8-flash-tts",
   "chars": 41,
-  "price": 0.12
+  "price": 0.12,
+  "text": "Его он тоже отправил вслед за остальными."
  },
  "audio/vo/rec_06.mp3": {
   "voice": "narr",
   "model": "gemini-3.8-flash-tts",
   "chars": 151,
-  "price": 0.43
+  "price": 0.43,
+  "text": "Образовалась пауза и, уже раздумывая об обеде, Лихнецкий расслабился, не ожидая подвоха. И получил его: следующим кандидатом оказалась пожилая женщина."
  },
  "audio/vo/rec_07.mp3": {
   "voice": "narr",
   "model": "gemini-3.8-flash-tts",
   "chars": 175,
-  "price": 0.5
+  "price": 0.5,
+  "text": "Кудрявые седые, как снег, волосы, мягкое лицо, прочерченное морщинами, яркие голубые глаза, похожие на летнее небо. И популярный среди добровольцев синий комбинезон на лямках."
  },
  "audio/vo/rec_08.mp3": {
   "voice": "Сергей",
   "model": "gemini-3.8-flash-tts",
-  "chars": 105,
-  "price": 0.3
+  "chars": 49,
+  "price": 0.14,
+  "text": "Добрый день. Добро пожаловать в Звездный городок,"
  },
  "audio/vo/rec_10.mp3": {
-  "voice": "Екатерина",
-  "model": "elevenlabs-v4-tts",
-  "chars": 132,
-  "price": 1.43
+  "voice": "Сергей",
+  "text": "Меня зовут Лихнецкий Сергей. Могу я увидеть ваши документы?",
+  "chars": 59,
+  "price": 0,
+  "reused_from": "rec_09.mp3"
  },
  "audio/vo/rec_11.mp3": {
-  "voice": "narr",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 176,
-  "price": 0.5
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 38,
+  "price": 0.42,
+  "text": "Здравствуйте, Сергей, вот, пожалуйста,"
  },
  "audio/vo/rec_12.mp3": {
   "voice": "narr",
   "model": "gemini-3.8-flash-tts",
-  "chars": 45,
-  "price": 0.13
+  "chars": 91,
+  "price": 0.26,
+  "text": "голос гостьи оказался мягкий и мелодичный. И вся она производила успокаивающее впечатление."
  },
  "audio/vo/rec_13.mp3": {
   "voice": "narr",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 195,
-  "price": 0.56
+  "text": "Такой Сергей мог представить бабушку. Не свою, а среднестатистическую, пекущую блины и пирожки, подкармливающую голубей в парке, бабушку, к которой приезжают внуки на каникулы.",
+  "chars": 176,
+  "price": 0,
+  "reused_from": "rec_11.mp3"
  },
  "audio/vo/rec_14.mp3": {
   "voice": "narr",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 223,
-  "price": 0.64
+  "text": "Что она делает здесь? Что ей нужно в космосе?",
+  "chars": 45,
+  "price": 0,
+  "reused_from": "rec_12.mp3"
  },
  "audio/vo/rec_15.mp3": {
   "voice": "narr",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 98,
-  "price": 0.28
+  "text": "К удивлению Сергея, у нее оказалось все в порядке со здоровьем, естественно, с поправкой на возраст. Но полет в космос — это не прогулка в парке, и уже возраст мог бы стать основанием для отказа.",
+  "chars": 195,
+  "price": 0,
+  "reused_from": "rec_13.mp3"
  },
  "audio/vo/rec_16.mp3": {
   "voice": "narr",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 72,
-  "price": 0.21
+  "text": "Но Лихнецкий, не желая сразу расстраивать такую милую женщину, листал документы дальше, обнаружив любопытную научную программу: немного биологии, немного астрономии, немного физики. Не для фундаментальных исследований, нет.",
+  "chars": 223,
+  "price": 0,
+  "reused_from": "rec_14.mp3"
  },
  "audio/vo/rec_17.mp3": {
   "voice": "narr",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 47,
-  "price": 0.14
+  "text": "Упор делался на трансляцию образовательного курса для школьников на Землю. Увлекательно и полезно.",
+  "chars": 98,
+  "price": 0,
+  "reused_from": "rec_15.mp3"
  },
  "audio/vo/rec_18.mp3": {
-  "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 81,
-  "price": 0.23
+  "voice": "narr",
+  "text": "Ах, если бы не возраст, ей, пожалуй, в команде были бы рады. Но увы-увы.",
+  "chars": 72,
+  "price": 0,
+  "reused_from": "rec_16.mp3"
  },
  "audio/vo/rec_19.mp3": {
-  "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 24,
-  "price": 0.07
+  "voice": "narr",
+  "text": "Сергей с сожалением закрыл папку с документами.",
+  "chars": 47,
+  "price": 0,
+  "reused_from": "rec_17.mp3"
  },
  "audio/vo/rec_20.mp3": {
-  "voice": "Екатерина",
-  "model": "elevenlabs-v4-tts",
-  "chars": 158,
-  "price": 1.72
+  "voice": "Сергей",
+  "text": "Екатерина Ивановна, я посмотрел ваши документы. У вас чудесная научная программа.",
+  "chars": 81,
+  "price": 0,
+  "reused_from": "rec_18.mp3"
  },
  "audio/vo/rec_21.mp3": {
   "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 68,
-  "price": 0.2
+  "text": "Действительно интересно.",
+  "chars": 24,
+  "price": 0,
+  "reused_from": "rec_19.mp3"
  },
  "audio/vo/rec_22.mp3": {
-  "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 94,
-  "price": 0.27
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 57,
+  "price": 0.62,
+  "text": "Спасибо, — от улыбки вокруг её глаз разбежались морщинки,"
  },
  "audio/vo/rec_23.mp3": {
-  "voice": "narr",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 70,
-  "price": 0.2
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 98,
+  "price": 1.07,
+  "text": "мне помогали несколько моих знакомых педагогов. Если у вас будут замечания, мы их быстро устраним."
  },
  "audio/vo/rec_24.mp3": {
   "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 267,
-  "price": 0.76
+  "text": "Да нет, замечаний не будет. Мы не корректируем программы кандидатов.",
+  "chars": 68,
+  "price": 0,
+  "reused_from": "rec_21.mp3"
  },
  "audio/vo/rec_25.mp3": {
-  "voice": "narr",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 186,
-  "price": 0.53
+  "voice": "Сергей",
+  "text": "Только в случае попадания в экипаж — чтобы совместить с остальной командой. Проблема в другом.",
+  "chars": 94,
+  "price": 0,
+  "reused_from": "rec_22.mp3"
  },
  "audio/vo/rec_26.mp3": {
-  "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 99,
-  "price": 0.29
+  "voice": "narr",
+  "text": "Сергей потер переносицу, подбирая слова, чтобы не обидеть собеседницу.",
+  "chars": 70,
+  "price": 0,
+  "reused_from": "rec_23.mp3"
  },
  "audio/vo/rec_27.mp3": {
   "voice": "Сергей",
   "model": "gemini-3.8-flash-tts",
-  "chars": 105,
-  "price": 0.3
+  "chars": 195,
+  "price": 0.56,
+  "text": "При всех наших технических возможностях, экспедиция на Марс остается очень сложным и дорогостоящим предприятием. Ограничения в тоннаже отправляемых на орбиту грузов лимитируют нас в оборудовании,"
  },
  "audio/vo/rec_28.mp3": {
   "voice": "narr",
   "model": "gemini-3.8-flash-tts",
-  "chars": 77,
-  "price": 0.22
+  "chars": 144,
+  "price": 0.41,
+  "text": "Лихнецкий засыпал её словами, чтобы отказ не прозвучал слишком резко. Ему была симпатична эта женщина, и отказать в лоб казалось слишком грубым."
  },
  "audio/vo/rec_29.mp3": {
   "voice": "Сергей",
   "model": "gemini-3.8-flash-tts",
-  "chars": 329,
-  "price": 0.94
+  "chars": 180,
+  "price": 0.51,
+  "text": "Увы, но экспедиция в течение всех месяцев полета должна будет обходиться минимумом медицинского оборудования. Только самое необходимое, рассчитанное на возможные несчастные случаи."
  },
  "audio/vo/rec_30.mp3": {
-  "voice": "Екатерина",
-  "model": "elevenlabs-v4-tts",
-  "chars": 37,
-  "price": 0.41
+  "voice": "Сергей",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 60,
+  "price": 0.17,
+  "text": "Помните вторую американскую? С такими авариями мы справимся."
  },
  "audio/vo/rec_31.mp3": {
   "voice": "Сергей",
   "model": "gemini-3.8-flash-tts",
-  "chars": 166,
-  "price": 0.47
+  "chars": 73,
+  "price": 0.21,
+  "text": "Есть даже реанимационный блок и возможность провести экстренную операцию."
  },
  "audio/vo/rec_32.mp3": {
-  "voice": "Екатерина",
-  "model": "elevenlabs-v4-tts",
-  "chars": 109,
-  "price": 1.19
+  "voice": "narr",
+  "text": "Женщина удивленно смотрела на него, не понимая, зачем он ей это рассказывает.",
+  "chars": 77,
+  "price": 0,
+  "reused_from": "rec_28.mp3"
  },
  "audio/vo/rec_33.mp3": {
-  "voice": "Екатерина",
-  "model": "elevenlabs-v4-tts",
-  "chars": 47,
-  "price": 0.51
+  "voice": "Сергей",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 104,
+  "price": 0.3,
+  "text": "Но мы не можем обеспечить длительное лечение и проведение процедур, — Сергей непроизвольно отвел взгляд,"
  },
  "audio/vo/rec_34.mp3": {
-  "voice": "Екатерина",
-  "model": "elevenlabs-v4-tts",
-  "chars": 73,
-  "price": 0.8
+  "voice": "Сергей",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 222,
+  "price": 0.63,
+  "text": "тем более, постоянный плотный контроль в процессе высадки экспедиции. Размер экипажа ограничен, и выделение отдельного врача для контроля здоровья во время непосредственной работы на Марсе для нас непозволительная роскошь."
  },
  "audio/vo/rec_35.mp3": {
-  "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 105,
-  "price": 0.3
+  "voice": "Екатерина",
+  "text": "Но у меня же все хорошо со здоровьем.",
+  "chars": 37,
+  "price": 0,
+  "reused_from": "rec_30.mp3"
  },
  "audio/vo/rec_36.mp3": {
-  "voice": "Екатерина",
-  "model": "elevenlabs-v4-tts",
-  "chars": 123,
-  "price": 1.34
+  "voice": "Сергей",
+  "text": "Да, конечно, текущее состояние у вас удовлетворительное. Однако в экспедиции предполагаются существенные нагрузки, тяжелые даже для совершенно здоровых молодых людей.",
+  "chars": 166,
+  "price": 0,
+  "reused_from": "rec_31.mp3"
  },
  "audio/vo/rec_37.mp3": {
-  "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 51,
-  "price": 0.15
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 63,
+  "price": 0.69,
+  "text": "Вы хотите сказать, что я слишком старая, чтобы лететь в космос?"
  },
  "audio/vo/rec_38.mp3": {
-  "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 92,
-  "price": 0.27
- },
- "audio/vo/rec_39.mp3": {
-  "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 34,
-  "price": 0.1
- },
- "audio/vo/rec_40.mp3": {
   "voice": "narr",
   "model": "gemini-3.8-flash-tts",
-  "chars": 21,
-  "price": 0.06
+  "chars": 43,
+  "price": 0.13,
+  "text": "в её голосе прорезались нотки обреченности."
+ },
+ "audio/vo/rec_39.mp3": {
+  "voice": "Екатерина",
+  "text": "Так? Но ведь у вас нет ограничения по возрасту.",
+  "chars": 47,
+  "price": 0,
+  "reused_from": "rec_33.mp3"
+ },
+ "audio/vo/rec_40.mp3": {
+  "voice": "Екатерина",
+  "text": "Нигде не указан предельный возраст для кандидатов. Я специально смотрела.",
+  "chars": 73,
+  "price": 0,
+  "reused_from": "rec_34.mp3"
  },
  "audio/vo/rec_41.mp3": {
   "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 67,
-  "price": 0.19
+  "text": "Да, конечно, предельного возраста нет. Мы опираемся на разумную оценку здоровья и возможностей кандидата.",
+  "chars": 105,
+  "price": 0,
+  "reused_from": "rec_35.mp3"
  },
  "audio/vo/rec_42.mp3": {
-  "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 140,
-  "price": 0.4
+  "voice": "Екатерина",
+  "text": "Но на орбитальную станцию летали люди старше меня. Я смотрела в сети, все было хорошо, никаких ограничений для них не было.",
+  "chars": 123,
+  "price": 0,
+  "reused_from": "rec_36.mp3"
  },
  "audio/vo/rec_43.mp3": {
   "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 106,
-  "price": 0.3
+  "text": "Я помню эти случаи. Но фактически это были туристы.",
+  "chars": 51,
+  "price": 0,
+  "reused_from": "rec_37.mp3"
  },
  "audio/vo/rec_44.mp3": {
   "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 125,
-  "price": 0.36
+  "text": "С кратким пребыванием на орбитальной станции. Никаких долгих полетов, ограниченные нагрузки.",
+  "chars": 92,
+  "price": 0,
+  "reused_from": "rec_38.mp3"
  },
  "audio/vo/rec_45.mp3": {
-  "voice": "narr",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 100,
-  "price": 0.29
+  "voice": "Сергей",
+  "text": "А с Земли их постоянно вели врачи.",
+  "chars": 34,
+  "price": 0,
+  "reused_from": "rec_39.mp3"
  },
  "audio/vo/rec_46.mp3": {
-  "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 80,
-  "price": 0.23
+  "voice": "narr",
+  "text": "Сергей развел руками.",
+  "chars": 21,
+  "price": 0,
+  "reused_from": "rec_40.mp3"
  },
  "audio/vo/rec_47.mp3": {
-  "voice": "Екатерина",
-  "model": "elevenlabs-v4-tts",
-  "chars": 30,
-  "price": 0.33
+  "voice": "Сергей",
+  "text": "Но ведь это не наш случай. Почти два года в космосе — это не шутка.",
+  "chars": 67,
+  "price": 0,
+  "reused_from": "rec_41.mp3"
  },
  "audio/vo/rec_48.mp3": {
-  "voice": "Екатерина",
-  "model": "elevenlabs-v4-tts",
-  "chars": 24,
-  "price": 0.26
+  "voice": "Сергей",
+  "text": "Случись что — необходимого лечения экипаж обеспечить не сможет. Упомянутые вами туристы по возвращении на Землю проходили курс реабилитации.",
+  "chars": 140,
+  "price": 0,
+  "reused_from": "rec_42.mp3"
  },
  "audio/vo/rec_49.mp3": {
   "voice": "Сергей",
-  "model": "gemini-3.8-flash-tts",
-  "chars": 250,
-  "price": 0.71
+  "text": "А миссии предстоит высадка на поверхность, затем взлет. Серьезные перегрузки после длительной невесомости.",
+  "chars": 106,
+  "price": 0,
+  "reused_from": "rec_43.mp3"
  },
  "audio/vo/rec_50.mp3": {
-  "voice": "Екатерина",
-  "model": "elevenlabs-v4-tts",
-  "chars": 144,
-  "price": 1.56
+  "voice": "Сергей",
+  "text": "Даже если вы останетесь в орбитальном модуле — кто даст гарантии, что экипажу не придется прерывать программу для помощи вам?",
+  "chars": 125,
+  "price": 0,
+  "reused_from": "rec_44.mp3"
  },
  "audio/vo/rec_09.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 53,
+  "price": 0.15,
+  "text": "Сергей заученно улыбнулся, заранее готовясь отказать."
+ },
+ "audio/vo/rec_51.mp3": {
+  "voice": "narr",
+  "text": "На посетительницу больно было взглянуть.С потухшим взглядом, вся сникшая, она сидела на краю кресла.",
+  "chars": 100,
+  "price": 0,
+  "reused_from": "rec_45.mp3"
+ },
+ "audio/vo/rec_54.mp3": {
+  "voice": "Екатерина",
+  "text": "Не извиняйтесь. Я все понимаю.",
+  "chars": 30,
+  "price": 0,
+  "reused_from": "rec_47.mp3"
+ },
+ "audio/vo/rec_55.mp3": {
+  "voice": "Екатерина",
+  "text": "Вы ни в чем не виноваты.",
+  "chars": 24,
+  "price": 0,
+  "reused_from": "rec_48.mp3"
+ },
+ "audio/vo/rec_52.mp3": {
   "voice": "Сергей",
   "model": "gemini-3.8-flash-tts",
+  "chars": 43,
+  "price": 0.13,
+  "text": "Простите, — Сергей чувствовал себя палачом,"
+ },
+ "audio/vo/rec_53.mp3": {
+  "voice": "Сергей",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 34,
+  "price": 0.1,
+  "text": "я не могу принять у вас документы."
+ },
+ "audio/vo/rec_56.mp3": {
+  "voice": "Сергей",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 163,
+  "price": 0.47,
+  "text": "Если вы так интересуетесь космосом, я знаю, у нас есть несколько вакансий на станциях слежения. Это, конечно, даже не взлет на орбиту, но тоже очень нужная работа,"
+ },
+ "audio/vo/rec_57.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 84,
+  "price": 0.24,
+  "text": "это звучало так, как будто он оправдывается, Лихнецкий сам не ожидал от себя такого."
+ },
+ "audio/vo/rec_58.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
   "chars": 59,
-  "price": 0.17
+  "price": 0.64,
+  "text": "Спасибо, — она внезапно тепло улыбнулась и пожала его руку,"
+ },
+ "audio/vo/rec_59.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 82,
+  "price": 0.89,
+  "text": "в любом случае спасибо. Если совсем ничего не получится, я посмотрю ваши вакансии."
  }
 }
