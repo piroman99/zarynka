@@ -229,6 +229,7 @@ cut4 = p9.find('Тысячи людей вспомнили')
 SEG9 = [p9[:cut], p9[cut:cut2], p9[cut2:cut3], p9[cut3:cut4], p9[cut4:]]
 
 SENT = re.compile(r'(?<=[.!?…])\s+(?=[А-ЯA-Z«—])')
+STUB = 15          # реплика короче — «обрывок»: склеивается с авторской вставкой
 
 
 def segments(par):
@@ -264,7 +265,22 @@ def segments(par):
         seg = par[end:stop].strip()
         if seg:
             out.append(('speech' if k % 2 == 0 else 'narr', seg))
-    return out
+    # ОБРЫВОК РЕПЛИКИ («Спасибо,» / «Простите,») склеиваем с идущей следом
+    # авторской вставкой в ОДНУ страницу закадра: «— Спасибо, — от улыбки…».
+    # Иначе получались страницы из одного слова и лишний клик (решение Ивана
+    # 2026-10-20). Длинную реплику не трогаем — она остаётся голосом персонажа.
+    merged = []
+    i = 0
+    while i < len(out):
+        kind, tx = out[i]
+        if (kind == 'speech' and len(tx) <= STUB and i + 1 < len(out)
+                and out[i + 1][0] == 'narr'):
+            merged.append(('narr', '— %s — %s' % (tx, out[i + 1][1])))
+            i += 2
+            continue
+        merged.append((kind, tx))
+        i += 1
+    return merged
 
 
 def pages_of(segs, maxn=2):
