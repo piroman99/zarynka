@@ -10,6 +10,7 @@
 Голос — ПОСТРАНИЧНО: у каждой страницы поле vo = audio/vo/<файл>, закадр пишет _vn2_vo.py.
 """
 import os, json, re, shutil, sys
+import hashlib
 from collections import deque
 import numpy as np
 from PIL import Image, ImageFilter
@@ -236,10 +237,10 @@ for sz in (192, 512):
     logo_sq.resize((sz, sz), Image.LANCZOS).save(os.path.join(VN2, 'icons', f'icon-{sz}.png'))
 
 # Значок для перехода между сценами — отдельный файл, чтобы форма выбиралась ОДНОЙ
-# строкой и не трогала титул:  TRANS_EMBLEM=penta python3 _vn2_build.py
-#   circle — тот же диск, что на титуле (сейчас в сборке)
-#   penta  — золотой пятиугольник-жетон из пролога (assets/gen/znachek_k1.png)
-TRANS_EMBLEM = os.environ.get('TRANS_EMBLEM', 'circle').strip().lower()
+# строкой и не трогала титул:  TRANS_EMBLEM=circle python3 _vn2_build.py
+#   penta  — золотой пятиугольник-жетон из пролога (ВЫБРАН Иваном 2026-10-21, дефолт)
+#   circle — диск, как на титуле (прежний вариант)
+TRANS_EMBLEM = os.environ.get('TRANS_EMBLEM', 'penta').strip().lower()
 if TRANS_EMBLEM == 'penta':
     emb = Image.open(os.path.join(GEN, 'znachek_k1.png')).convert('RGBA')
     emb = emb.crop(emb.split()[3].getbbox())          # обрезать по непрозрачному
@@ -250,6 +251,11 @@ if TRANS_EMBLEM == 'penta':
 else:
     logo_round.save(os.path.join(IMG, 'trans_logo.png'))
 print('logo/icons OK (лого — круг с прозрачным фоном, переход: %s)' % TRANS_EMBLEM)
+
+# Версия значка перехода = хеш самого файла: меняется форма (круг ↔ пятиугольник)
+# — меняется адрес, и браузер/Pages не отдаёт старую картинку из кеша.
+EMBLEM_VER = hashlib.md5(open(os.path.join(IMG, 'trans_logo.png'), 'rb').read()).hexdigest()[:8]
+print('  trans_logo.png v=%s' % EMBLEM_VER)
 
 # ---- 4) текст -----------------------------------------------------------
 lines = open(STORY, encoding='utf-8').read().split('\n')
@@ -527,6 +533,7 @@ data = {
     'byline': 'по рассказу Александра «Котобус» Горбова',
     'credits': CREDITS,
     'voVer': VO_VER,
+    'emblemVer': EMBLEM_VER,
     'music': {'prolog': '../assets/audio/sketch/prolog_bed_soft_0.mp3',
               'reception': '../assets/audio/sketch/vn_reception_soft_0.mp3'},
     'chars': CHARS_AVAIL,

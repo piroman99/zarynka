@@ -32,6 +32,7 @@ window.VN = {
   }
  ],
  "voVer": 2,
+ "emblemVer": "96713814",
  "music": {
   "prolog": "../assets/audio/sketch/prolog_bed_soft_0.mp3",
   "reception": "../assets/audio/sketch/vn_reception_soft_0.mp3"

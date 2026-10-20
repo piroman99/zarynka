@@ -1,0 +1,11 @@
+vn2: transition emblem is the pentagon badge (Ivan's pick), own cache version
+
+- the long scene transition now shows the gold pentagon badge from the prologue
+  (assets/gen/znachek_k1.png, cropped to alpha, 512x512 RGBA, displayed at 189 px)
+  instead of the round title disc; TRANS_EMBLEM=penta is the default now,
+  TRANS_EMBLEM=circle restores the disc, the title keeps the circle either way
+- emblem src carries D.emblemVer (md5 of trans_logo.png computed in the build), so
+  swapping the shape cannot be masked by the Pages/browser cache
+- badge enlarged a little (21vmin, was 18vmin) so the engraving reads on a dark frame
+- checks: _trans_shape.py (bbox corners 0.03 — no square corners), _trans_portrait.py
+  (103 px, fits the portrait art band), _vn2_vo_break.py 13/13, _vn2_restart.py 3/3

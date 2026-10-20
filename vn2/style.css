@@ -186,7 +186,7 @@ button:active{transform:translateY(1px)}
 }
 #trans.on{opacity:1}
 #trans .tlogo{
-  width:clamp(96px,18vmin,220px); height:auto; opacity:0;
+  width:clamp(104px,21vmin,240px); height:auto; opacity:0;
   transform:scale(.94);
   transition:opacity .45s ease, transform 1.5s ease;
   filter:drop-shadow(0 0 26px rgba(255,214,150,.20));

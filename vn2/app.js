@@ -809,9 +809,9 @@
     if (curVo && voList(pg, nd).join("|") === curVo) scheduleAuto();
   });
   syncToggles();
-  // Значок перехода берётся с версией (?v=N): иначе Pages отдаёт старую картинку
-  // из кеша и форма (круг/пятиугольник) не меняется после пересборки.
-  if (transLogo) transLogo.src = "img/trans_logo.png" + (D.voVer ? "?v=" + D.voVer : "");
+  // Значок перехода берётся с версией (D.emblemVer = хеш файла): иначе Pages отдаёт
+  // старую картинку из кеша и форма (круг/пятиугольник) не меняется после пересборки.
+  if (transLogo) transLogo.src = "img/trans_logo.png?v=" + (D.emblemVer || D.voVer || 1);
   plBuild();                       // запускаем фоновую предзагрузку с гл. экрана
   fitScreens();                    // титул/конец серии — вписать в высоту экрана
   if (location.protocol === "http:" || location.protocol === "https:") {
