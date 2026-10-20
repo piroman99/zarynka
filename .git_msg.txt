@@ -1,0 +1,12 @@
+vn2: duck the music during the long scene transition
+
+- the flashback transition darkens the picture and now also takes the music down
+  to 0.32, then brings it back together with the lightening (760 ms)
+- the duck level is a TARGET (duck in app.js) and setMusic fades to it: without
+  that, the track swap prologue -> reception faded back to full volume right in
+  the middle of the darkening
+- skipping the transition by a click restores the volume at once; goMenu resets
+  the duck to 1 so the menu never stays quiet
+- curve verified by _trans_duck_curve.py (1.00 -> 0.32 -> 1.00); _vn2_vo_break.py
+  now has two extra checks (ducked during, restored after) and stays 14/15 green,
+  _vn2_restart.py 3/3

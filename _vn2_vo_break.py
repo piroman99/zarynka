@@ -73,11 +73,12 @@ try:
                 return
 
     enter_var2()
-    seen, t0 = {'on': 0, 'logo': 0, 'node': None}, time.time()
+    seen, t0 = {'on': 0, 'logo': 0, 'node': None, 'vol': [], 'vol_end': None}, time.time()
     while time.time() - t0 < 5.0:
         st = b.js("[document.getElementById('trans').classList.contains('on'),"
                   " document.getElementById('translogo').classList.contains('on'),"
-                  " __DBG.node]")
+                  " __DBG.node, document.getElementById('music').volume,"
+                  " document.getElementById('music').paused]")
         el = time.time() - t0
         if st[0]:
             seen['on'] = max(seen['on'], el)
@@ -85,9 +86,20 @@ try:
             seen['logo'] = max(seen['logo'], el)
         if st[2] == NODE['starik'] and seen['node'] is None:
             seen['node'] = el
+        # громкость музыки: в темноте должна упасть, после перехода — вернуться
+        if st[3] is not None and not st[4]:
+            seen['vol'].append((el, st[3]))
+        if not st[0] and seen['on'] > 0:
+            seen['vol_end'] = st[3]
         time.sleep(0.06)
     print('  тайминги: затемнение+осветление %.2f с, лого %.2f с, кабинет на %.2f с'
           % (seen['on'], seen['logo'], seen['node'] or -1))
+    if seen['vol']:
+        lo = min(v for _, v in seen['vol'])
+        print('  музыка: минимум громкости %.2f, в конце %.2f'
+              % (lo, seen['vol_end'] if seen['vol_end'] is not None else -1))
+    else:
+        print('  музыка не играет — приглушение не проверить')
     check('затемнение есть', seen['on'] > 0.5, '%.2f с' % seen['on'])
     check('лого показано в темноте', seen['logo'] > 0.5, '%.2f с' % seen['logo'])
     check('переход дольше 1.5 с', seen['on'] > 1.5, '%.2f с' % seen['on'])
@@ -95,6 +107,13 @@ try:
     check('кабинет под тёмным (до осветления)',
           seen['node'] is not None and seen['node'] < seen['on'],
           '%.2f / %.2f' % (seen['node'] or -1, seen['on']))
+    if seen['vol']:
+        check('музыка приглушена на переходе',
+              min(v for _, v in seen['vol']) < 0.6,
+              'минимум %.2f' % min(v for _, v in seen['vol']))
+        check('громкость вернулась после перехода',
+              seen['vol_end'] is not None and seen['vol_end'] > 0.9,
+              '%.2f' % (seen['vol_end'] if seen['vol_end'] is not None else -1))
 
     # ---------- снимки трёх фаз (отдельный прогон, чтобы не мешать таймингам) ----------
     enter_var2()

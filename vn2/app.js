@@ -253,6 +253,11 @@
   // Смена трека = короткий фейд-аут → подмена источника → фейд-ин.
   // Без этого переход пролог→кабинет Старика начинался с резкого обрыва трека.
   let fadeT = null;
+  // Громкость, к которой стремится музыка. 1 = обычная; меньше — приглушение на
+  // долгом переходе (флешбэк в кабинет). Нужна именно цель, а не разовый fade:
+  // на стыке пролог→кабинет трек ещё и подменяется (setMusic), и без общей цели
+  // фейд-ин подмены возвращал бы полную громкость прямо в затемнении.
+  let duck = 1;
   function fadeTo(v, ms, done) {
     clearInterval(fadeT);
     const from = music.volume, t0 = performance.now();
@@ -261,6 +266,11 @@
       music.volume = from + (v - from) * k;
       if (k >= 1) { clearInterval(fadeT); music.volume = v; if (done) done(); }
     }, 30);
+  }
+  // приглушить/вернуть музыку (только если она вообще играет)
+  function duckTo(v, ms) {
+    duck = v;
+    if (musicOn && started && !music.paused) fadeTo(v, ms);
   }
   function setMusic(key) {
     if (key === musicKey) return;
@@ -271,7 +281,7 @@
       music.src = plAud.get(src) || src;   // предзагруженный blob — стартует мгновенно
       music.volume = 0;
       if (musicOn && started) music.play().catch(() => {});
-      fadeTo(1, 700);
+      fadeTo(duck, 700);
     };
     if (musicOn && started && !music.paused) fadeTo(0, PACE * 380, swap);
     else { swap(); music.volume = 1; }
@@ -371,6 +381,7 @@
   // Иван 2026-10-21: «переход с проходной на кабинет должен быть чуть подольше,
   // затемнением, а потом осветлением; может даже лого показать».
   const TR = { dark: 520, logoIn: 420, hold: 620, logoOut: 300, light: 720 };
+  const TR_DUCK = 0.32;              // музыка в темноте перехода — тише втрое
   let transT = [];
   function sceneTrans(cb) {
     if (!transEl) { cb(); return; }
@@ -378,12 +389,13 @@
     clearTimeout(brkT);
     transT.forEach(clearTimeout); transT = [];
     const at = (ms, fn) => transT.push(setTimeout(fn, ms));
+    duckTo(TR_DUCK, 340);                              // музыка уходит вместе с кадром
     transEl.classList.add("on");                       // затемнение
     at(TR.dark, () => { const f = brkCb; brkCb = null; if (f) f(); });
     at(TR.dark + 80, () => transLogo && transLogo.classList.add("on"));
     at(TR.dark + 80 + TR.logoIn + TR.hold, () => transLogo && transLogo.classList.remove("on"));
     at(TR.dark + 80 + TR.logoIn + TR.hold + TR.logoOut,
-       () => transEl.classList.remove("on"));          // осветление
+       () => { transEl.classList.remove("on"); duckTo(1, 760); });   // свет и музыка вместе
   }
   // клик во время перебивки = сразу пройти её (иначе на стыке сцен теряются нажатия)
   function finishBreak() {
@@ -395,6 +407,7 @@
     if (transEl) transEl.classList.remove("on");
     if (transLogo) transLogo.classList.remove("on");
     inBreak = false;
+    if (duck !== 1) duckTo(1, 420);      // пропустили переход — сразу вернуть музыку
     f();
   }
 
@@ -503,6 +516,7 @@
     if (brk) brk.classList.remove("on");
     if (transEl) transEl.classList.remove("on");
     if (transLogo) transLogo.classList.remove("on");
+    duck = 1;                       // в меню музыка не должна остаться приглушённой
     playToken++;
     curNode = -1;
     clearCast();
