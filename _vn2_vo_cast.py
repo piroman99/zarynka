@@ -12,6 +12,12 @@
 
   python3 _vn2_vo_cast.py --dry     # только смета
   python3 _vn2_vo_cast.py           # записать
+  python3 _vn2_vo_cast.py --no-reuse  # ничего не переиспользовать (починка)
+
+ВАЖНО (баг 2026-10-20): раньше переиспользование копировало файл из рабочего
+дерева, а рабочее дерево в том же прогоне перезаписывается — получался каскад:
+копия делалась с уже перезаписанного файла, и одна и та же озвучка расползалась
+по десятку страниц. Теперь источник берётся из git-блоба (HEAD), он неизменен.
 """
 import os, sys, json, re, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -25,6 +31,7 @@ OUTDIR = os.path.join(HERE, 'vn2', 'audio', 'vo')
 MANIFEST = os.path.join(OUTDIR, '_voices.json')
 CAP_RUB = 40.0
 DRY = '--dry' in sys.argv
+NO_REUSE = '--no-reuse' in sys.argv
 
 NARR_STYLE = (
     "Спокойный, зрелый мужской закадровый голос. Документальная кинохроника: "
@@ -72,6 +79,14 @@ def norm(tx):
 # Разбивка на страницы меняется (реплики/авторский текст разведены), поэтому номера
 # файлов сдвигаются. Чтобы не платить за тот же текст дважды, ищем совпадение
 # (голос + текст) в предыдущей сборке content.js из git HEAD и копируем готовый файл.
+def git_blob(rel):
+    """Байты файла из HEAD — источник переиспользования (рабочее дерево
+    в этом прогоне перезаписывается, брать из него нельзя)."""
+    r = subprocess.run(['git', 'show', 'HEAD:' + rel], cwd=HERE,
+                       capture_output=True)
+    return r.stdout if r.returncode == 0 and r.stdout else None
+
+
 REUSE = {}
 try:
     old = subprocess.run(['git', 'show', 'HEAD:vn2/content.js'], cwd=HERE,
@@ -103,16 +118,19 @@ for pg in nd['pages']:
     tx = norm(pg['tx'])
     rec = man.get(vo, {})
     if (rec.get('voice') == key and rec.get('text') == tx
+            and not rec.get('stale_reason')
             and os.path.exists(dst) and os.path.getsize(dst) > 2000):
         done.append(name)
         continue
     # тот же голос + тот же текст уже озвучен в предыдущей сборке → копируем файл
-    src_vo = REUSE.get((key, tx))
+    # (из git-блоба HEAD, а НЕ из рабочего дерева — иначе каскад копий)
+    src_vo = None if NO_REUSE else REUSE.get((key, tx))
     if src_vo:
-        sp = os.path.join(OUTDIR, os.path.basename(src_vo)[:-4] + '.mp3')
-        if os.path.exists(sp) and os.path.getsize(sp) > 2000 and sp != dst:
-            with open(sp, 'rb') as fi, open(dst, 'wb') as fo:
-                fo.write(fi.read())
+        rel = 'vn2/audio/vo/' + os.path.basename(src_vo)[:-4] + '.mp3'
+        blob = git_blob(rel)
+        if blob and len(blob) > 2000:
+            with open(dst, 'wb') as fo:
+                fo.write(blob)
             man[vo] = {'voice': key, 'text': tx, 'chars': len(tx), 'price': 0,
                        'reused_from': os.path.basename(src_vo)}
             reused += 1
