@@ -14,6 +14,7 @@
   const endScr = $("end"), prevBtn = $("prev"), nextBtn = $("next");
   const creditsEl = $("credits"), crList = $("crlist");   // титры (благодарности)
   const brk = $("brk");                     // акварельная перебивка между сценами
+  const transEl = $("trans"), transLogo = $("translogo");  // долгий переход + лого
   const AVM = "../out/avm_v3_epic.mp4";
 
   const qp = new URLSearchParams(location.search);
@@ -126,12 +127,12 @@
       plPush(charUrl(c[0], c[1]), "img", prio);
       plPush(charUrl(c[0], "neutral"), "img", prio);
     });
-    plPush(pg.vo || nd.vo, "audio", prio);
+    voList(pg, nd).forEach((u) => plPush(u, "audio", prio));
   }
   function plNode(ni, prio) {
     const nd = NODES[ni]; if (!nd || nd.t !== "scene") return;
     plPush(nd.bg, "img", prio);
-    plPush(nd.vo, "audio", prio);
+    voList(null, nd).forEach((u) => plPush(u, "audio", prio));
   }
 
   // весь эп1 в очередь: сначала ближние страницы, в конце — музыка и тизер
@@ -276,15 +277,35 @@
     else { swap(); music.volume = 1; }
   }
 
-  // ---------- голос (постранично) ----------
+  // ---------- голос (постранично, может быть НЕСКОЛЬКО сегментов) ----------
+  // Обычно страница озвучена одним файлом. Но склеенная страница
+  // «— Спасибо, — от улыбки…» имеет ДВА голоса: реплику читает персонаж,
+  // авторскую вставку — закадр. Тогда pg.vo = [файл, файл], pg.vwho = [кто, кто].
+  // Играем их подряд одним потоком.
+  let voQ = [];
+  // Версия озвучки в адресе (?v=N): иначе браузер и GitHub Pages отдают старый
+  // mp3 из кеша даже после Ctrl+F5 — force-cache в предзагрузке перезагрузка не отменяет.
+  function voUrl(u) { return D.voVer ? u + "?v=" + D.voVer : u; }
+  function voList(pg, nd) {
+    let l = [];
+    if (pg && pg.vo) l = Array.isArray(pg.vo) ? pg.vo.slice() : [pg.vo];
+    else if (nd && nd.vo) l = [nd.vo];
+    return l.map(voUrl);
+  }
   function playVoice(pg, nd) {
     voice.pause();
     voice.removeAttribute("src");
     curVo = "";
+    voQ = [];
     if (!voiceOn) return;
-    const src = (pg && pg.vo) || (nd && nd.vo);   // страница → узел (совместимость)
-    if (!src) return;
-    curVo = src;
+    voQ = voList(pg, nd);                 // страница → узел (совместимость)
+    if (!voQ.length) return;
+    curVo = voQ.join("|");
+    playVoNext();
+  }
+  function playVoNext() {
+    if (!voQ.length) return;
+    const src = voQ.shift();
     voice.src = plAud.get(src) || src;    // предзагруженный blob — без сетевой паузы
     voice.volume = 1.0;
     voice.play().catch(() => {});
@@ -345,12 +366,34 @@
       brkT = setTimeout(() => brk.classList.remove("on"), 120);
     }, PACE * 220);
   }
+  // Долгий переход «в кабинет Старика» (узел trans:"fade"):
+  // затемнение → лого в темноте → осветление. Дольше обычной перебивки.
+  // Иван 2026-10-21: «переход с проходной на кабинет должен быть чуть подольше,
+  // затемнением, а потом осветлением; может даже лого показать».
+  const TR = { dark: 520, logoIn: 420, hold: 620, logoOut: 300, light: 720 };
+  let transT = [];
+  function sceneTrans(cb) {
+    if (!transEl) { cb(); return; }
+    brkCb = cb;
+    clearTimeout(brkT);
+    transT.forEach(clearTimeout); transT = [];
+    const at = (ms, fn) => transT.push(setTimeout(fn, ms));
+    transEl.classList.add("on");                       // затемнение
+    at(TR.dark, () => { const f = brkCb; brkCb = null; if (f) f(); });
+    at(TR.dark + 80, () => transLogo && transLogo.classList.add("on"));
+    at(TR.dark + 80 + TR.logoIn + TR.hold, () => transLogo && transLogo.classList.remove("on"));
+    at(TR.dark + 80 + TR.logoIn + TR.hold + TR.logoOut,
+       () => transEl.classList.remove("on"));          // осветление
+  }
   // клик во время перебивки = сразу пройти её (иначе на стыке сцен теряются нажатия)
   function finishBreak() {
     if (!brkCb) return;
     const f = brkCb; brkCb = null;
     clearTimeout(brkT);
+    transT.forEach(clearTimeout); transT = [];
     if (brk) brk.classList.remove("on");
+    if (transEl) transEl.classList.remove("on");
+    if (transLogo) transLogo.classList.remove("on");
     inBreak = false;
     f();
   }
@@ -363,7 +406,8 @@
       clearTimeout(autoTimer);
       playToken++;                       // гасим отложенный автолист
       inBreak = true;
-      sceneBreak(() => { inBreak = false; enterPos(i, true); });
+      const long = NODES[s0.n] && NODES[s0.n].trans === "fade";
+      (long ? sceneTrans : sceneBreak)(() => { inBreak = false; enterPos(i, true); });
       return;
     }
     inBreak = false;
@@ -401,7 +445,14 @@
       const remain = Math.max(0, (voice.duration - voice.currentTime)) * 1000;
       delay = Math.max(delay, remain + AUTO_GAP);
     }
-    autoTimer = setTimeout(() => { if (t === playToken && autoOn) next(); }, delay);
+    autoTimer = setTimeout(() => {
+      if (t !== playToken || !autoOn) return;
+      // страница ещё говорит (второй сегмент в очереди или голос не дочитал) — не листаем
+      const speaking = voQ.length || (voiceOn && curVo && !voice.paused
+        && isFinite(voice.duration) && voice.currentTime < voice.duration - 0.08);
+      if (speaking) { scheduleAuto(); return; }
+      next();
+    }, delay);
   }
 
   // ---------- навигация ----------
@@ -448,7 +499,10 @@
     clearTimeout(autoTimer);
     closeCredits();
     clearTimeout(brkT); brkCb = null; inBreak = false;
+    transT.forEach(clearTimeout); transT = [];
     if (brk) brk.classList.remove("on");
+    if (transEl) transEl.classList.remove("on");
+    if (transLogo) transLogo.classList.remove("on");
     playToken++;
     curNode = -1;
     clearCast();
@@ -748,10 +802,11 @@
   $("e-byline").textContent = D.byline;
   // голос дочитал страницу → не ждём полный расчётный таймер
   voice.addEventListener("ended", () => {
+    if (voQ.length) { playVoNext(); return; }   // ещё сегменты той же страницы
     if (!autoOn || cinemaOpen) return;
     const s = SCENES[pos]; if (!s) return;
     const nd = NODES[s.n], pg = nd.pages[s.p];
-    if (curVo && ((pg && pg.vo) || nd.vo) === curVo) scheduleAuto();
+    if (curVo && voList(pg, nd).join("|") === curVo) scheduleAuto();
   });
   syncToggles();
   plBuild();                       // запускаем фоновую предзагрузку с гл. экрана

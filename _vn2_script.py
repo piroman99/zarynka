@@ -20,6 +20,7 @@ WS = os.path.abspath(os.path.join(HERE, '..', '..'))
 VN2 = os.path.join(HERE, 'vn2')
 VD = os.path.join(VN2, 'audio', 'vo')
 OUT = os.path.join(HERE, 'out')
+import _vo_util as U   # разбор страниц на сегменты (склеенная страница = 2 голоса)
 FF = os.path.join(WS, '.probe', '.lib', 'imageio_ffmpeg', 'binaries',
                   'ffmpeg-linux-x86_64-v7.0.2')
 
@@ -64,18 +65,16 @@ def main():
             continue
         nid = nd.get('id')
         for k, pg in enumerate(nd.get('pages') or []):
-            vo = pg.get('vo')
-            if not vo:
-                continue
-            n += 1
-            path = os.path.join(VN2, vo)
-            rows.append({
-                'no': n, 'node': nid, 'first': k == 0, 'idx': k,
-                'who': pg.get('who') or 'narr',
-                'voice': (man.get(vo) or {}).get('voice') or pg.get('who') or 'narr',
-                'file': os.path.basename(vo),
-                'tx': pg['tx'], 'dur': dur(path) if os.path.exists(path) else 0.0,
-            })
+            for j, (vo, stx, who) in enumerate(U.segs_of(pg)):
+                n += 1
+                path = os.path.join(VN2, vo)
+                rows.append({
+                    'no': n, 'node': nid, 'first': k == 0 and j == 0, 'idx': k,
+                    'who': who,
+                    'voice': (man.get(vo) or {}).get('voice') or who,
+                    'file': os.path.basename(vo),
+                    'tx': stx, 'dur': dur(path) if os.path.exists(path) else 0.0,
+                })
 
     # --- md ---
     md = ['# «Зарянка» · эп-1 — подстрочник', '',

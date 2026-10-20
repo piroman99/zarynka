@@ -1,67 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Сверка озвучки и текста: для каждой страницы VN берём vo-файл,
-сравниваем текст страницы с текстом, который реально был озвучен
+"""Сверка озвучки и текста: для каждого СЕГМЕНТА страницы VN берём vo-файл,
+сравниваем текст сегмента с текстом, который реально был озвучен
 (поле text в манифесте _voices.json), и проверяем наличие файла.
 Печатает расхождения: MISSING / NO_TEXT / DIFF.
+Сегменты: у склеенной страницы их два (реплика + авторская вставка) — см. _vo_util.
 """
-import json
 import os
-import re
 import sys
+from collections import Counter
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
-VN2 = os.path.join(ROOT, 'vn2')
-VO = os.path.join(VN2, 'audio', 'vo')
-MAN = os.path.join(VO, '_voices.json')
-
-
-def norm(t):
-    t = t.replace('«', '"').replace('»', '"').replace('—', '-').replace('–', '-')
-    t = t.replace('…', '...')
-    t = re.sub(r'[^0-9A-Za-zА-Яа-яЁё]+', ' ', t)
-    return re.sub(r'\s+', ' ', t).strip().lower()
-
-
-def load_content():
-    src = open(os.path.join(VN2, 'content.js'), encoding='utf-8').read()
-    i = src.index('{')
-    j = src.rindex('}')
-    return json.loads(src[i:j + 1])
-
-
-def pages_of(content):
-    out = []
-    for n in content['nodes']:
-        for k, pg in enumerate(n.get('pages') or []):
-            if pg.get('vo'):
-                out.append((n.get('id') or n.get('t'), k, pg))
-    return out
+import _vo_util as U
 
 
 def main():
-    content = load_content()
-    man = json.load(open(MAN, encoding='utf-8'))
-    pages = pages_of(content)
+    content = U.load_content()
+    man = U.load_manifest()
+    segs = U.segments(content)
     missing, diff, notext, ok = [], [], [], 0
-    for nid, k, pg in pages:
-        vo = pg['vo']
-        path = os.path.join(VN2, vo)
+    for nid, k, vo, tx, who in segs:
+        path = os.path.join(U.VN2, vo)
         if not os.path.exists(path):
-            missing.append((nid, k, vo, pg['tx'][:60]))
+            missing.append((nid, k, vo, tx[:60]))
             continue
         m = man.get(vo) or {}
-        txt = m.get('text')
-        if not txt:
-            notext.append((nid, k, vo, pg['tx'][:60], m.get('voice')))
+        got = m.get('text')
+        if not got:
+            notext.append((nid, k, vo, tx[:60], m.get('voice')))
             continue
-        a, b = norm(txt), norm(pg['tx'])
-        if a != b:
-            diff.append((nid, k, vo, pg['tx'], txt))
+        if U.norm(got) != U.norm(tx):
+            diff.append((nid, k, vo, tx, got))
         else:
             ok += 1
-    print('страниц с vo: %d | совпало: %d | нет файла: %d | нет текста в манифесте: %d | РАСХОЖДЕНИЙ: %d'
-          % (len(pages), ok, len(missing), len(notext), len(diff)))
+    print('сегментов с vo: %d | совпало: %d | нет файла: %d | нет текста в манифесте: %d | РАСХОЖДЕНИЙ: %d'
+          % (len(segs), ok, len(missing), len(notext), len(diff)))
     if missing:
         print('\n-- нет файла --')
         for r in missing:
@@ -77,8 +49,7 @@ def main():
             print('     сейчас : %s' % cur)
             print('     озвучено: %s' % old)
     # дубли: один и тот же файл на нескольких страницах
-    from collections import Counter
-    c = Counter(pg['vo'] for _, _, pg in pages)
+    c = Counter(vo for _, _, vo, _, _ in segs)
     dup = {v: n for v, n in c.items() if n > 1}
     if dup:
         print('\n-- один файл на несколько страниц --')

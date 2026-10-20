@@ -230,6 +230,10 @@ SEG9 = [p9[:cut], p9[cut:cut2], p9[cut2:cut3], p9[cut3:cut4], p9[cut4:]]
 
 SENT = re.compile(r'(?<=[.!?…])\s+(?=[А-ЯA-Z«—])')
 STUB = 15          # реплика короче — «обрывок»: склеивается с авторской вставкой
+# Версия озвучки: попадает в адрес mp3 (?v=N). Поднимать при любой переозвучке.
+# Без неё браузер и GitHub Pages отдают старый файл из кеша (предзагрузка идёт с
+# force-cache) — так Иван слышал уже переозвученную страницу старым голосом.
+VO_VER = 2
 
 
 def segments(par):
@@ -266,16 +270,18 @@ def segments(par):
         if seg:
             out.append(('speech' if k % 2 == 0 else 'narr', seg))
     # ОБРЫВОК РЕПЛИКИ («Спасибо,» / «Простите,») склеиваем с идущей следом
-    # авторской вставкой в ОДНУ страницу закадра: «— Спасибо, — от улыбки…».
-    # Иначе получались страницы из одного слова и лишний клик (решение Ивана
-    # 2026-10-20). Длинную реплику не трогаем — она остаётся голосом персонажа.
+    # авторской вставкой в ОДНУ страницу: «— Спасибо, — от улыбки…».
+    # Голоса при этом РАЗНЫЕ (реплика — персонаж, вставка — закадр), поэтому
+    # страница помечается kind='mix' и получает ДВА аудиофайла.
+    # Иван 2026-10-21: «спасибо — Екатерина, от улыбки… — автор, а тут всё одним
+    # мужским голосом».
     merged = []
     i = 0
     while i < len(out):
         kind, tx = out[i]
         if (kind == 'speech' and len(tx) <= STUB and i + 1 < len(out)
                 and out[i + 1][0] == 'narr'):
-            merged.append(('narr', '— %s — %s' % (tx, out[i + 1][1])))
+            merged.append(('mix', [(kind, tx), (out[i + 1][0], out[i + 1][1])]))
             i += 2
             continue
         merged.append((kind, tx))
@@ -285,9 +291,12 @@ def segments(par):
 
 def pages_of(segs, maxn=2):
     """Сегменты -> страницы по 1-2 предложения, НИКОГДА не смешивая
-    реплику и авторский текст в одной странице."""
+    реплику и авторский текст в одной странице (кроме склеенных 'mix')."""
     out = []
     for kind, tx in segs:
+        if kind == 'mix':
+            out.append(('mix', tx))       # список (kind, текст) — два голоса на страницу
+            continue
         cur = []
         for s in [x.strip() for x in SENT.split(tx) if x.strip()]:
             cur.append(s)
@@ -381,6 +390,18 @@ raw = []
 for n in sorted(reception_par):
     who = SPEAK.get(n, '')
     for kind, p in pages_of(segments(reception_par[n]), 2):
+        if kind == 'mix':
+            # склеенная страница: реплика + авторская вставка, у каждого сегмента свой голос
+            idx = len(raw)
+            vos, parts, vwho = [], [], []
+            for j, (k, t) in enumerate(p):
+                t = re.sub(r'(?<=[а-яё])\.(?=[А-ЯЁ])', '. ', t)
+                vos.append('audio/vo/rec_%02d%s.mp3' % (idx, '' if j == 0 else 'b'))
+                parts.append(('— ' + t) if k == 'speech' else t)
+                vwho.append(who if (k == 'speech' and who) else 'narr')
+            raw.append({'tx': ' — '.join(parts), 'vo': vos,
+                        'vtx': parts, 'vwho': vwho})
+            continue
         tx = p
         # реплика, продолжающаяся после авторской вставки, начинается со строчной —
         # ставим тире, иначе страница выглядит обрывком («я не могу принять…»)
@@ -435,7 +456,7 @@ for i, pg in enumerate(raw):
 cut = anchor_index('Сегодня первыми кандидатами')
 flash, present = raw[:cut], raw[cut:]
 nodes.append({'t': 'scene', 'id': 'starik', 'bg': 'img/bg/cabinet' + CLIENT_EXT,
-              'music': 'reception', 'pages': flash})
+              'music': 'reception', 'trans': 'fade', 'pages': flash})
 nodes.append({'t': 'scene', 'id': 'reception', 'bg': 'img/bg/reception' + CLIENT_EXT,
               'music': 'reception', 'pages': present})
 
@@ -466,6 +487,7 @@ data = {
     'episode': 'Эпизод 1 · «Пролог. Приёмная комиссия»',
     'byline': 'по рассказу Александра «Котобус» Горбова',
     'credits': CREDITS,
+    'voVer': VO_VER,
     'music': {'prolog': '../assets/audio/sketch/prolog_bed_soft_0.mp3',
               'reception': '../assets/audio/sketch/vn_reception_soft_0.mp3'},
     'chars': CHARS_AVAIL,

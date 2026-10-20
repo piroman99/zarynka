@@ -177,6 +177,23 @@ button:active{transform:translateY(1px)}
 }
 #brk.on{opacity:1; transition-duration:.2s}
 
+/* Долгий переход (узел trans:"fade"): затемнение → лого → осветление.
+   Темп задаёт JS (sceneTrans), CSS держит только длительность заливки. */
+#trans{
+  position:absolute; inset:0; z-index:13; pointer-events:none;
+  background:#07080c; opacity:0; transition:opacity .55s ease;
+  display:grid; place-items:center;
+}
+#trans.on{opacity:1}
+#trans .tlogo{
+  width:clamp(96px,18vmin,220px); height:auto; opacity:0;
+  transform:scale(.94);
+  transition:opacity .45s ease, transform 1.5s ease;
+  filter:drop-shadow(0 0 26px rgba(255,214,150,.20));
+}
+#trans .tlogo.on{opacity:.92; transform:scale(1)}
+body.nofx #trans, body.nofx #trans .tlogo{transition:none}
+
 /* тулбар тумблеров */
 #tools{position:absolute; top:2.6%; right:3.4%; z-index:40; display:flex; gap:.5em}
 .tg{

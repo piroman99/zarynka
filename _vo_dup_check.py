@@ -20,13 +20,13 @@ def norm(t):
 
 src = open(os.path.join(VN2, 'content.js'), encoding='utf-8').read()
 content = json.loads(src[src.index('{'):src.rindex('}') + 1])
+import _vo_util as U
+segs = U.segments(content)
 
-# 1) повторы текста
+# 1) повторы текста (по СЕГМЕНТАМ, вкл. реплики в склеенных страницах)
 seen = defaultdict(list)
-for n in content['nodes']:
-    nid = n.get('id') or n.get('t')
-    for k, pg in enumerate(n.get('pages') or []):
-        seen[norm(pg['tx'])].append('%s[%d]' % (nid, k))
+for nid, k, vo, tx, who in segs:
+    seen[norm(tx)].append('%s[%d]' % (nid, k))
 dups = {t: loc for t, loc in seen.items() if len(loc) > 1}
 print('== повторяющийся текст страниц: %d' % len(dups))
 for t, loc in dups.items():
@@ -44,7 +44,5 @@ for k, v in same.items():
 
 # 3) страницы в порядке показа
 print('\n== порядок страниц ==')
-for n in content['nodes']:
-    nid = n.get('id') or n.get('t')
-    for k, pg in enumerate(n.get('pages') or []):
-        print('%s[%d] vo=%s who=%s | %s' % (nid, k, pg.get('vo', '-'), pg.get('who', '-'), pg['tx'][:70]))
+for nid, k, vo, tx, who in segs:
+    print('%s[%d] vo=%s who=%s | %s' % (nid, k, vo, who, tx[:70]))

@@ -32,6 +32,11 @@ MANIFEST = os.path.join(OUTDIR, '_voices.json')
 CAP_RUB = 40.0
 DRY = '--dry' in sys.argv
 NO_REUSE = '--no-reuse' in sys.argv
+# --force=rec_22,rec_23 — переозвучить указанные файлы, даже если текст/голос не менялись
+FORCE = set()
+for a in sys.argv:
+    if a.startswith('--force='):
+        FORCE = set(x.strip() for x in a.split('=', 1)[1].split(',') if x.strip())
 
 NARR_STYLE = (
     "Спокойный, зрелый мужской закадровый голос. Документальная кинохроника: "
@@ -70,9 +75,21 @@ if os.path.exists(MANIFEST):
 
 
 def norm(tx):
-    """Текст страницы в том виде, в каком он уходит в TTS (для сравнения и кэша)."""
+    """Текст сегмента в том виде, в каком он уходит в TTS (для сравнения и кэша)."""
     t = re.sub(r'^[\u2014\u2013-]+\s*', '', tx.strip())
+    t = re.sub(r'[,;:]+$', '', t)          # «Спасибо,» → «Спасибо» (иначе TTS тянет паузу)
     return re.sub(r'\s+', ' ', t).strip()
+
+def segs_of(pg):
+    """Страница -> [(файл, текст, кто)]. У склеенной страницы ДВА сегмента
+    («Спасибо» — Екатерина, «от улыбки…» — закадр), у обычной — один."""
+    vo = pg.get('vo')
+    if not vo:
+        return []
+    vos = [vo] if isinstance(vo, str) else list(vo)
+    vtx = pg.get('vtx') or [pg['tx']] * len(vos)
+    vwho = pg.get('vwho') or [pg.get('who') or 'narr'] * len(vos)
+    return [(vos[i], vtx[i], (vwho[i] or 'narr')) for i in range(len(vos))]
 
 
 # --- переиспользование уже оплаченной озвучки -------------------------------
@@ -88,54 +105,73 @@ def git_blob(rel):
 
 
 REUSE = {}
+OLD_MAN = {}
 try:
     old = subprocess.run(['git', 'show', 'HEAD:vn2/content.js'], cwd=HERE,
                          capture_output=True, text=True).stdout
+    omraw = subprocess.run(['git', 'show', 'HEAD:vn2/audio/vo/_voices.json'], cwd=HERE,
+                           capture_output=True, text=True).stdout
+    if omraw:
+        OLD_MAN = json.loads(omraw)
     if old:
         oD = json.loads(old[old.index('=') + 1:].strip().rstrip(';'))
         for ond in oD['nodes']:
             for opg in ond.get('pages', []):
-                ovo = opg.get('vo')
-                if not ovo:
-                    continue
-                ok = opg.get('who') or 'narr'
-                if ok not in VOICES:
-                    ok = 'narr'
-                REUSE[(ok, norm(opg['tx']))] = ovo
+                for ovo, otx, ok in segs_of(opg):
+                    if ok not in VOICES:
+                        ok = 'narr'
+                    REUSE[(ok, norm(otx))] = ovo
 except Exception as e:
     print('reuse: пропущено (%s)' % e)
 
+# СТРАХОВКА (баг 2026-10-21): копировать файл можно только если манифест HEAD
+# описывает у источника ТОТ ЖЕ текст и голос. Без проверки переиспользование
+# копировало чужой файл (путь «правильный», содержимое — нет), и страница
+# Екатерины звучала мужским голосом.
+def reuse_ok(src_vo, key, tx):
+    om = OLD_MAN.get(src_vo) or {}
+    if norm(om.get('text') or '') != tx:
+        return False, 'источник %s записан с другим текстом' % os.path.basename(src_vo)
+    if (om.get('voice') or 'narr') != key:
+        return False, 'источник %s — голос %s' % (os.path.basename(src_vo), om.get('voice'))
+    return True, ''
+
 todo, done, reused = [], [], 0
+skipped = []
 for pg in nd['pages']:
-    vo = pg.get('vo')
-    if not vo:
-        continue
-    key = pg.get('who') or 'narr'
-    if key not in VOICES:
-        key = 'narr'
-    name = os.path.basename(vo)[:-4]
-    dst = os.path.join(OUTDIR, name + '.mp3')
-    tx = norm(pg['tx'])
-    rec = man.get(vo, {})
-    if (rec.get('voice') == key and rec.get('text') == tx
-            and not rec.get('stale_reason')
-            and os.path.exists(dst) and os.path.getsize(dst) > 2000):
-        done.append(name)
-        continue
-    # тот же голос + тот же текст уже озвучен в предыдущей сборке → копируем файл
-    # (из git-блоба HEAD, а НЕ из рабочего дерева — иначе каскад копий)
-    src_vo = None if NO_REUSE else REUSE.get((key, tx))
-    if src_vo:
-        rel = 'vn2/audio/vo/' + os.path.basename(src_vo)[:-4] + '.mp3'
-        blob = git_blob(rel)
-        if blob and len(blob) > 2000:
-            with open(dst, 'wb') as fo:
-                fo.write(blob)
-            man[vo] = {'voice': key, 'text': tx, 'chars': len(tx), 'price': 0,
-                       'reused_from': os.path.basename(src_vo)}
-            reused += 1
+    for vo, stx, skey in segs_of(pg):
+        key = skey if skey in VOICES else 'narr'
+        name = os.path.basename(vo)[:-4]
+        dst = os.path.join(OUTDIR, name + '.mp3')
+        tx = norm(stx)
+        rec = man.get(vo, {})
+        if name in FORCE:
+            todo.append((vo, name, key, stx.strip(), tx))
             continue
-    todo.append((vo, name, key, pg['tx'].strip(), tx))
+        if (rec.get('voice') == key and rec.get('text') == tx
+                and not rec.get('stale_reason')
+                and os.path.exists(dst) and os.path.getsize(dst) > 2000):
+            done.append(name)
+            continue
+        # тот же голос + тот же текст уже озвучен в предыдущей сборке → копируем файл
+        # (из git-блоба HEAD, а НЕ из рабочего дерева — иначе каскад копий)
+        src_vo = None if NO_REUSE else REUSE.get((key, tx))
+        if src_vo:
+            ok, why = reuse_ok(src_vo, key, tx)
+            if not ok:
+                skipped.append('%s: %s' % (name, why))
+                src_vo = None
+        if src_vo:
+            rel = 'vn2/audio/vo/' + os.path.basename(src_vo)[:-4] + '.mp3'
+            blob = git_blob(rel)
+            if blob and len(blob) > 2000:
+                with open(dst, 'wb') as fo:
+                    fo.write(blob)
+                man[vo] = {'voice': key, 'text': tx, 'chars': len(tx), 'price': 0,
+                           'reused_from': os.path.basename(src_vo)}
+                reused += 1
+                continue
+        todo.append((vo, name, key, stx.strip(), tx))
 
 chars = {}
 for _, _, key, _, tx in todo:
@@ -143,6 +179,8 @@ for _, _, key, _, tx in todo:
 cost = sum(len(tx) * VOICES[key][2] / 1000 for _, _, key, _, tx in todo)
 print('страниц: %d, к переозвучке: %d, уже в нужном голосе: %d, переиспользовано: %d'
       % (len(nd['pages']), len(todo), len(done), reused))
+for s in skipped:
+    print('  переиспользование отклонено — ' + s)
 for k, n in sorted(chars.items(), key=lambda x: -x[1]):
     print('  %-10s %5d зн.  ~%.2f ₽  (%s)'
           % (k, n, n * VOICES[k][2] / 1000, VOICES[k][0]))

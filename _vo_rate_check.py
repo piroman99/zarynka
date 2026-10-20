@@ -26,20 +26,18 @@ def dur(path):
 
 src = open(os.path.join(VN2, 'content.js'), encoding='utf-8').read()
 content = json.loads(src[src.index('{'):src.rindex('}') + 1])
+
+import _vo_util as U
+segs = U.segments(content)
 man = json.load(open(os.path.join(VO, '_voices.json'), encoding='utf-8'))
 
 rows = []
-for n in content['nodes']:
-    nid = n.get('id') or n.get('t')
-    for k, pg in enumerate(n.get('pages') or []):
-        vo = pg.get('vo')
-        if not vo:
-            continue
-        p = os.path.join(VN2, vo)
-        d = dur(p)
-        n_ch = len(pg['tx'])
-        rate = n_ch / d if d else 0
-        rows.append((nid, k, vo, d, n_ch, rate, pg['tx'][:50]))
+for nid, k, vo, tx, who in segs:
+    p = os.path.join(VN2, vo)
+    d = dur(p)
+    n_ch = len(tx)
+    rate = n_ch / d if d else 0
+    rows.append((nid, k, vo, d, n_ch, rate, tx[:50]))
 
 print('%-12s %3s %-22s %7s %5s %6s' % ('узел', '#', 'файл', 'сек', 'зн', 'зн/с'))
 bad = []
