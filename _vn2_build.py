@@ -203,14 +203,53 @@ def char_manifest():
 CHARS_AVAIL = char_manifest()
 
 # ---- 3) лого/иконки -----------------------------------------------------
-logo = Image.open(os.path.join(GEN, 'logo_b_0.jpg')).convert('RGB')
-side = min(logo.size)
-logo = logo.crop(((logo.width - side) // 2, (logo.height - side) // 2,
-                  (logo.width + side) // 2, (logo.height + side) // 2))
-logo.resize((512, 512), Image.LANCZOS).save(os.path.join(IMG, 'logo.png'))
+# Лого = КРУГ, а не квадрат: у исходника (logo_b_0.jpg) диск на белом фоне, и на
+# тёмном кадре перехода этот белый квадрат светился углами (Иван 2026-10-21:
+# «лого в квадрате, а мы договаривались либо в круге, либо в пятиугольнике»).
+# Теперь: обрезаем по диску и маскируем всё вне круга в прозрачность (с мягким краем),
+# чтобы лого читалось круглым на любом фоне. Иконки для PWA/иконки «на Домой»
+# остаются НЕпрозрачными квадратами (iOS/Android сами скругляют).
+def _circle_logo(im, size, feather=1.2):
+    a = np.asarray(im.convert('RGB'), dtype=np.int16)
+    # диск = не-белые пиксели (белый фон генератора); порог с запасом на полутон
+    mask = (a.max(axis=2) < 245) | (a.min(axis=2) < 235)
+    ys, xs = np.nonzero(mask)
+    x0, x1, y0, y1 = xs.min(), xs.max(), ys.min(), ys.max()
+    cx, cy = (x0 + x1) / 2.0, (y0 + y1) / 2.0
+    r = max(x1 - x0, y1 - y0) / 2.0 + 2          # чуть воздуха по краю
+    box = (int(cx - r), int(cy - r), int(cx + r), int(cy + r))
+    disc = im.convert('RGB').crop(box).resize((size, size), Image.LANCZOS)
+    out = disc.convert('RGBA')
+    yy, xx = np.mgrid[0:size, 0:size]
+    d = np.hypot(xx - (size - 1) / 2.0, yy - (size - 1) / 2.0)
+    rr = size / 2.0 - 1
+    alpha = np.clip((rr - d) / feather + 0.5, 0, 1) * 255
+    al = np.asarray(out).copy()
+    al[:, :, 3] = alpha.astype(np.uint8)
+    return Image.fromarray(al, 'RGBA'), disc
+
+
+logo_src = Image.open(os.path.join(GEN, 'logo_b_0.jpg'))
+logo_round, logo_sq = _circle_logo(logo_src, 512)
+logo_round.save(os.path.join(IMG, 'logo.png'))          # прозрачный круг (титул)
 for sz in (192, 512):
-    logo.resize((sz, sz), Image.LANCZOS).save(os.path.join(VN2, 'icons', f'icon-{sz}.png'))
-print('logo/icons OK')
+    logo_sq.resize((sz, sz), Image.LANCZOS).save(os.path.join(VN2, 'icons', f'icon-{sz}.png'))
+
+# Значок для перехода между сценами — отдельный файл, чтобы форма выбиралась ОДНОЙ
+# строкой и не трогала титул:  TRANS_EMBLEM=penta python3 _vn2_build.py
+#   circle — тот же диск, что на титуле (сейчас в сборке)
+#   penta  — золотой пятиугольник-жетон из пролога (assets/gen/znachek_k1.png)
+TRANS_EMBLEM = os.environ.get('TRANS_EMBLEM', 'circle').strip().lower()
+if TRANS_EMBLEM == 'penta':
+    emb = Image.open(os.path.join(GEN, 'znachek_k1.png')).convert('RGBA')
+    emb = emb.crop(emb.split()[3].getbbox())          # обрезать по непрозрачному
+    side = max(emb.size)
+    sq = Image.new('RGBA', (side, side), (0, 0, 0, 0))
+    sq.paste(emb, ((side - emb.width) // 2, (side - emb.height) // 2), emb)
+    sq.resize((512, 512), Image.LANCZOS).save(os.path.join(IMG, 'trans_logo.png'))
+else:
+    logo_round.save(os.path.join(IMG, 'trans_logo.png'))
+print('logo/icons OK (лого — круг с прозрачным фоном, переход: %s)' % TRANS_EMBLEM)
 
 # ---- 4) текст -----------------------------------------------------------
 lines = open(STORY, encoding='utf-8').read().split('\n')

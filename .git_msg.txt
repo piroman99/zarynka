@@ -1,0 +1,13 @@
+vn2: round emblem in the scene transition (circle, no square corners)
+
+- logo_b_0.jpg is a disc on a white background; the plain square crop glowed with
+  white corners on the dark transition frame, so the emblem read as a square
+- _circle_logo() bboxes the disc and masks everything outside the circle to
+  transparency (1.2 px feather): img/logo.png (title) and img/trans_logo.png
+  (transition) are round RGBA now, PWA icons stay opaque squares
+- the transition emblem is a separate file and switches with one command:
+  TRANS_EMBLEM=penta python3 _vn2_build.py (gold pentagon badge from the prologue),
+  default circle; A/B sheet review_116_trans_logo_ab.png
+- emblem src carries ?v=D.voVer so Pages cannot serve the old shape from cache
+- checks: _trans_shape.py (bbox corners 0.04 vs ~0.8 for a square),
+  _vn2_vo_break.py 13/13, _vn2_restart.py 3/3 (154 clicks)
