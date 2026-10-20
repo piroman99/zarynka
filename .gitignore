@@ -38,3 +38,6 @@ assets/review/_pl_*.png
 assets/review/_live_*.png
 assets/review/_webp_*.png
 assets/review/_ref_*.png
+
+# Склейка озвучки для проверки (собирается _vn2_script.py за секунды)
+out/ep1_vo_full.mp3
