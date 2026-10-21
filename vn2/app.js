@@ -293,6 +293,13 @@
   // авторскую вставку — закадр. Тогда pg.vo = [файл, файл], pg.vwho = [кто, кто].
   // Играем их подряд одним потоком.
   let voQ = [];
+  // Отложенный старт голоса на длинном переходе: картинка гаснет, показывается жетон,
+  // и только когда снова светло — начинается речь новой сцены. Без этого голос кабинета
+  // читал ПОД тёмным экраном и паузы-тишины не было
+  // (Иван 2026-10-21: «пауза между прологом и кабинетом не тормозит голос, почти нет тишины»).
+  let voDelay = 0;        // мс: сколько ждать (ставит sceneTrans, съедает playVoice)
+  let voTimer = null;     // таймер отложенного старта
+  let voWaitMs = 0;       // сколько ещё ждать — чтобы автолист не уехал вперёд
   // Версия озвучки в адресе (?v=N): иначе браузер и GitHub Pages отдают старый
   // mp3 из кеша даже после Ctrl+F5 — force-cache в предзагрузке перезагрузка не отменяет.
   function voUrl(u) { return D.voVer ? u + "?v=" + D.voVer : u; }
@@ -302,15 +309,29 @@
     else if (nd && nd.vo) l = [nd.vo];
     return l.map(voUrl);
   }
-  function playVoice(pg, nd) {
+  function stopVoice() {
+    clearTimeout(voTimer); voTimer = null; voWaitMs = 0; voDelay = 0;
     voice.pause();
     voice.removeAttribute("src");
     curVo = "";
     voQ = [];
+  }
+  function playVoice(pg, nd) {
+    const d = voDelay;                    // забрать ДО stopVoice: он обнуляет задержку
+    stopVoice();
     if (!voiceOn) return;
     voQ = voList(pg, nd);                 // страница → узел (совместимость)
     if (!voQ.length) return;
     curVo = voQ.join("|");
+    if (d > 0) {
+      voWaitMs = d;
+      voTimer = setTimeout(() => {
+        voTimer = null; voWaitMs = 0;
+        playVoNext();
+        if (autoOn && typingDone()) scheduleAuto();   // автолист ждал голоса
+      }, d);
+      return;
+    }
     playVoNext();
   }
   function playVoNext() {
@@ -382,33 +403,52 @@
   // затемнением, а потом осветлением; может даже лого показать».
   const TR = { dark: 520, logoIn: 420, hold: 620, logoOut: 300, light: 720 };
   const TR_DUCK = 0.32;              // музыка в темноте перехода — тише втрое
-  let transT = [];
+  const TR_SILENCE = 260;            // и ещё немного тишины после того, как стало светло
+  let transT = [], transActive = false;
+  // погасить переход сейчас: снять затемнение/жетон, вернуть музыку
+  function endTrans(quick) {
+    transT.forEach(clearTimeout); transT = [];
+    transActive = false;
+    if (transEl) transEl.classList.remove("on");
+    if (transLogo) transLogo.classList.remove("on");
+    if (duck !== 1) duckTo(1, quick ? 260 : 760);
+  }
   function sceneTrans(cb) {
     if (!transEl) { cb(); return; }
     brkCb = cb;
     clearTimeout(brkT);
     transT.forEach(clearTimeout); transT = [];
+    transActive = true;
     const at = (ms, fn) => transT.push(setTimeout(fn, ms));
+    const total = TR.dark + 80 + TR.logoIn + TR.hold + TR.logoOut + TR.light;
     duckTo(TR_DUCK, 340);                              // музыка уходит вместе с кадром
+    stopVoice();                                       // и голос тоже — вот она, тишина
     transEl.classList.add("on");                       // затемнение
-    at(TR.dark, () => { const f = brkCb; brkCb = null; if (f) f(); });
+    at(TR.dark, () => {
+      // сцена меняется в темноте, но ГОЛОС молчит до конца осветления
+      voDelay = total - TR.dark + TR_SILENCE;
+      const f = brkCb; brkCb = null; if (f) f();
+    });
     at(TR.dark + 80, () => transLogo && transLogo.classList.add("on"));
     at(TR.dark + 80 + TR.logoIn + TR.hold, () => transLogo && transLogo.classList.remove("on"));
-    at(TR.dark + 80 + TR.logoIn + TR.hold + TR.logoOut,
-       () => { transEl.classList.remove("on"); duckTo(1, 760); });   // свет и музыка вместе
+    at(TR.dark + 80 + TR.logoIn + TR.hold + TR.logoOut, () => endTrans(false));
   }
-  // клик во время перебивки = сразу пройти её (иначе на стыке сцен теряются нажатия)
+  // клик во время перебивки = сразу пройти её (иначе на стыке сцен теряются нажатия).
+  // Работает и когда сцена уже сменилась в темноте — тогда сразу догоняем отложенный голос.
   function finishBreak() {
-    if (!brkCb) return;
+    if (!brkCb && !transActive) return;
     const f = brkCb; brkCb = null;
     clearTimeout(brkT);
-    transT.forEach(clearTimeout); transT = [];
     if (brk) brk.classList.remove("on");
-    if (transEl) transEl.classList.remove("on");
-    if (transLogo) transLogo.classList.remove("on");
+    endTrans(true);
     inBreak = false;
-    if (duck !== 1) duckTo(1, 420);      // пропустили переход — сразу вернуть музыку
-    f();
+    voDelay = 0;                         // голос не ждать: пользователь уже прошёл
+    if (f) { f(); return; }
+    if (voWaitMs > 0) {                  // сцена уже стоит, ждём только голос
+      clearTimeout(voTimer); voTimer = null; voWaitMs = 0;
+      playVoNext();
+      if (autoOn && typingDone()) scheduleAuto();
+    }
   }
 
   function enterPos(i, skipBreak) {
@@ -450,6 +490,8 @@
   function scheduleAuto() {
     clearTimeout(autoTimer);
     if (!autoOn || paused || cinemaOpen) return;
+    // голос новой сцены ещё ждёт конца перехода — не считаем время, стартуем после него
+    if (voWaitMs > 0) return;
     const s = SCENES[pos]; if (!s) return;
     const nd = NODES[s.n], pg = nd.pages[s.p];
     const t = playToken;
@@ -530,7 +572,7 @@
     try { znak.onended = null; znak.pause(); } catch (err) {}
     showHud(false); hideScreens();
     setBg("");
-    music.pause(); voice.pause();
+    music.pause(); stopVoice();
     musicKey = null;                 // иначе setMusic() на рестарте решит «уже играет»
     title.classList.add("show");
     autoOn = false; syncToggles();

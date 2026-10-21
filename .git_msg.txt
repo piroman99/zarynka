@@ -1,0 +1,18 @@
+vn2: silence through the transition — the new scene's voice waits for the light
+
+- enterPos used to start the page voice the moment the scene swapped in the dark
+  (0.52 s into the fade), so the cabinet narration read UNDER the badge and there
+  was almost no pause (Ivan: «пауза между прологом и кабинетом не тормозит голос,
+  почти нет тишины»)
+- sceneTrans now stops the voice up front and defers the new one: playVoice turns
+  voDelay into a timer, so speech starts when the picture is light again plus
+  TR_SILENCE (260 ms) — about 2.7 s of real silence from the click
+- playVoice reads voDelay BEFORE stopVoice (which zeroes it); scheduleAuto returns
+  early while voWaitMs > 0 and is re-armed by the deferred start, so auto mode
+  never runs ahead of the voice
+- a click mid-transition now also works after the scene has already swapped in the
+  dark: transActive/endTrans end the fade and start the deferred voice at once
+  (before, finishBreak silently did nothing past the 520 ms mark)
+- new check _trans_voice_gap.py: voice starts after the lightening (2.68 s vs 1.70),
+  click-skip, and auto mode — 10/10 green; _vn2_vo_break.py 14/14,
+  _vn2_restart.py 3/3 (154 clicks)
