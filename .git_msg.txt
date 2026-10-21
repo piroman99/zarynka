@@ -1,0 +1,12 @@
+vn2: stretch the scene transition to 4 seconds of real silence
+
+- Ivan: «слишком короткая пауза. Сделай общую длину 4 секунды»
+- TR phases rebalanced to 3850 ms of visible transition (dark 750, gap 80,
+  logoIn 580, hold 920, logoOut 420, light 1100), TR_TOTAL = 4000 is the silence
+  from the click to the first word, TR_SILENCE = TR_TOTAL - TR_VIS = 150; the
+  total is now derived from one number instead of being hand-tuned per phase
+- measured 4.03 s from click to narration (was 2.68 s), voice still starts only
+  after the picture is light again
+- _trans_voice_gap.py now asserts the 3.85…4.25 s window and measures from the
+  click that triggers the transition, not from the first poll that sees it;
+  10/10 green, _vn2_vo_break.py 14/14, _vn2_restart.py 3/3 (154 clicks)

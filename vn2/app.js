@@ -398,12 +398,17 @@
     }, PACE * 220);
   }
   // Долгий переход «в кабинет Старика» (узел trans:"fade"):
-  // затемнение → лого в темноте → осветление. Дольше обычной перебивки.
+  // затемнение → жетон в темноте → осветление → и только потом речь.
   // Иван 2026-10-21: «переход с проходной на кабинет должен быть чуть подольше,
-  // затемнением, а потом осветлением; может даже лого показать».
-  const TR = { dark: 520, logoIn: 420, hold: 620, logoOut: 300, light: 720 };
+  // затемнением, а потом осветлением; может даже лого показать» → потом «слишком
+  // короткая пауза, сделай общую длину 4 секунды».
+  // Тайминги заданы так, чтобы СУММА (включая тишину после света) была ровно 4000 мс:
+  // 750 + 80 + 580 + 920 + 420 + 1100 = 3850 видимая часть, + 150 тишины = 4000.
+  const TR = { dark: 750, gap: 80, logoIn: 580, hold: 920, logoOut: 420, light: 1100 };
   const TR_DUCK = 0.32;              // музыка в темноте перехода — тише втрое
-  const TR_SILENCE = 260;            // и ещё немного тишины после того, как стало светло
+  const TR_VIS = TR.dark + TR.gap + TR.logoIn + TR.hold + TR.logoOut + TR.light;
+  const TR_TOTAL = 4000;             // полная тишина от клика до первого слова
+  const TR_SILENCE = TR_TOTAL - TR_VIS;   // тишина после того, как стало светло
   let transT = [], transActive = false;
   // погасить переход сейчас: снять затемнение/жетон, вернуть музыку
   function endTrans(quick) {
@@ -420,18 +425,19 @@
     transT.forEach(clearTimeout); transT = [];
     transActive = true;
     const at = (ms, fn) => transT.push(setTimeout(fn, ms));
-    const total = TR.dark + 80 + TR.logoIn + TR.hold + TR.logoOut + TR.light;
     duckTo(TR_DUCK, 340);                              // музыка уходит вместе с кадром
     stopVoice();                                       // и голос тоже — вот она, тишина
     transEl.classList.add("on");                       // затемнение
     at(TR.dark, () => {
-      // сцена меняется в темноте, но ГОЛОС молчит до конца осветления
-      voDelay = total - TR.dark + TR_SILENCE;
+      // сцена меняется в темноте, но ГОЛОС молчит до конца перехода:
+      // речь стартует через (остаток видимой части + хвост тишины) = TR_TOTAL - TR.dark
+      voDelay = (TR_VIS - TR.dark) + TR_SILENCE;
       const f = brkCb; brkCb = null; if (f) f();
     });
-    at(TR.dark + 80, () => transLogo && transLogo.classList.add("on"));
-    at(TR.dark + 80 + TR.logoIn + TR.hold, () => transLogo && transLogo.classList.remove("on"));
-    at(TR.dark + 80 + TR.logoIn + TR.hold + TR.logoOut, () => endTrans(false));
+    at(TR.dark + TR.gap, () => transLogo && transLogo.classList.add("on"));
+    at(TR.dark + TR.gap + TR.logoIn + TR.hold,
+       () => transLogo && transLogo.classList.remove("on"));
+    at(TR.dark + TR.gap + TR.logoIn + TR.hold + TR.logoOut, () => endTrans(false));
   }
   // клик во время перебивки = сразу пройти её (иначе на стыке сцен теряются нажатия).
   // Работает и когда сцена уже сменилась в темноте — тогда сразу догоняем отложенный голос.

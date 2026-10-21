@@ -46,13 +46,18 @@ try:
            deviceScaleFactor=1, mobile=False)
     b.navigate(BASE + '?node=%d&preload=0' % NODE['s7'])
     time.sleep(1.5)
-    # дойти до последней страницы пролога: там голос уже звучит
+    # дойти до последней страницы пролога: там голос уже звучит.
+    # t0 = момент КЛИКА, который запустил переход (а не момент, когда мы его заметили).
+    t0 = None
     for _ in range(6):
+        tc = time.time()
         b.js("document.getElementById('stage').click()")
-        time.sleep(0.25)
+        time.sleep(0.2)
         if b.js("document.getElementById('trans').classList.contains('on')"):
+            t0 = tc
             break
-    t0 = time.time()
+    if t0 is None:
+        t0 = time.time()
     t_on = t_logo = t_off = t_voice = None
     while time.time() - t0 < 6.0:
         st = b.js("""(function(){
@@ -81,7 +86,8 @@ try:
     if t_voice is not None and t_off is not None:
         check('голос НЕ звучит под жетоном (старт после осветления)',
               t_voice >= t_off - 0.05, 'голос %.2f, светло %.2f' % (t_voice, t_off))
-        check('тишина на переходе не короче 1.5 с', t_voice >= 1.5,
+        # Иван 2026-10-21: «слишком короткая пауза, сделай общую длину 4 секунды»
+        check('тишина на переходе ≈4 с (3.85…4.25)', 3.85 <= t_voice <= 4.25,
               '%.2f с' % t_voice)
     check('js-ошибок нет', not b.errors(), b.errors())
 
