@@ -275,81 +275,13 @@ SEG9 = [p9[:cut], p9[cut:cut2], p9[cut2:cut3], p9[cut3:cut4], p9[cut4:]]
 
 SENT = re.compile(r'(?<=[.!?…])\s+(?=[А-ЯA-Z«—])')
 STUB = 15          # реплика короче — «обрывок»: склеивается с авторской вставкой
+# Разбор абзаца на сегменты и страницы — в общем модуле _text_seg.py:
+# тем же кодом пользуется подстрочник _story_cast.py (без запуска сборки).
+from _text_seg import segments, pages_of   # noqa: E402
 # Версия озвучки: попадает в адрес mp3 (?v=N). Поднимать при любой переозвучке.
 # Без неё браузер и GitHub Pages отдают старый файл из кеша (предзагрузка идёт с
 # force-cache) — так Иван слышал уже переозвученную страницу старым голосом.
 VO_VER = 2
-
-
-def segments(par):
-    """Абзац -> [('speech'|'narr', текст)].
-
-    Маркер диалога — «— » в начале абзаца или после , . ? ! … : ;
-    (тире ВНУТРИ фразы без знака перед ним — обычное тире, не маркер).
-    Авторская вставка ВНУТРИ реплики — ОТДЕЛЬНЫЙ сегмент (её читает закадр).
-    Старое правило «вставка на запятой = пауза внутри реплики» давало баг:
-    персонаж читал авторский текст, страница обрывалась на полуслове, а
-    следующая начиналась со строчной — «озвучка разъехалась с текстом».
-    Правильно: каждый сегмент — своя страница, голос по роли
-    (Иван, 2026-10-20: «озвучка разъехалась с текстом, повторы какие-то»).
-    """
-    starts = []
-    for m in re.finditer(r'—\s', par):
-        i = m.start()
-        if i == 0:
-            starts.append((i, m.end()))
-            continue
-        prev = par[:i].rstrip()
-        if prev and prev[-1] in ',.?!…:;':
-            starts.append((i, m.end()))
-    if not starts:
-        return [('narr', par.strip())]
-    out = []
-    if starts[0][0] > 0:
-        head = par[:starts[0][0]].strip()
-        if head:
-            out.append(('narr', head))
-    for k, (i, end) in enumerate(starts):
-        stop = starts[k + 1][0] if k + 1 < len(starts) else len(par)
-        seg = par[end:stop].strip()
-        if seg:
-            out.append(('speech' if k % 2 == 0 else 'narr', seg))
-    # ОБРЫВОК РЕПЛИКИ («Спасибо,» / «Простите,») склеиваем с идущей следом
-    # авторской вставкой в ОДНУ страницу: «— Спасибо, — от улыбки…».
-    # Голоса при этом РАЗНЫЕ (реплика — персонаж, вставка — закадр), поэтому
-    # страница помечается kind='mix' и получает ДВА аудиофайла.
-    # Иван 2026-10-21: «спасибо — Екатерина, от улыбки… — автор, а тут всё одним
-    # мужским голосом».
-    merged = []
-    i = 0
-    while i < len(out):
-        kind, tx = out[i]
-        if (kind == 'speech' and len(tx) <= STUB and i + 1 < len(out)
-                and out[i + 1][0] == 'narr'):
-            merged.append(('mix', [(kind, tx), (out[i + 1][0], out[i + 1][1])]))
-            i += 2
-            continue
-        merged.append((kind, tx))
-        i += 1
-    return merged
-
-
-def pages_of(segs, maxn=2):
-    """Сегменты -> страницы по 1-2 предложения, НИКОГДА не смешивая
-    реплику и авторский текст в одной странице (кроме склеенных 'mix')."""
-    out = []
-    for kind, tx in segs:
-        if kind == 'mix':
-            out.append(('mix', tx))       # список (kind, текст) — два голоса на страницу
-            continue
-        cur = []
-        for s in [x.strip() for x in SENT.split(tx) if x.strip()]:
-            cur.append(s)
-            if len(cur) >= maxn:
-                out.append((kind, ' '.join(cur))); cur = []
-        if cur:
-            out.append((kind, ' '.join(cur)))
-    return out
 
 
 def pages(text, maxn=2):
