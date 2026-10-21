@@ -1,0 +1,16 @@
+vn2: auto mode on by default, and the menu's «Авто» no longer skips the badge video
+
+- AUTO_DEFAULT = ?auto!=0: the episode now autoplays after a single «Начать» click;
+  ?auto=0 restores manual mode, goMenu resets to the same default
+- bug: the t-auto handler called scheduleAuto() without checking `started`. On the
+  title screen pos=0 and typingDone() is true, so the timer immediately called
+  next() -> enterPos(1): it jumped into S1 page 2 and swallowed the badge video
+  (Ivan: «если в меню нажать авто, сразу переключится на кадр с подворотней»).
+  Now the toggle arms the timer only when started, and scheduleAuto/next/prev all
+  return early before the start
+- documented why the title screen stays: a stock Chromium rejects voice.play() and
+  music.play() with NotAllowedError before any user gesture (_autoplay_probe.py),
+  so "start on page load without a title card" would run silent
+- new check _vn2_auto_menu.py 12/12 (title intact after «Авто», badge not skipped,
+  video plays after «Начать», then page 0 and auto-advance);
+  _vn2_restart.py 3/3 (154 clicks)

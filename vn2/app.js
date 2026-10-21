@@ -27,7 +27,10 @@
   let textOn = qp.get("text") !== "0";
   let voiceOn = qp.get("voice") !== "0";
   let musicOn = qp.get("music") !== "0";
-  let autoOn = qp.get("auto") === "1";
+  // Авто-режим включён ПО УМОЛЧАНИЮ (Иван 2026-10-21: «запускаться надо … авто сразу»);
+  // отключается тумблером или адресом ?auto=0.
+  const AUTO_DEFAULT = qp.get("auto") !== "0";
+  let autoOn = AUTO_DEFAULT;
 
   let autoTimer = null, playToken = 0;
   let paused = qp.get("pause") === "1";
@@ -495,7 +498,7 @@
   // ---------- авто-режим ----------
   function scheduleAuto() {
     clearTimeout(autoTimer);
-    if (!autoOn || paused || cinemaOpen) return;
+    if (!autoOn || paused || cinemaOpen || !started) return;
     // голос новой сцены ещё ждёт конца перехода — не считаем время, стартуем после него
     if (voWaitMs > 0) return;
     const s = SCENES[pos]; if (!s) return;
@@ -519,6 +522,7 @@
   // ---------- навигация ----------
   function next() {
     clearTimeout(autoTimer);
+    if (!started) return;                 // титул/меню: листать нечего
     if (inBreak) { finishBreak(); return; }
     if (!vlayer.hidden) { vskip.click(); return; }   // идёт интро-значок → пропустить
     if (paused) { paused = false; tyPaused = false; syncToggles(); }
@@ -532,6 +536,7 @@
   }
   function prev() {
     clearTimeout(autoTimer);
+    if (!started) return;
     if (inBreak) { finishBreak(); return; }
     if (cinemaOpen) return;
     if (!vlayer.hidden) return;
@@ -581,7 +586,7 @@
     music.pause(); stopVoice();
     musicKey = null;                 // иначе setMusic() на рестарте решит «уже играет»
     title.classList.add("show");
-    autoOn = false; syncToggles();
+    autoOn = AUTO_DEFAULT; syncToggles();
   }
 
   // ---------- титул / значок ----------
@@ -687,7 +692,9 @@
     autoOn = !autoOn;
     if (!autoOn) { paused = false; tyPaused = false; clearTimeout(autoTimer); }
     syncToggles();
-    if (autoOn && !paused && typingDone()) scheduleAuto();
+    // В МЕНЮ таймер не запускаем: иначе «Авто» на титуле сразу перелистывал
+    // новеллу и проглатывал видео с жетоном (баг, найден Иваном 2026-10-21).
+    if (autoOn && started && !paused && typingDone()) scheduleAuto();
   };
   $("t-pause").onclick = (e) => { e.stopPropagation(); togglePause(); };
 
