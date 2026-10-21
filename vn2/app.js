@@ -35,6 +35,9 @@
   let autoTimer = null, playToken = 0;
   let paused = qp.get("pause") === "1";
   let ty = null, tyPaused = false;
+  // Стартовый экран без титров (Иван 2026-10-21: «титры бы выключить по умолчанию»).
+  // Остаются логотип, «Начать» и полоска загрузки; ?titles=1 возвращает надписи.
+  if (qp.get("titles") !== "1") document.body.classList.add("notitles");
   // PACE = общий темп новеллы. 1.0 — как было, 0.8 = на 20% быстрее (решение Ивана 2026-10-19).
   // Можно переопределить из адреса: ?pace=0.9 — для сравнения на глаз.
   const PACE = (function () {
@@ -557,6 +560,7 @@
     endScr.classList.add("show");
     prevBtn.disabled = true;
     voice.pause();
+    wakeOff();                       // серия закончилась — экран может гаснуть
   }
   // Возврат в меню = сброс к «первому запуску». Без сброса started/starting
   // кнопка «Начать» после прохождения молчала (start() упирался в started=true),
@@ -564,6 +568,7 @@
   function goMenu() {
     clearTimeout(autoTimer);
     closeCredits();
+    wakeOff();
     clearTimeout(brkT); brkCb = null; inBreak = false;
     transT.forEach(clearTimeout); transT = [];
     if (brk) brk.classList.remove("on");
@@ -621,6 +626,8 @@
       started = true; starting = false; pendingGo = null;
       btn.textContent = "Начать";
       hideScreens();
+      tryFullscreen();                 // клик = жест: можно сразу во весь экран
+      wakeOn();                        // и экран больше не гаснет
       if (music.src && musicOn) music.play().catch(() => {});
       enterZnak(NODES[1]);
     };
@@ -839,6 +846,43 @@
   }
   const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
   function fsSync() { if (fsBtn) fsBtn.classList.toggle("on", !!fsEl()); }
+  // Фуллскрин ПО КНОПКЕ «Начать» (Иван 2026-10-21). Требует жеста пользователя — клик
+  // как раз он, так что можно сразу, без отдельного тумблера. Не трогаем iOS Safari:
+  // там фуллскрина для элемента нет (только для <video>), поэтому молча пропускаем.
+  function tryFullscreen() {
+    if (qp.get("fs") === "0" || INSTANT || fsEl()) return false;
+    const root = document.documentElement;
+    const req = root.requestFullscreen || root.webkitRequestFullscreen;
+    if (!req) return false;
+    fsTried++;
+    try {
+      const p = req.call(root);
+      if (p && p.catch) p.catch(() => {});
+      return true;
+    } catch (e) { return false; }
+  }
+  // Экран не гаснет во время чтения. Wake Lock API: Chrome/Edge (Android и десктоп),
+  // Safari 16.4+ (iOS 16.4+). Нужен HTTPS или localhost — на GitHub Pages это есть.
+  // Отключается адресом ?wake=0. После сворачивания вкладки браузер снимает лок
+  // сам, поэтому возвращаем его по visibilitychange.
+  const WAKE_OK = "wakeLock" in navigator && qp.get("wake") !== "0";
+  let wakeLock = null, wakeWant = false, fsTried = 0;
+  function wakeOn() {
+    wakeWant = true;
+    if (!WAKE_OK || wakeLock || document.visibilityState !== "visible") return;
+    navigator.wakeLock.request("screen").then((l) => {
+      wakeLock = l;
+      l.addEventListener("release", () => { wakeLock = null; });
+    }).catch(() => {});
+  }
+  function wakeOff() {
+    wakeWant = false;
+    try { if (wakeLock) wakeLock.release(); } catch (e) {}
+    wakeLock = null;
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && wakeWant) wakeOn();
+  });
   function toggleFs() {
     if (fsEl()) { (document.exitFullscreen || document.webkitExitFullscreen || function () {}).call(document); return; }
     const root = document.documentElement;
@@ -891,7 +935,10 @@
   window.__PL = { img: plImg, aud: plAud, vid: plVid, miss: plMiss,
                   queue: () => plQ.length, off: () => PRELOAD_OFF };
   window.__DBG = { get pos() { return pos; }, get node() { return curNode; },
-                   get typing() { return !!typing; } };
+                   get typing() { return !!typing; },
+                   get wake() { return { want: wakeWant, held: !!wakeLock, ok: WAKE_OK }; },
+                   get fs() { return !!fsEl(); },
+                   get fsTried() { return fsTried; } };
   if (SHOT) {                      // режим скриншота: сразу к нужному узлу
     started = true;
     const ni = parseInt(qp.get("node"), 10);

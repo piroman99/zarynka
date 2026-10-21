@@ -79,6 +79,12 @@ body{
    в портрете полоса всего ~56vw высотой, и кнопки (тизер) обрезались. */
 #title,#end,#credits{position:fixed}
 .title-inner{padding:5%}
+/* «Титры» на стартовом экране выключены по умолчанию (Иван 2026-10-21):
+   при запуске остаются только логотип, кнопка «Начать» и полоска загрузки.
+   Вернуть надписи: ?titles=1 в адресе. */
+body.notitles #tt, body.notitles #title .sub,
+body.notitles #title .ep, body.notitles #title .by{display:none}
+body.notitles .logo{width:min(30vmin,196px)}
 .logo{width:min(26vmin,168px); border-radius:50%;
   filter:drop-shadow(0 10px 30px rgba(220,38,38,.35))}
 h1{font-size:clamp(38px,7.2vmin,92px); letter-spacing:.14em; margin:.25em 0 .1em;

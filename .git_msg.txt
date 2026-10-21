@@ -1,0 +1,16 @@
+vn2: start screen without titles, fullscreen and wake lock on the «Начать» click
+
+- title screen shows only the logo, «Начать» and the loading bar by default
+  (body.notitles); the headline, «визуальная новелла», the episode line and the
+  byline are hidden, the logo is a bit larger; ?titles=1 restores the old look.
+  The screen itself stays — it is the gesture that unlocks audio
+- the click now also requests fullscreen (tryFullscreen) and a screen wake lock
+  (navigator.wakeLock), so on a phone the episode opens full screen and does not
+  dim while reading; the lock is re-acquired on visibilitychange and released in
+  enterEnd/goMenu. iOS Safari cannot fullscreen an element (only <video>), there
+  the installed PWA covers it. Switches: ?fs=0, ?wake=0
+- new check _vn2_start_mobile.py 17/17: titles hidden, ?titles=1 restores, wake
+  lock requested/held/released, fullscreen request attempted (headless Chromium
+  rejects it with "Permissions check failed", so __DBG.fsTried is asserted),
+  start still reaches the badge video; _vn2_auto_menu.py 12/12,
+  _vn2_restart.py 3/3 (154 clicks)
