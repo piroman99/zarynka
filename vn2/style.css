@@ -85,7 +85,10 @@ body{
 body.notitles #tt, body.notitles #title .sub,
 body.notitles #title .ep, body.notitles #title .by{display:none}
 body.notitles .logo{width:min(30vmin,196px)}
-.logo{width:min(26vmin,168px); border-radius:50%;
+/* Логотип — БЛОК по центру. Иначе, когда титры скрыты, <img> и <button> стоят
+   в одной строке (оба inline-уровня) и «Начать» уезжает вправо от логотипа
+   (баг, пойман Иваном 2026-10-21). */
+.logo{display:block; margin:0 auto; width:min(26vmin,168px); border-radius:50%;
   filter:drop-shadow(0 10px 30px rgba(220,38,38,.35))}
 h1{font-size:clamp(38px,7.2vmin,92px); letter-spacing:.14em; margin:.25em 0 .1em;
   font-weight:700; text-shadow:0 4px 24px rgba(0,0,0,.6)}
