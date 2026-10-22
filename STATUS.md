@@ -601,10 +601,15 @@ https://piroman99.github.io/zarynka/vn2/ (опубликованный `rebuild`
   Голос закадра в тизер НЕ взят — он ещё выбирается.
 - **`tg.py` научился:** `post --audio` (sendAudio с title/performer), `del <id>` (deleteMessage),
   `edit` для медиа-постов (падает в editMessageCaption).
-- ❗ **GitHub Pages выключен:** `https://piroman99.github.io/zaryanka/` и `/vn2/` отдают 404,
-  `api.github.com/repos/piroman99/zarynka/pages` → 404 (Pages not enabled). Репозиторий и ветки целы
-  (`master == rebuild == 8f2316e`, `index.html` в корне на месте). Пока не включено, ссылки на демо
-  в постах НЕ ставим; в посте #6 ссылка уже есть — либо чинить Pages, либо править подпись.
+- ❗ **Демо-ссылка — `https://piroman99.github.io/zarynka/`** (репозиторий `zarynka`, без «a»).
+  Форма `…/zaryanka/` даёт 404 — эту опечатку допустили ДВАЖДЫ: 22.10 она попала в TG-пост #6,
+  и я же на ней ошибся при проверке, решив, что Pages выключен. **Pages работает**, `/zarynka/` и
+  `/zarynka/vn2/` — 200. Опечатка исправлена в #6 и добавлена правильно в #7 (`_fix_links.py`).
+  Перед публикацией сверять хост в тексте поста с `git remote -v`, а не по памяти.
+- **Групповой токен ВК больше не умеет `wall.edit` и `wall.delete`** (оба → error 27,
+  проверено `_vk_edit_probe.py`/`_vk_del_probe.py` на несуществующем id). Править/удалять
+  посты на стене агент не может — только `wall.post`; правка — руками Ивана или user-токеном.
+  ВК-пост #8 опубликован без демо-ссылки (только текст + ссылка на TG) — так и остался.
 - Проверка постов: TG — `tg_probe/_tme_dump.py`/`_tme_post.py` (превью t.me через IP + SNI),
   ВК — `_vk_wall_check.py` (headless Chromium `--dump-dom`, Playwright в системе НЕТ).
 
