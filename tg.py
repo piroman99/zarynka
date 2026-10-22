@@ -14,9 +14,10 @@ allowlist (никакого egress-allowlist в nanobot нет, DNS резолв
   info                       — описание/имя/число подписчиков канала (getChat)
   desc "<текст>"             — поставить описание канала (бот-админ)
   title "<название>"         — переименовать канал
-  post "<текст|@file>" [--video f] [--photo f] [--silent]
+  post "<текст|@file>" [--video f] [--photo f] [--audio f] [--silent]
   edit <message_id> "<текст|@file>"
   pin <message_id>
+  del <message_id>           — удалить сообщение канала
 """
 import os, sys, json, mimetypes, uuid, socket, ssl, time
 import urllib.request, urllib.error, urllib.parse
@@ -170,7 +171,8 @@ def _text(arg):
     return arg
 
 
-def post(text, video=None, photo=None, silent=False):
+def post(text, video=None, photo=None, audio=None, title=None, performer=None,
+         duration=None, silent=False):
     kw = dict(chat_id=CHANNEL, parse_mode="HTML",
               link_preview_options=json.dumps({"is_disabled": False}),
               disable_notification=True if silent else None)
@@ -181,6 +183,15 @@ def post(text, video=None, photo=None, silent=False):
     if photo:
         kw["caption"] = text
         return send_file("sendPhoto", "photo", photo, **kw)
+    if audio:
+        kw["caption"] = text
+        if title:
+            kw["title"] = title
+        if performer:
+            kw["performer"] = performer
+        if duration:
+            kw["duration"] = int(duration)
+        return send_file("sendAudio", "audio", audio, **kw)
     kw["text"] = text
     return call("sendMessage", **kw)
 
@@ -216,22 +227,39 @@ def main(argv):
     elif cmd == "title":
         print(call("setChatTitle", chat_id=CHANNEL, title=argv[1]))
     elif cmd == "post":
-        video = photo = None
+        video = photo = audio = None
         silent = "--silent" in argv
         rest = [a for a in argv[1:] if a != "--silent"]
-        if "--video" in rest:
-            i = rest.index("--video"); video = rest[i + 1]; rest = rest[:i] + rest[i + 2:]
-        if "--photo" in rest:
-            i = rest.index("--photo"); photo = rest[i + 1]; rest = rest[:i] + rest[i + 2:]
-        res = post(_text(rest[0]), video=video, photo=photo, silent=silent)
+        for flag in ("--video", "--photo", "--audio"):
+            if flag in rest:
+                i = rest.index(flag)
+                val = rest[i + 1]
+                rest = rest[:i] + rest[i + 2:]
+                if flag == "--video":
+                    video = val
+                elif flag == "--photo":
+                    photo = val
+                else:
+                    audio = val
+        res = post(_text(rest[0]), video=video, photo=photo, audio=audio, silent=silent)
         print("message_id:", res.get("message_id"))
     elif cmd == "edit":
         mid = int(argv[1])
-        print(call("editMessageText", chat_id=CHANNEL, message_id=mid,
-                   text=_text(argv[2]), parse_mode="HTML"))
+        txt = _text(argv[2])
+        try:
+            print(call("editMessageText", chat_id=CHANNEL, message_id=mid,
+                       text=txt, parse_mode="HTML"))
+        except RuntimeError:
+            # у медиа-сообщений текст живёт в caption
+            print(call("editMessageCaption", chat_id=CHANNEL, message_id=mid,
+                       caption=txt, parse_mode="HTML"))
     elif cmd == "pin":
         print(call("pinChatMessage", chat_id=CHANNEL, message_id=int(argv[1]),
                    disable_notification=True))
+    elif cmd in ("del", "delete"):
+        # Бот-админ с правом «Удаление сообщений» может снести любой пост канала.
+        ok = call("deleteMessage", chat_id=CHANNEL, message_id=int(argv[1]))
+        print("deleted" if ok else ok)
     else:
         print(__doc__)
         return 1
