@@ -297,10 +297,25 @@ def pages(text, maxn=2):
     return out
 
 
+CG_DIR = os.path.join(IMG, 'cg')
+os.makedirs(CG_DIR, exist_ok=True)
+CG_SRC = os.path.join(GEN, 'cg_room_a__gpt-image-2_0.png')
+if os.path.exists(CG_SRC):
+    cg = Image.open(CG_SRC).convert('RGB')
+    if cg.size != (W, H):
+        cg = cg.resize((W, H), Image.LANCZOS)
+    save_client(cg, CG_DIR, 'rec_48')
+    print('CG rec_48 OK', cg.size)
+else:
+    print('CG SKIP (нет', CG_SRC, ')')
+
 nodes = []
 nodes.append({'t': 'title'})
 nodes.append({'t': 'znak', 'video': '../out/znak3d_rot.mp4',
               'caption': 'Зарянка'})
+# Посвящение — дословно из рассказа (строки 1 и 3); показывается после лого-значка,
+# перед первой сценой пролога (Иван 2026-10-24: «мы забыли посвящение»).
+nodes.append({'t': 'ded', 'l1': L[1], 'l2': L[3]})
 
 # пролог: кадр + страницы дословного текста + закадр (существующий vo_prolog2)
 # камера «двухбит одним кадром» — плавный наезд без склейки (S4 → Марс на панели)
@@ -432,6 +447,20 @@ for i, pg in enumerate(raw):
 # Нужно для перебивки на стыке (раньше фон щёлкал посреди абзаца, а музыка рвалась).
 cut = anchor_index('Сегодня первыми кандидатами')
 flash, present = raw[:cut], raw[cut:]
+
+# CG-страница: расскаянный кадр «сникшая Екатерина» (вариант А, выбор Ивана
+# 2026-10-24) заменяет фон+спрайты. Спрайты убираем: они уже в самом кадре.
+CG_ANCHOR = 'На посетительницу больно было взглянуть'
+for _pg in present:
+    if CG_ANCHOR in _pg['tx']:
+        _pg['bg'] = 'img/cg/rec_48' + CLIENT_EXT
+        _pg['cast'] = {}
+        _pg['cg'] = True
+        print('CG на странице:', _pg['tx'][:70])
+        break
+else:
+    raise SystemExit('не найден якорь CG: %r' % CG_ANCHOR)
+
 nodes.append({'t': 'scene', 'id': 'starik', 'bg': 'img/bg/cabinet' + CLIENT_EXT,
               'music': 'reception', 'trans': 'fade', 'pages': flash})
 nodes.append({'t': 'scene', 'id': 'reception', 'bg': 'img/bg/reception' + CLIENT_EXT,
@@ -457,6 +486,11 @@ CREDITS = [
               'Екатерина Ивановна|ElevenLabs v4 «Charlotte»',
               'Музыка|Lyria 3.5',
               'Жетон-значок|собственная 3D-отрисовка']},
+    # Без придуманных должностей: никаких «режиссёр/продюсер» — только имена
+    # и то, что действительно сделано (уточнено Иваном 2026-10-24).
+    {'h': 'Над эпизодом работали',
+     'rows': ['Иван Карпухин · piroman99', 'nanobot 🐈'],
+     'notes': ['Отбор кадров и решений — Иван; кадры, озвучка и движок — nanobot']},
 ]
 
 data = {

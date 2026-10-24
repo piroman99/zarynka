@@ -12,7 +12,8 @@
   const music = $("music"), voice = $("voice");
   const cinema = $("cinema"), avm = $("avm"), skip = $("skip");
   const endScr = $("end"), prevBtn = $("prev"), nextBtn = $("next");
-  const creditsEl = $("credits"), crList = $("crlist");   // титры (благодарности)
+  const creditsEl = $("credits"), crList = $("crlist");   // титры (ролл)
+  const crView = $("crview"), dedEl = $("ded");           // вьюпорт титров / посвящение
   const brk = $("brk");                     // акварельная перебивка между сценами
   const transEl = $("trans"), transLogo = $("translogo");  // долгий переход + лого
   const AVM = "../out/avm_v3_epic.mp4";
@@ -128,6 +129,7 @@
     const s = SCENES[i]; if (!s) return;
     const nd = NODES[s.n], pg = nd.pages[s.p];
     if (s.p === 0) plPush(nd.bg, "img", prio);
+    if (pg.bg) plPush(pg.bg, "img", prio);
     if (pg.cast) [pg.cast.l, pg.cast.r].forEach((c) => {
       if (!c) return;
       plPush(charUrl(c[0], c[1]), "img", prio);
@@ -230,9 +232,11 @@
   }
   function applySlot(i, who, emo) {
     const el = castEls[i]; if (!el) return;
-    if (!who) { el.classList.remove("on", "dim", "breathe"); return; }
+    // сброс инлайновой opacity: в режиме скриншота (INSTANT) она ставится в 1 и
+    // иначе переживает снятие класса .on — спрайт остаётся видимым на CG-странице
+    if (!who) { el.classList.remove("on", "dim", "breathe"); el.style.opacity = ""; return; }
     const url = charUrl(who, emo);
-    if (!url) { el.classList.remove("on", "dim", "breathe"); return; }
+    if (!url) { el.classList.remove("on", "dim", "breathe"); el.style.opacity = ""; return; }
     el.dataset.base = charUrl(who, "neutral") || url;
     if (el.getAttribute("src") !== url) el.src = url;
     el.classList.add("on", "breathe");
@@ -484,10 +488,12 @@
     hideScreens();
     chapter.textContent = D.episode;
     if (s.n !== curNode) {
-      setBg(nd.bg);
       setMusic(nd.music || musicKey);
       curNode = s.n;
     }
+    // страницу можно перекрыть своим кадром (CG): pg.bg важнее фона сцены
+    const wantBg = pg.bg || nd.bg;
+    if (wantBg !== curBg) setBg(wantBg);
     renderCast(pg.cast);
     applyCam(pg);
     plWarm(i);                       // заранее тянем следующие страницы
@@ -557,10 +563,13 @@
     showHud(false);
     vlayer.hidden = true;
     title.classList.remove("show");
-    endScr.classList.add("show");
     prevBtn.disabled = true;
     voice.pause();
     wakeOff();                       // серия закончилась — экран может гаснуть
+    // титры в конце показываются САМИ (Иван 2026-10-24); после них — экран конца
+    // серии. Отключить для снимка экрана «Конец»: ?credits=0
+    endScr.classList.add("show");
+    if (qp.get("credits") !== "0" && !crOpen()) openCredits();  // openCredits убирает экран конца
   }
   // Возврат в меню = сброс к «первому запуску». Без сброса started/starting
   // кнопка «Начать» после прохождения молчала (start() упирался в started=true),
@@ -568,6 +577,8 @@
   function goMenu() {
     clearTimeout(autoTimer);
     closeCredits();
+    dedShown = false; clearTimeout(dedT); dedT = null;
+    if (dedEl) { dedEl.classList.remove("show"); dedEl.setAttribute("aria-hidden", "true"); }
     wakeOff();
     clearTimeout(brkT); brkCb = null; inBreak = false;
     transT.forEach(clearTimeout); transT = [];
@@ -606,9 +617,35 @@
     znak.src = plVid.get(nd.video) || nd.video;   // предзагруженный blob — без чёрного кадра
     znak.currentTime = 0;
     znak.play().catch(() => {});
-    const done = () => { vlayer.hidden = true; try { znak.pause(); } catch (e) {} znak.onended = null; enterPos(0); };
+    const done = () => { vlayer.hidden = true; try { znak.pause(); } catch (e) {} znak.onended = null; enterDed(); };
     znak.onended = done;
     vskip.onclick = (e) => { e.stopPropagation(); done(); };
+  }
+
+  // ---------- посвящение (сразу после лого-значка, до пролога) ----------
+  // Текст — дословно из рассказа (story.txt, строки 1 и 3), берётся из content.js.
+  const DED = NODES.find((n) => n.t === "ded");
+  const DED_MS = 7000;                     // сколько висеть, если не кликнули
+  let dedShown = false, dedT = null;
+  function dedOpen() { return dedShown; }
+  function enterDed() {
+    clearTimeout(autoTimer);
+    if (!DED) return enterPos(0);
+    showHud(false); hideScreens();
+    $("ded-l1").textContent = DED.l1 || "";
+    $("ded-l2").textContent = DED.l2 || "";
+    dedShown = true;
+    dedEl.classList.add("show");
+    dedEl.setAttribute("aria-hidden", "false");
+    clearTimeout(dedT); dedT = null;
+    if (autoOn) dedT = setTimeout(leaveDed, DED_MS);   // в ручном режиме ждёт клика
+  }
+  function leaveDed() {
+    if (!dedShown) return;
+    dedShown = false; clearTimeout(dedT); dedT = null;
+    dedEl.classList.remove("show");
+    dedEl.setAttribute("aria-hidden", "true");
+    if (started) enterPos(0);
   }
 
   let starting = false, pendingGo = null;
@@ -725,63 +762,125 @@
     syncToggles();
   }
 
-  // ---------- титры (благодарности) ----------
+  // ---------- титры: кинематографический ролл ----------
+  // Появляются в конце серии САМИ (Иван 2026-10-24), вручную — кнопкой «Титры»
+  // на экране конца серии. Крутятся снизу вверх; скорость считается от высоты
+  // ролла, чтобы длинные титры не пролетали мимо глаз за пяток секунд.
+  const CR_SPEED = 52;                            // px/сек
+  const CR_POS = parseFloat(qp.get("crpos"));     // ?crpos=0.45 — замер кадра для скриншота
+  let crT = null;
   function crOpen() { return creditsEl.classList.contains("show"); }
+  function crEl(tag, cls, txt) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (txt != null) n.textContent = txt;
+    return n;
+  }
   function renderCredits() {
     if (!crList || crList.dataset.done === "1") return;
+    const hero = crEl("div", "cr-hero");
+    const emb = crEl("img", "cr-emb");            // жетон-значок над названием
+    emb.src = "img/trans_logo.png?v=" + (D.emblemVer || D.voVer || 1);
+    emb.alt = "";
+    hero.appendChild(emb);
+    hero.appendChild(crEl("p", "cr-title", D.title || "ЗАРЯНКА"));
+    if (D.episode) hero.appendChild(crEl("p", "cr-ep", D.episode));
+    if (D.byline) hero.appendChild(crEl("p", "cr-by", D.byline));
+    crList.appendChild(hero);
     (D.credits || []).forEach(function (g) {
-      const blk = document.createElement("div"); blk.className = "crgrp";
-      const h = document.createElement("p"); h.className = "crh"; h.textContent = g.h || "";
-      blk.appendChild(h);
+      const blk = crEl("div", "crgrp");
+      if (g.h) blk.appendChild(crEl("p", "crh", g.h));
       (g.rows || []).forEach(function (r) {
-        const p = document.createElement("p"); p.className = "crrow";
+        const p = crEl("div", "crrow");
         const cut = r.indexOf("|");
-        if (cut > 0) {                       // «роль|исполнитель» → две колонки
-          const a = document.createElement("span"); a.className = "crrole"; a.textContent = r.slice(0, cut).trim();
-          const b = document.createElement("span"); b.className = "crname"; b.textContent = r.slice(cut + 1).trim();
-          p.appendChild(a); p.appendChild(b);
+        if (cut > 0) {                       // «роль|исполнитель» → роль над именем
+          p.appendChild(crEl("span", "crrole", r.slice(0, cut).trim()));
+          p.appendChild(crEl("span", "crname", r.slice(cut + 1).trim()));
         } else {
-          p.textContent = r;
+          p.appendChild(crEl("span", "crname", r));
         }
         blk.appendChild(p);
       });
-      (g.notes || []).forEach(function (n) {
-        const q = document.createElement("p"); q.className = "crnote"; q.textContent = n;
-        blk.appendChild(q);
-      });
+      (g.notes || []).forEach(function (n) { blk.appendChild(crEl("p", "crnote", n)); });
       crList.appendChild(blk);
     });
+    const fin = crEl("div", "crfin");
+    fin.appendChild(crEl("p", "crfin-ttl", D.title || "ЗАРЯНКА"));
+    fin.appendChild(crEl("p", "crfin-line", "Ждите следующих серий"));
+    crList.appendChild(fin);
     crList.dataset.done = "1";
+  }
+  function runRoll() {
+    if (!crList || !crView) return;
+    clearTimeout(crT); crT = null;
+    crList.classList.remove("run");
+    crList.style.animationDelay = "";
+    crList.style.animationPlayState = "";
+    const h = crList.offsetHeight || crList.scrollHeight || 0;
+    const vh = crView.clientHeight || window.innerHeight || 0;
+    const dur = Math.min(90, Math.max(10, (vh + h) / CR_SPEED));
+    crList.style.setProperty("--cr-dur", dur.toFixed(2) + "s");
+    void crList.offsetWidth;                 // рестарт анимации с начала
+    crList.classList.add("run");
+    if (isFinite(CR_POS)) {                  // режим скриншота: замер на доле пути
+      crList.style.animationDelay = (-CR_POS * dur).toFixed(2) + "s";
+      crList.style.animationPlayState = "paused";
+      return;
+    }
+    crT = setTimeout(finishCredits, dur * 1000 + 350);   // страховка, если animationend не придёт
+  }
+  function stopRoll() {
+    clearTimeout(crT); crT = null;
+    if (!crList) return;
+    crList.classList.remove("run");
+    crList.style.animationDelay = "";
+    crList.style.animationPlayState = "";
   }
   function openCredits() {
     renderCredits();
+    endScr.classList.remove("show");        // титры — поверх пустого кадра, не поверх кнопок
     creditsEl.classList.add("show");
     creditsEl.setAttribute("aria-hidden", "false");
-    if (crList) crList.parentElement.scrollTop = 0;
+    runRoll();
+  }
+  function finishCredits() {
+    if (!crOpen()) return;
+    closeCredits();
+    if (started) { endScr.classList.add("show"); fitScreens(); }
   }
   function closeCredits() {
     creditsEl.classList.remove("show");
     creditsEl.setAttribute("aria-hidden", "true");
+    stopRoll();
   }
+  if (crList) crList.addEventListener("animationend", (e) => {
+    if (e.animationName === "crUp") finishCredits();
+  });
 
   // ---------- ввод ----------
   $("start").onclick = (e) => { e.stopPropagation(); start(); };
   $("teaser").onclick = (e) => { e.stopPropagation(); playCinema(AVM); };
   $("e-menu").onclick = (e) => { e.stopPropagation(); goMenu(); };
   $("e-credits").onclick = (e) => { e.stopPropagation(); openCredits(); };
-  $("cr-back").onclick = (e) => { e.stopPropagation(); closeCredits(); };
+  $("cr-skip").onclick = (e) => { e.stopPropagation(); finishCredits(); };
+  creditsEl.onclick = () => { finishCredits(); };     // клик по титрам — пропустить
   $("e-teaser").onclick = (e) => { e.stopPropagation(); playCinema(AVM); };
   prevBtn.onclick = (e) => { e.stopPropagation(); prev(); };
   nextBtn.onclick = (e) => { e.stopPropagation(); next(); };
 
   document.getElementById("stage").addEventListener("click", () => {
     if (cinemaOpen || !vlayer.hidden || crOpen()) return;
+    if (dedOpen()) { leaveDed(); return; }
     if (title.classList.contains("show") || endScr.classList.contains("show")) return;
     next();
   });
   addEventListener("keydown", (e) => {
-    if (crOpen()) {                      // титры: листаются колесом/стрелками сами
-      if (e.key === "Escape" || e.key === "Enter") { e.preventDefault(); closeCredits(); }
+    if (dedOpen()) {                     // посвящение: любой « далее» уводит к прологу
+      if ([" ", "Enter", "ArrowRight", "PageDown", "Escape"].includes(e.key)) { e.preventDefault(); leaveDed(); }
+      return;
+    }
+    if (crOpen()) {                      // титры: листаются сами, любой « далее» — пропустить
+      if ([" ", "Enter", "ArrowRight", "PageDown", "Escape"].includes(e.key)) { e.preventDefault(); finishCredits(); }
       return;
     }
     if (e.key === "Escape" && cinemaOpen) { skip.click(); return; }
@@ -813,7 +912,7 @@
   document.body.addEventListener("touchend", (e) => {
     if (!sw) return; sw = false;
     const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
-    if (cinemaOpen || crOpen() || title.classList.contains("show") || endScr.classList.contains("show")) return;
+    if (cinemaOpen || crOpen() || dedOpen() || title.classList.contains("show") || endScr.classList.contains("show")) return;
     if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) {
       swipedAt = Date.now();
       dx < 0 ? next() : prev();
@@ -900,7 +999,7 @@
   // в портрете подстрочник живёт ВНЕ 16:9-сцены → тап по нему тоже листает
   // (после свайпа клик игнорируем, иначе страница уезжает на две вперёд)
   $("box").addEventListener("click", (e) => {
-    if (cinemaOpen || !vlayer.hidden) return;
+    if (cinemaOpen || !vlayer.hidden || dedOpen()) return;
     if (title.classList.contains("show") || endScr.classList.contains("show")) return;
     e.stopPropagation();
     if (Date.now() - swipedAt < 450) return;
@@ -936,6 +1035,8 @@
                   queue: () => plQ.length, off: () => PRELOAD_OFF };
   window.__DBG = { get pos() { return pos; }, get node() { return curNode; },
                    get typing() { return !!typing; },
+                   get started() { return started; }, get inBreak() { return inBreak; },
+                   get paused() { return paused; }, get voQ() { return voQ.length; },
                    get wake() { return { want: wakeWant, held: !!wakeLock, ok: WAKE_OK }; },
                    get fs() { return !!fsEl(); },
                    get fsTried() { return fsTried; } };
@@ -947,6 +1048,7 @@
       const base = scriptStart[ni] || 0;
       enterPos(base + parseInt(qp.get("page") || "0", 10));
     } else if (nd && nd.t === "znak") { enterZnak(nd); }
+    else if (nd && nd.t === "ded") { enterDed(); }
     else if (nd && nd.t === "title") { enterTitle(); }
     else { enterEnd(); }
     if (qp.get("credits") === "1") openCredits();   // ?node=99&credits=1 — снимок титров

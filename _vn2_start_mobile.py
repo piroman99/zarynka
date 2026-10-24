@@ -92,7 +92,14 @@ try:
     b.js("document.getElementById('vskip').click()")
     time.sleep(0.4)
     b.js("""(function(){var st=document.getElementById('stage');
-      for(var i=0;i<600;i++){ if(document.getElementById('end').classList.contains('show')) break; st.click(); }
+      for(var i=0;i<600;i++){
+        if(document.getElementById('end').classList.contains('show')) break;
+        // с 2026-10-24 после серии сначала идёт ролл титров — его тоже пропускаем
+        if(document.getElementById('credits').classList.contains('show')){
+          document.getElementById('cr-skip').click(); continue;
+        }
+        st.click();
+      }
     })()""")
     time.sleep(0.8)
     check('дошли до конца серии',

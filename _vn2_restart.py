@@ -43,12 +43,18 @@ try:
         check('прогон %d: значок пошёл' % run, b.js(VLAYER_OFF) == False)
         b.js(CLICK % 'vskip')
         time.sleep(0.5)
+        # с 2026-10-24 после значка идёт посвящение — закрываем его, как это сделал бы игрок
+        b.js(CLICK % 'ded')
+        time.sleep(0.5)
         check('прогон %d: страница 0' % run, b.js("__DBG.pos") == 0, b.js("__DBG.pos"))
         check('прогон %d: HUD включён' % run, b.js("document.getElementById('hud').classList.contains('on')"))
         n = b.js("""(function(){
           var st=document.getElementById('stage'), i=0;
           for(; i<500; i++){
             if(document.getElementById('end').classList.contains('show')) break;
+            if(document.getElementById('credits').classList.contains('show')){
+              document.getElementById('cr-skip').click(); continue;
+            }
             st.click();
           }
           return i;

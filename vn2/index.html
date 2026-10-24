@@ -64,6 +64,15 @@
       <button id="vskip">Пропустить ▸</button>
     </div>
 
+    <!-- Посвящение: сразу после лого-значка, до первой сцены пролога.
+         Текст — дословно из рассказа (строки 1 и 3 файла story.txt). -->
+    <section id="ded" class="screen" aria-hidden="true">
+      <div class="ded-inner">
+        <p class="ded-l1" id="ded-l1"></p>
+        <p class="ded-l2" id="ded-l2"></p>
+      </div>
+    </section>
+
     <!-- Навигация: назад / далее -->
     <div id="nav">
       <button id="prev" title="Назад (←)">‹</button>
@@ -94,16 +103,12 @@
       </div>
     </section>
 
-    <!-- Титры: благодарности и авторы графики -->
+    <!-- Титры: кинематографический ролл (появляются в конце серии сами) -->
     <section id="credits" class="screen" aria-hidden="true">
-      <div class="cr-inner">
-        <p class="endkicker">Титры</p>
-        <h2 class="crttl">Благодарности</h2>
-        <div class="crlist" id="crlist"></div>
-        <div class="endbtns crbtns">
-          <button id="cr-back">Назад</button>
-        </div>
+      <div class="cr-view" id="crview">
+        <div class="cr-roll" id="crlist"></div>
       </div>
+      <button id="cr-skip" class="ghost crskip">Пропустить ▸</button>
     </section>
 
     <!-- Кинозал (тизер/AVM) -->
