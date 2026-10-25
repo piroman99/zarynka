@@ -116,6 +116,22 @@ try:
     check('нет придуманных должностей', not bad, bad)
     check('титры упоминают автора рассказа', 'Котобус' in txt)
 
+    # мерцающие звёзды в титрах (2026-10-25): три слоя, анимация реально идёт
+    stars = b.js("(function(){var s=document.querySelector('.cr-stars');"
+                 "if(!s) return null;"
+                 "var l=[].map.call(s.children,function(e){var c=getComputedStyle(e);"
+                 "return c.animationName+'|'+c.animationDuration+'|'"
+                 "+(c.backgroundImage.match(/radial-gradient/g)||[]).length;});"
+                 "return {n:l.length, l:l};})()")
+    check('звёзды: три слоя', stars and stars['n'] == 3, stars and stars['n'])
+    if stars:
+        names = [x.split('|')[0] for x in stars['l']]
+        durs = [x.split('|')[1] for x in stars['l']]
+        dots = [int(x.split('|')[2]) for x in stars['l']]
+        check('звёзды мерцают (crTwinkle)', all(n == 'crTwinkle' for n in names), names)
+        check('у слоёв разная частота', len(set(durs)) == 3, durs)
+        check('звёзд достаточно (150+)', sum(dots) >= 150, dots)
+
     # пропуск титров → экран конца серии
     b.js("document.getElementById('cr-skip').click()")
     time.sleep(0.8)
