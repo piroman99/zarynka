@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
-"""Проверка живого демо: content.js и app.js на Pages совпадают с локальными."""
-import hashlib, os, time, urllib.request
+"""Проверка, что GitHub Pages отдаёт новую сборку."""
+import json
+import time
+import urllib.request
 
-HERE = "/home/ivan/.nanobot/workspace/novella/zaryanka"
-BASE = "https://piroman99.github.io/zarynka/vn2/"
-TS = str(int(time.time()))
-
-for name in ("content.js", "app.js", "style.css", "img/bg/cabinet.webp"):
-    local = os.path.join(HERE, "vn2", name)
-    with open(local, "rb") as f:
-        lm = hashlib.md5(f.read()).hexdigest()
-    url = BASE + name + "?cb=" + TS
+BASE = 'https://piroman99.github.io/zarynka/vn2/'
+for attempt in range(8):
     try:
-        with urllib.request.urlopen(url, timeout=30) as r:
-            data = r.read()
-        rm = hashlib.md5(data).hexdigest()
-        print("%-20s %s  локально %s  %s" % (name, "OK " if lm == rm else "РАЗНО",
-                                             lm[:8], rm[:8]))
+        with urllib.request.urlopen(BASE + 'content.js?cachebust=%d' % time.time(),
+                                    timeout=30) as r:
+            txt = r.read().decode('utf-8')
+        has_ded = '"ded"' in txt
+        has_cg = 'img/cg/rec_48' in txt
+        has_ivan = 'piroman99' in txt
+        print('попытка %d: размер %d, ded=%s cg=%s piroman99=%s'
+              % (attempt + 1, len(txt), has_ded, has_cg, has_ivan))
+        if has_ded and has_cg and has_ivan:
+            print('Pages отдаёт новую сборку')
+            break
     except Exception as e:
-        print(name, "FAIL", e)
+        print('попытка %d: %s' % (attempt + 1, e))
+    time.sleep(20)

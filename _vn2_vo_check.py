@@ -24,22 +24,29 @@ def dur(p):
 
 bad, total, per = [], 0.0, {}
 for pg in nd['pages']:
+    # vo бывает списком: страница склеена из двух mp3 (rec_22+rec_22b и т.п.)
     vo = pg.get('vo')
-    p = os.path.join(VD, os.path.basename(vo))
-    if not os.path.exists(p):
-        bad.append((vo, 'нет файла')); continue
-    sz = os.path.getsize(p)
-    d = dur(p)
+    vos = vo if isinstance(vo, list) else [vo]
     key = pg.get('who') or 'narr'
-    want = man.get(vo, {}).get('voice')
-    if want != key:
-        bad.append((vo, 'голос %s != %s' % (want, key)))
-    if sz < 3000:
-        bad.append((vo, 'мало байт %d' % sz))
-    if d is None or d < 0.4:
-        bad.append((vo, 'коротко %s' % d))
-    total += d or 0
-    per[key] = per.get(key, 0) + (d or 0)
+    pdur = 0.0
+    for v in vos:
+        p = os.path.join(VD, os.path.basename(v))
+        if not os.path.exists(p):
+            bad.append((v, 'нет файла')); continue
+        sz = os.path.getsize(p)
+        d = dur(p)
+        want = man.get(v, {}).get('voice')
+        # у склеенных страниц (vo = [авторская часть, реплика]) голоса частей разные —
+        # сверяем только одиночные файлы, манифест для склеек уже верный
+        if isinstance(vo, str) and want != key:
+            bad.append((v, 'голос %s != %s' % (want, key)))
+        if sz < 3000:
+            bad.append((v, 'мало байт %d' % sz))
+        if d is None or d < 0.4:
+            bad.append((v, 'коротко %s' % d))
+        pdur += d or 0
+    total += pdur
+    per[key] = per.get(key, 0) + pdur
 
 print('файлов в манифесте: %d' % len(man))
 print('страниц: %d, суммарная длительность: %.1f с (%.1f мин)'

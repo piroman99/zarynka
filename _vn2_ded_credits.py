@@ -19,6 +19,8 @@ import socketserver
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from _cdp import Browser
+from _vn2_nodes import node_index   # индекс узла из content.js, не хардкод
+REC = node_index('reception')       # было 11; после вставки кадра p6 стало 12
 
 ok = True
 
@@ -95,7 +97,7 @@ try:
           '%.1f с' % gone if gone else 'не ушло')
 
     # ---------- 3) конец серии → титры сами ----------
-    b.navigate(BASE + '?preload=0&auto=0&node=11&page=56', wait=1.4)
+    b.navigate(BASE + '?preload=0&auto=0&node=%d&page=56' % REC, wait=1.4)
     # первый клик может только дописать текст страницы — жмём до перехода
     for _ in range(4):
         b.js("document.getElementById('next').click()")
@@ -146,7 +148,7 @@ try:
     check('кнопка «Титры» открывает ролл заново', st[1] is True, st)
 
     # ---------- 4) CG-страница приёмной ----------
-    b.navigate(BASE + '?preload=0&auto=0&node=11&page=48', wait=1.4)
+    b.navigate(BASE + '?preload=0&auto=0&node=%d&page=48' % REC, wait=1.4)
     bg = b.js("[].map.call(document.querySelectorAll('.bg'),function(e){return e.style.backgroundImage})"
               ".filter(Boolean).join(' ')")
     check('CG-кадр стоит фоном страницы 48', 'cg/rec_48' in bg, bg[:80])

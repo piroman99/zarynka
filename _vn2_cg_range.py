@@ -62,7 +62,12 @@ CASES = [
 
 # ВАЖНО: auto=0 — иначе короткие страницы сами уезжают за время ожидания и замер
 # попадает на следующую страницу (на этом тест уже один раз соврал).
-URL = BASE + '?instant=1&auto=0&text=1&voice=0&music=0&node=11&page=%d'
+# Номер узла не хардкодим: при вставке кадров индексы СДВИГАЮТСЯ (было 11, после
+# вставки кадра p6 приёмная стала 12) — берём из content.js по id.
+from _vn2_nodes import node_index  # noqa: E402
+REC = node_index('reception')
+print('приёмная = node=%d' % REC)
+URL = BASE + '?instant=1&auto=0&text=1&voice=0&music=0&node=%d&page=%%d' % REC
 
 b = Browser(1280, 720)
 try:
