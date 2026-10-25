@@ -299,15 +299,19 @@ def pages(text, maxn=2):
 
 CG_DIR = os.path.join(IMG, 'cg')
 os.makedirs(CG_DIR, exist_ok=True)
-CG_SRC = os.path.join(GEN, 'cg_room_a__gpt-image-2_0.png')
-if os.path.exists(CG_SRC):
-    cg = Image.open(CG_SRC).convert('RGB')
-    if cg.size != (W, H):
-        cg = cg.resize((W, H), Image.LANCZOS)
-    save_client(cg, CG_DIR, 'rec_48')
-    print('CG rec_48 OK', cg.size)
-else:
-    print('CG SKIP (нет', CG_SRC, ')')
+# имя в vn2 <- исходник в assets/gen (выбор варианта — константы ниже)
+CG_P4 = 'cg_p4v2_a'          # P4 v2 на стр. 35..37: 'a' (общий, оба лица) | 'b' (через плечо)
+CG_SAD = 'cg_room_a'         # сникшая Екатерина на стр. 59..61 (принят 2026-10-24)
+CG_SOURCES = {'rec_35': CG_P4, 'rec_48': CG_SAD}
+for _out, _stem in CG_SOURCES.items():
+    _src = os.path.join(GEN, _stem + '__gpt-image-2_0.png')
+    if not os.path.exists(_src):
+        raise SystemExit('нет исходника CG: %s' % _src)
+    _cg = Image.open(_src).convert('RGB')
+    if _cg.size != (W, H):
+        _cg = _cg.resize((W, H), Image.LANCZOS)
+    save_client(_cg, CG_DIR, _out)
+    print('CG %s OK %dx%d <- %s' % (_out, _cg.width, _cg.height, _stem))
 
 nodes = []
 nodes.append({'t': 'title'})
@@ -372,7 +376,10 @@ EMO_ANCHOR = [
 CAST_ANCHOR = [
     ('Лихнецкому не повезло', 'l', 'Старик', 'stern'),
     ('Так и пришлось долгих два месяца', 'l', 'Сергей', 'neutral'),
-    ('Образовалась пауза', 'r', 'Екатерина', 'neutral'),
+    # Появление Екатерины перенесено на стр. 23 (правка Ивана 2026-10-25): сначала идёт
+    # описание за кадром («кудрявые седые волосы…»), спрайт въезжает на приветствии
+    # «Добрый день. Добро пожаловать в Звездный городок» — это и есть её выход.
+    ('Добрый день. Добро пожаловать', 'r', 'Екатерина', 'neutral'),
 ]
 
 # 1) текст + говорящие: реплика и авторский текст разведены по СЕГМЕНТАМ
@@ -450,16 +457,31 @@ flash, present = raw[:cut], raw[cut:]
 
 # CG-страница: расскаянный кадр «сникшая Екатерина» (вариант А, выбор Ивана
 # 2026-10-24) заменяет фон+спрайты. Спрайты убираем: они уже в самом кадре.
-CG_ANCHOR = 'На посетительницу больно было взглянуть'
-for _pg in present:
-    if CG_ANCHOR in _pg['tx']:
-        _pg['bg'] = 'img/cg/rec_48' + CLIENT_EXT
+# CG-ДИАПАЗОНОМ (правка Ивана 2026-10-25): кадр держится от якоря начала до якоря конца
+# включительно, а не одну страницу. Внутри диапазона спрайты не рисуем — они уже в кадре.
+#   rec_35 — P4 v2: «Сергей потер переносицу» → «При всех наших технических возможностях»
+#            (новый кабинет, форма Сергея со спрайта, весна за окном)
+#   rec_48 — «сникшая Екатерина» → «я не могу принять у вас документы» (было только 1 стр.)
+CG_RANGES = [
+    ('Сергей потер переносицу', 'При всех наших технических возможностях', 'rec_35'),
+    ('На посетительницу больно было взглянуть', 'я не могу принять у вас документы', 'rec_48'),
+]
+for _a, _b, _name in CG_RANGES:
+    i0, i1 = anchor_index(_a), anchor_index(_b)
+    if i1 < i0:
+        raise SystemExit('CG-диапазон задом наперёд: %r..%r' % (_a, _b))
+    hit = 0
+    for _i in range(i0, i1 + 1):
+        if _i < cut:
+            continue                      # CG-точки — только в приёмной, не во флешбэке
+        _pg = present[_i - cut]
+        _pg['bg'] = 'img/cg/' + _name + CLIENT_EXT
         _pg['cast'] = {}
         _pg['cg'] = True
-        print('CG на странице:', _pg['tx'][:70])
-        break
-else:
-    raise SystemExit('не найден якорь CG: %r' % CG_ANCHOR)
+        hit += 1
+    if not hit:
+        raise SystemExit('CG-диапазон не попал в приёмную: %r..%r' % (_a, _b))
+    print('CG %s: страниц %d (%r .. %r)' % (_name, hit, _a[:28], _b[:28]))
 
 nodes.append({'t': 'scene', 'id': 'starik', 'bg': 'img/bg/cabinet' + CLIENT_EXT,
               'music': 'reception', 'trans': 'fade', 'pages': flash})
