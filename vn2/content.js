@@ -131,13 +131,13 @@ window.VN = {
   },
   {
    "t": "scene",
-   "id": "s2",
-   "bg": "img/prolog/s2.webp",
+   "id": "p8",
+   "bg": "img/prolog/p8.webp",
    "music": "prolog",
    "pages": [
     {
      "tx": "Космонавты начали тренировки, утверждалась научная программа, выбирали место высадки.",
-     "vo": "audio/vo/s2_00.mp3"
+     "vo": "audio/vo/p8_00.mp3"
     }
    ]
   },

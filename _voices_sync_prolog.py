@@ -18,7 +18,7 @@ import re
 HERE = os.path.dirname(os.path.abspath(__file__))
 VO = os.path.join(HERE, "vn2", "audio", "vo")
 MAN = os.path.join(VO, "_voices.json")
-PROLOG_IDS = {"s1", "p6", "p7", "s2", "s3", "s4", "s5", "s6", "s7"}
+PROLOG_IDS = {"s1", "p6", "p7", "p8", "s3", "s4", "s5", "s6", "s7"}
 MODEL = "gemini-3.8-flash-tts"
 PRICE_PER_1000 = 1.70
 
