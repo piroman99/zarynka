@@ -89,10 +89,13 @@ def soft(base, box, color, alpha, blur=16):
 
 
 def tag(base, txt):
+    # Ширина плашки — по РЕАЛЬНОЙ ширине текста (было len*15 → текст вылезал за
+    # плашку на 3–46 px во всех кадрах, «ПЛОЩАДЬ · ЛОЗУНГ» обрезалась).
     d = ImageDraw.Draw(base)
-    x1 = 70 + 26 + int(len(txt) * 15)
+    f = F(LATO_B, 30)
+    x1 = 90 + int(d.textlength(txt, font=f)) + 20
     d.rectangle([70, 70, x1, 128], fill=(0, 0, 0))
-    d.text((90, 82), txt, font=F(LATO_B, 30), fill=(232, 180, 120))
+    d.text((90, 82), txt, font=f, fill=(232, 180, 120))
     return base
 
 
