@@ -9,7 +9,7 @@ WS = os.path.abspath(os.path.join(HERE, '..', '..'))
 FF = os.path.join(WS, '.probe', '.lib', 'imageio_ffmpeg',
                   'binaries', 'ffmpeg-linux-x86_64-v7.0.2')
 VD = os.path.join(HERE, 'vn2', 'audio', 'vo')
-PROLOG = ['s1', 'p6', 'p7', 'p8', 's3', 's4', 's5', 's6', 's7']
+PROLOG = ['s1', 'p6', 'p7', 'p8', 's3', 's4', 's5a', 's5b', 's6', 's7']
 
 src = open(os.path.join(HERE, 'vn2', 'content.js'), encoding='utf-8').read()
 D = json.loads(src[src.index('=') + 1:].strip().rstrip(';'))

@@ -15,10 +15,12 @@
   const creditsEl = $("credits"), crList = $("crlist");   // титры (ролл)
   const crView = $("crview"), dedEl = $("ded");           // вьюпорт титров / посвящение
   const brk = $("brk");                     // акварельная перебивка между сценами
+  const ovlEl = $("ovl");                    // титр-слой кадра (pg.ovl)
   const transEl = $("trans"), transLogo = $("translogo");  // долгий переход + лого
   const AVM = "../out/avm_v3_epic.mp4";
 
   const qp = new URLSearchParams(location.search);
+  const OVL_OFF = qp.get("ovl") === "0";     // ?ovl=0 — кадр без титр-слоя (для пиксельных проверок)
   const INSTANT = qp.get("instant") === "1";     // не печатать по буквам (для скриншотов)
   const SHOT = qp.has("node");
 
@@ -467,6 +469,51 @@
     }
   }
 
+  // ---------- титр-слой кадра (pg.ovl) ----------
+  // Надписи кадров пролога до 2026-11-01 вжигались в PNG и висели весь кадр. Теперь это
+  // DOM-слой ПОВЕРХ кадра, живёт ПО СТРАНИЦАМ: страница = фраза, строка приходит вместе с ней.
+  // Координаты и кегли — в пространстве 2400x1350 (как было в _prolog_finals.py).
+  // 1em слоя = ШИРИНА кадра, поэтому вертикаль тоже считается по X (1350/2400 = 9/16):
+  // y_em = y/2400. Так всё масштабируется вместе со сценой на любом экране.
+  // Элемент: {t,f,s,c,x,y,a} — текст; {b:[x0,y0,x1,y1],c,a,bl} — скрим/плашка.
+  function applyOvl(pg) {
+    if (!ovlEl) return;
+    ovlEl.textContent = "";
+    if (OVL_OFF) { ovlEl.classList.remove("on"); return; }   // ?ovl=0 — снимок кадра без слоя (проверки)
+    const list = (pg && pg.ovl) || null;
+    if (!list || !list.length) { ovlEl.classList.remove("on"); return; }
+    const E = 2400;
+    const px = ovlEl.clientWidth || 2400;
+    ovlEl.style.fontSize = px + "px";       // 1em = ширина кадра
+    list.forEach(function (it) {
+      if (it.b) {                            // мягкая плашка/скрим под текст
+        const b = it.b, el = document.createElement("i");
+        el.style.left = b[0] / E + "em";
+        el.style.top = b[1] / E + "em";
+        el.style.width = (b[2] - b[0]) / E + "em";
+        el.style.height = (b[3] - b[1]) / E + "em";
+        el.style.borderRadius = 20 / E + "em";
+        el.style.background = "rgba(" + (it.c || [6, 8, 14]).join(",") + "," +
+          ((it.a == null ? 150 : it.a) / 255).toFixed(3) + ")";
+        if (it.bl) el.style.filter = "blur(" + (it.bl / E) + "em)";
+        ovlEl.appendChild(el);
+        return;
+      }
+      const el = document.createElement("b");
+      el.textContent = it.t;
+      el.style.fontSize = (it.s || 48) / E + "em";
+      el.style.fontFamily = (it.f === "l" ? "LatoBold" : "URWGothicDemi") + ",sans-serif";
+      el.style.color = it.c || "#f6eede";
+      el.style.left = (it.x == null ? 1200 : it.x) / E + "em";
+      el.style.top = (it.y == null ? 675 : it.y) / E + "em";
+      const a = it.a || "mm";
+      el.style.transform = (a === "mm") ? "translate(-50%,-50%)"
+                         : (a === "lt" ? "none" : "translateX(-50%)");
+      ovlEl.appendChild(el);
+    });
+    ovlEl.classList.add("on");
+  }
+
   function enterPos(i, skipBreak) {
     if (i < 0) i = 0;
     if (i > SCENES.length - 1) return enterEnd();
@@ -496,6 +543,7 @@
     if (wantBg !== curBg) setBg(wantBg);
     renderCast(pg.cast);
     applyCam(pg);
+    applyOvl(pg);                    // надписи кадра — по страницам (было вожжено в PNG)
     plWarm(i);                       // заранее тянем следующие страницы
     if (pg.name) { nameEl.style.visibility = "visible"; nameEl.textContent = pg.name; }
     else nameEl.style.visibility = "hidden";

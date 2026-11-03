@@ -68,6 +68,27 @@ body{
     linear-gradient(to top, rgba(0,0,0,.55), transparent 35%);
 }
 
+/* ---------- ТИТР-СЛОЙ КАДРА (pg.ovl) ----------
+   Надписи кадров пролога раньше вжигались в PNG. Теперь это отдельный слой поверх
+   кадра, живёт ПО СТРАНИЦАМ: страница = фраза. Координаты и кегли в content.js —
+   в пространстве 2400x1350 (как в _prolog_finals.py), 1em слоя = ширина кадра,
+   поэтому всё масштабируется вместе со сценой на любом экране.
+   Шрифты — те же, которыми надписи были вожжены (подмножества в vn2/fonts/). */
+@font-face{
+  font-family:URWGothicDemi; src:url("fonts/gothic-demi.woff2") format("woff2");
+  font-weight:400; font-style:normal; font-display:swap;
+}
+@font-face{
+  font-family:LatoBold; src:url("fonts/lato-bold.woff2") format("woff2");
+  font-weight:400; font-style:normal; font-display:swap;
+}
+#ovl{position:absolute; inset:0; z-index:4; pointer-events:none; opacity:0;
+  transition:opacity .3s ease}
+#ovl.on{opacity:1}
+#ovl i{position:absolute; display:block}
+#ovl b{position:absolute; display:block; white-space:pre; font-weight:400;
+  letter-spacing:0; text-shadow:0 .045em .16em rgba(0,0,0,.62), 0 0 .45em rgba(0,0,0,.38)}
+
 /* экраны */
 .screen{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
