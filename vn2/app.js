@@ -23,6 +23,8 @@
   const OVL_OFF = qp.get("ovl") === "0";     // ?ovl=0 — кадр без титр-слоя (для пиксельных проверок)
   const INSTANT = qp.get("instant") === "1";     // не печатать по буквам (для скриншотов)
   const SHOT = qp.has("node");
+  // ?ovln=N — тест-хук для снимков середины набора: показать ровно N букв надписи
+  const OVL_N = qp.has("ovln") ? Math.max(0, parseInt(qp.get("ovln"), 10) || 0) : null;
 
   let curBg = "", curVo = "";
   let bgActive = bgA, other = bgB, typing = null;
@@ -37,6 +39,8 @@
 
   let autoTimer = null, playToken = 0;
   let paused = qp.get("pause") === "1";
+  // титр-слой: буквы проявляются тем же ритмом, что идёт подстрочник (0 ₽, решение Ивана 2026-11-04)
+  let OVL_SPANS = [], OVL_REVEAL = 0;
   let ty = null, tyPaused = false;
   // Стартовый экран без титров (Иван 2026-10-21: «титры бы выключить по умолчанию»).
   // Остаются логотип, «Начать» и полоска загрузки; ?titles=1 возвращает надписи.
@@ -365,7 +369,7 @@
     ty = { full: s, i: 0, cb: cb };
     tyPaused = false;
     textEl.textContent = "";
-    if (INSTANT) { textEl.textContent = s; ty.i = s.length; typing = null; if (cb) cb(); return; }
+    if (INSTANT) { textEl.textContent = s; ty.i = s.length; typing = null; ovlSync(); if (cb) cb(); return; }
     typing = setInterval(typeTick, TYPE_MS);
   }
   function typeTick() {
@@ -379,12 +383,14 @@
     } else {
       textEl.appendChild(document.createTextNode(ch));
     }
-    if (ty.i >= ty.full.length) { clearInterval(typing); typing = null; if (ty.cb) ty.cb(); }
+    ovlSync();                        // буквы надписи идут следом за подстрочником
+    if (ty.i >= ty.full.length) { clearInterval(typing); typing = null; ovlSync(); if (ty.cb) ty.cb(); }
   }
   function typingDone() { return !ty || ty.i >= ty.full.length; }
   function skipTyping() {
     if (ty && ty.i < ty.full.length) {
       clearInterval(typing); typing = null; textEl.textContent = ty.full; ty.i = ty.full.length;
+      ovlSync();
     }
   }
 
@@ -479,6 +485,7 @@
   function applyOvl(pg) {
     if (!ovlEl) return;
     ovlEl.textContent = "";
+    OVL_SPANS = []; OVL_REVEAL = 0;          // буквы новой страницы начинают набор с нуля
     if (OVL_OFF) { ovlEl.classList.remove("on"); return; }   // ?ovl=0 — снимок кадра без слоя (проверки)
     const list = (pg && pg.ovl) || null;
     if (!list || !list.length) { ovlEl.classList.remove("on"); return; }
@@ -500,7 +507,15 @@
         return;
       }
       const el = document.createElement("b");
-      el.textContent = it.t;
+      // буквы кладём span'ами СРАЗУ (ширина строки и её центровка не пляшут при наборе),
+      // видимыми они станут по очереди — см. ovlSync(). Пробелы — обычные текстовые узлы.
+      Array.prototype.forEach.call(String(it.t), function (c) {
+        if (c === " ") { el.appendChild(document.createTextNode(c)); return; }
+        const sp = document.createElement("span");
+        sp.textContent = c;
+        el.appendChild(sp);
+        OVL_SPANS.push(sp);
+      });
       el.style.fontSize = (it.s || 48) / E + "em";
       el.style.fontFamily = (it.f === "l" ? "LatoBold" : "URWGothicDemi") + ",sans-serif";
       el.style.color = it.c || "#f6eede";
@@ -515,6 +530,30 @@
       ovlEl.appendChild(el);
     });
     ovlEl.classList.add("on");
+    if (OVL_N !== null) {                      // тест-хук: ровно N букв (снимок середины набора)
+      while (OVL_REVEAL < OVL_N && OVL_REVEAL < OVL_SPANS.length) ovlShow(OVL_SPANS[OVL_REVEAL++]);
+    } else if (INSTANT || !LETTERS) ovlSync();  // снимок/ручной режим — строка сразу целиком
+  }
+
+  // ---------- набор букв титр-слоя ----------
+  // Одна буква — один span; показываем их ПРОПОРЦИОНАЛЬНО прочитанному подстрочнику:
+  // сколько текста под кадром напечатано, столько букв надписи и проступило. Так надпись
+  // приходит «по фразе», а не висит целиком с первого кадра. ?letters=0 — без анимации.
+  function ovlShow(sp) {
+    if (!sp || sp.dataset.on) return;
+    sp.dataset.on = "1";
+    // ?instant=1 / ?letters=0 — без анимации: в headless-снимках CSS-анимация под
+    // виртуальным временем замирает на кадре opacity:0 и кадр «без надписей».
+    sp.classList.add(LETTERS && !INSTANT ? "in" : "plain");
+  }
+  function ovlSync() {
+    if (!OVL_SPANS.length) return;
+    let k = OVL_SPANS.length;
+    if (ty && ty.full && ty.full.length) {
+      k = Math.floor(ty.i / ty.full.length * OVL_SPANS.length);
+    }
+    if (OVL_N !== null) k = Math.min(k, OVL_N);   // тест-хук ограничивает и автонабор
+    while (OVL_REVEAL < k) ovlShow(OVL_SPANS[OVL_REVEAL++]);
   }
 
   function enterPos(i, skipBreak) {

@@ -19,9 +19,19 @@ E = 2400.0
 WANT = [('s3', 0), ('s4', 0), ('s5a', 0), ('s5a', 1), ('s5b', 0)]
 
 
-def px(v):
-    m = re.match(r'(-?[\d.]+)em', v.strip())
-    return 0.0 if not m else float(m.group(1)) * E
+def px(v, full=E):
+    """значение inline-стиля → пиксели пространства 2400x1350 (%, em от ширины кадра, px)"""
+    v = v.strip()
+    m = re.match(r'(-?[\d.]+)%', v)
+    if m:
+        return float(m.group(1)) * full / 100.0
+    m = re.match(r'(-?[\d.]+)em', v)
+    if m:
+        return float(m.group(1)) * E
+    m = re.match(r'(-?[\d.]+)px', v)
+    if m:
+        return float(m.group(1))
+    return 0.0
 
 
 bad = 0
@@ -45,16 +55,18 @@ for nid, p in WANT:
     for st in re.findall(r'<i style="([^"]*)"></i>', inner):
         d = dict((k.strip(), v.strip()) for k, v in
                  (kv.split(':', 1) for kv in st.split(';') if ':' in kv))
-        x0, y0 = px(d.get('left', '0')), px(d.get('top', '0'))
-        bx = (x0, x0 + px(d.get('width', '0')), y0, y0 + px(d.get('height', '0')))
+        x0, y0 = px(d.get('left', '0')), px(d.get('top', '0'), 1350.0)
+        bx = (x0, x0 + px(d.get('width', '0'), E), y0, y0 + px(d.get('height', '0'), 1350.0))
         boxes.append(bx)
         print('  плашка x %.0f..%.0f y %.0f..%.0f  центр %.1f  bg=%s'
               % (bx[0], bx[1], bx[2], bx[3], (bx[0] + bx[1]) / 2.0,
                  d.get('background', '')))
-    for st, t in re.findall(r'<b style="([^"]*)">([^<]*)</b>', inner):
+    # текст теперь набором span'ов (вариант B, 2026-11-04) — берём разметку целиком и снимаем теги
+    for st, body in re.findall(r'<b style="([^"]*)">(.*?)</b>', inner, re.S):
+        t = re.sub(r'<[^>]+>', '', body)
         d = dict((k.strip(), v.strip()) for k, v in
                  (kv.split(':', 1) for kv in st.split(';') if ':' in kv))
-        x, y = px(d.get('left', '0')), px(d.get('top', '0'))
+        x, y = px(d.get('left', '0')), px(d.get('top', '0'), 1350.0)
         tf = d.get('transform', '')
         tr = re.search(r'translate\((-?[\d.]+)px,\s*(-?[\d.]+)px\)', tf)
         if tr:

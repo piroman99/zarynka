@@ -88,6 +88,13 @@ body{
 #ovl i{position:absolute; display:block}
 #ovl b{position:absolute; display:block; white-space:pre; font-weight:400;
   letter-spacing:0; text-shadow:0 .045em .16em rgba(0,0,0,.62), 0 0 .45em rgba(0,0,0,.38)}
+/* буквы надписи: стоят на своих местах сразу (ширина строки не пляшет), но проявляются
+   по одной — тем же ключевым кадром chIn, что и подстрочник */
+#ovl b span{display:inline-block; white-space:pre; opacity:0; will-change:opacity,transform,filter}
+#ovl b span.in{animation:chIn .38s cubic-bezier(.2,.7,.3,1) both}
+#ovl b span.plain{opacity:1}
+#stage.paused #ovl b span.in{animation-play-state:paused}
+@media (prefers-reduced-motion: reduce){ #ovl b span.in{animation:none; opacity:1} }
 
 /* экраны */
 .screen{
