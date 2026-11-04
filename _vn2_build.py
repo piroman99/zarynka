@@ -201,6 +201,10 @@ CHAR_SRC = {
     'poet.png':              os.path.join(SPR, 'poet_ha_neutral.png'),
     'poet_interested.png':   os.path.join(SPR, 'poet_ha_interested.png'),
     'poet_upset.png':        os.path.join(SPR, 'poet_ha_upset.png'),
+    # сидящий поэт (сцена «аллея»: по тексту он на скамейке) — правка Ивана 2026-11-04
+    'poet_sit.png':          os.path.join(SPR, 'poet_sit_neutral.png'),
+    'poet_sit_interested.png': os.path.join(SPR, 'poet_sit_interested.png'),
+    'poet_sit_upset.png':    os.path.join(SPR, 'poet_sit_upset.png'),
     'poet_sh.png':           os.path.join(SPR, 'poet_sh_neutral.png'),
     'poet_sh_tired.png':     os.path.join(SPR, 'poet_sh_tired.png'),
     'poet_sh_inspired.png':  os.path.join(SPR, 'poet_sh_inspired.png'),
@@ -225,7 +229,7 @@ for dst, src in CHAR_SRC.items():
 # рисует только то, что есть, и подхватит новые эмоции без правок кода
 def char_manifest():
     key_of = {'Сергей': 'sergey', 'Екатерина': 'kate', 'Старик': 'starik',
-              'Поэт': 'poet', 'Поэт (стриж.)': 'poet_sh'}
+              'Поэт': 'poet', 'Поэт (стриж.)': 'poet_sh', 'Поэт (сидя)': 'poet_sit'}
     known = ['neutral', 'smile', 'sad', 'concerned', 'stern',
              'interested', 'upset', 'tired', 'inspired']
     have = set(os.listdir(os.path.join(IMG, 'char')))
@@ -378,10 +382,14 @@ os.makedirs(CG_DIR, exist_ok=True)
 CG_P4 = 'cg_p4v3_a'          # P4 на стр. 35..37. v3 = Сергей со спрайта (щетина, жилет, бейдж);
                              # 'a' (общий от окна — принят Иваном 2026-10-25) | 'b' (через плечо).
                              # v2 (бритый, в галстуке) забракован — оставлен исходником в assets/gen.
+CG_MUZA = 'cg_muza'          # «— Муза, — юноша покраснел и отвернулся» (сцена «аллея»,
+                             # решение Ивана 2026-11-04: «давай попробуем CG на музу»)
 CG_SAD = 'cg_room_a'         # сникшая Екатерина на стр. 59..61 (принят 2026-10-24)
-CG_SOURCES = {'rec_35': CG_P4, 'rec_48': CG_SAD}
+CG_SOURCES = {'rec_35': CG_P4, 'rec_48': CG_SAD, 'al_muza': CG_MUZA}
+# имя файла генерации: у новых партий gpt-image-2 без суффикса модели
+CG_FILE = {'rec_35': None, 'rec_48': None, 'al_muza': 'cg_muza_0.png'}
 for _out, _stem in CG_SOURCES.items():
-    _src = os.path.join(GEN, _stem + '__gpt-image-2_0.png')
+    _src = os.path.join(GEN, CG_FILE.get(_out) or (_stem + '__gpt-image-2_0.png'))
     if not os.path.exists(_src):
         raise SystemExit('нет исходника CG: %s' % _src)
     _cg = Image.open(_src).convert('RGB')
@@ -544,7 +552,7 @@ NAME = {'Сергей': 'Лихнецкий Сергей', 'Екатерина':
         'Старик': 'Старик',
         # поэт по имени представится только после тренировки («Я Лёша, Лёша Савушкин»),
         # поэтому в плашке до того момента — без фамилии
-        'Поэт': 'Поэт'}
+        'Поэт': 'Поэт', 'Поэт (сидя)': 'Поэт'}
 
 # --- приёмная: страницы, каст (кто и где стоит) и эмоции ---
 # Эмоции/появления проставлены РУЧНО по смыслу текста (в тексте эмоций нет).
@@ -759,16 +767,16 @@ def _anchor2(frag):
 ALLEY_CAST = [
     ('Расстроенная Екатерина Ивановна вышла', 'l', 'Екатерина', 'sad'),
     ('Недалеко от кованых ажурных ворот', 'l', 'Екатерина', 'neutral'),
-    ('Недалеко от кованых ажурных ворот', 'r', 'Поэт', 'upset'),
+    ('Недалеко от кованых ажурных ворот', 'r', 'Поэт (сидя)', 'upset'),
     ('Юноша еще долго сидел на скамейке', 'l', '-', ''),
 ]
 ALLEY_EMO = [
     ('Екатерина Ивановна улыбнулась и стала искать', 'Екатерина', 'smile'),
-    ('Юноша отнял лицо от ладоней', 'Поэт', 'neutral'),
-    ('Тот что-то неразборчиво буркнул', 'Поэт', 'upset'),
-    ('Наконец оторвавшись от ладоней', 'Поэт', 'upset'),
-    ('Что это?', 'Поэт', 'interested'),
-    ('Поэт поджал губы', 'Поэт', 'upset'),
+    ('Юноша отнял лицо от ладоней', 'Поэт (сидя)', 'neutral'),
+    ('Тот что-то неразборчиво буркнул', 'Поэт (сидя)', 'upset'),
+    ('Наконец оторвавшись от ладоней', 'Поэт (сидя)', 'upset'),
+    ('Что это?', 'Поэт (сидя)', 'interested'),
+    ('Поэт поджал губы', 'Поэт (сидя)', 'upset'),
 ]
 _cdict2 = {}
 for frag, side, who, em in ALLEY_CAST:
@@ -806,6 +814,17 @@ steps_pages, alley_pages = raw2[:_cut2], raw2[_cut2:]
 if not steps_pages or not alley_pages:
     raise SystemExit('сцена «аллея»: пустая часть (steps %d, alley %d)'
                      % (len(steps_pages), len(alley_pages)))
+
+# CG на пиковую страницу «— Муза, — юноша покраснел и отвернулся» (решение Ивана
+# 2026-11-04: «давай попробуем CG на музу»): кадр заменяет фон+спрайты на ОДНОЙ странице.
+# Готча: _anchor2 считает по ВСЕМУ raw2, а alley_pages = raw2[_cut2:] — индекс надо сдвинуть.
+_muza = _anchor2('юноша покраснел и отвернулся') - _cut2
+if not (0 <= _muza < len(alley_pages)):
+    raise SystemExit('CG «Муза»: индекс вне узла (%d при %d страницах)' % (_muza, len(alley_pages)))
+alley_pages[_muza]['bg'] = 'img/cg/al_muza' + CLIENT_EXT
+alley_pages[_muza]['cast'] = {}
+alley_pages[_muza]['cg'] = True
+print('CG al_muza: страница %d сцены «аллея» (%r)' % (_muza, alley_pages[_muza]['tx'][:34]))
 # перебивка на «* * *» перед выходом из приёмной — тот же длинный переход, что у кабинета
 nodes.append({'t': 'scene', 'id': 'steps', 'bg': 'img/bg/steps' + CLIENT_EXT,
               'music': 'reception', 'trans': 'fade', 'pages': steps_pages})

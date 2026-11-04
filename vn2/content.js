@@ -85,6 +85,14 @@ window.VN = {
     "tired": "img/char/poet_sh_tired.webp",
     "inspired": "img/char/poet_sh_inspired.webp"
    }
+  },
+  "Поэт (сидя)": {
+   "base": "img/char/poet_sit.webp",
+   "emos": {
+    "neutral": "img/char/poet_sit.webp",
+    "interested": "img/char/poet_sit_interested.webp",
+    "upset": "img/char/poet_sit_upset.webp"
+   }
   }
  },
  "nodes": [
@@ -1429,7 +1437,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -1444,7 +1452,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -1461,7 +1469,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Екатерина"
@@ -1477,7 +1485,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "neutral"
       ]
      }
@@ -1494,7 +1502,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "neutral"
       ],
       "speak": "Екатерина"
@@ -1510,7 +1518,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -1525,7 +1533,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -1542,7 +1550,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Екатерина"
@@ -1558,7 +1566,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -1575,7 +1583,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Поэт"
@@ -1593,7 +1601,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Екатерина"
@@ -1609,7 +1617,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -1626,7 +1634,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Поэт"
@@ -1644,7 +1652,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Поэт"
@@ -1660,7 +1668,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -1677,7 +1685,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Поэт"
@@ -1695,7 +1703,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Поэт"
@@ -1713,7 +1721,7 @@ window.VN = {
        "neutral"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Екатерина"
@@ -1737,16 +1745,9 @@ window.VN = {
       "audio/vo/al_20.mp3",
       "audio/vo/al_20b.mp3"
      ],
-     "cast": {
-      "l": [
-       "Екатерина",
-       "neutral"
-      ],
-      "r": [
-       "Поэт",
-       "upset"
-      ]
-     }
+     "cast": {},
+     "bg": "img/cg/al_muza.webp",
+     "cg": true
     },
     {
      "tx": "Екатерина Ивановна улыбнулась и стала искать что-то у себя в сумке.",
@@ -1758,7 +1759,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -1787,7 +1788,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -1804,7 +1805,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "interested"
       ],
       "speak": "Поэт"
@@ -1834,7 +1835,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "interested"
       ]
      }
@@ -1851,7 +1852,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "interested"
       ],
       "speak": "Екатерина"
@@ -1881,7 +1882,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "interested"
       ]
      }
@@ -1898,7 +1899,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "interested"
       ],
       "speak": "Поэт"
@@ -1916,7 +1917,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "interested"
       ],
       "speak": "Екатерина"
@@ -1934,7 +1935,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "interested"
       ],
       "speak": "Екатерина"
@@ -1952,7 +1953,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "interested"
       ],
       "speak": "Екатерина"
@@ -1968,7 +1969,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -1985,7 +1986,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Екатерина"
@@ -2001,7 +2002,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -2018,7 +2019,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Екатерина"
@@ -2036,7 +2037,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Екатерина"
@@ -2054,7 +2055,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Екатерина"
@@ -2070,7 +2071,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
@@ -2087,7 +2088,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Екатерина"
@@ -2105,7 +2106,7 @@ window.VN = {
        "smile"
       ],
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ],
       "speak": "Екатерина"
@@ -2117,7 +2118,7 @@ window.VN = {
      "vo": "audio/vo/al_40.mp3",
      "cast": {
       "r": [
-       "Поэт",
+       "Поэт (сидя)",
        "upset"
       ]
      }
