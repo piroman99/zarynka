@@ -5,7 +5,7 @@
   1) стр. 35..37 (SCRIPT_CAST) — CG rec_35 стоит фоном, спрайтов нет;
   2) стр. 59..61 — CG rec_48 стоит фоном, спрайтов нет;
   3) до и после диапазонов — обычный фон приёмной и спрайты на месте;
-  4) Екатерины НЕТ на описании (стр. 21), появляется на приветствии (стр. 23).
+  4) Екатерина входит на ОПИСАНИИ (стр. 21), на предыдущей странице её ещё нет.
 """
 import os, sys, time, threading, functools, http.server, socketserver
 
@@ -78,16 +78,16 @@ try:
         got = g['bg'][0] if g['bg'] else '(нет)'
         chk(got == want_bg and len(g['sprites']) == want_sp, label,
             'bg=%s sprites=%d' % (got, len(g['sprites'])))
-    # выход Екатерины: на описании её нет, на приветствии есть
+    # выход Екатерины: на предыдущей странице её нет, на описании уже есть
+    b.navigate(URL % 2, wait=1.4)
+    time.sleep(0.25)
+    g = b.js(GEO)
+    chk(len(g['sprites']) == 1, 'стр. 20 (перед описанием): Екатерины ещё нет — только Сергей',
+        'sprites=%d' % len(g['sprites']))
     b.navigate(URL % 3, wait=1.4)
     time.sleep(0.25)
     g = b.js(GEO)
-    chk(len(g['sprites']) == 1, 'стр. 21 (описание): Екатерины ещё нет — только Сергей',
-        'sprites=%d' % len(g['sprites']))
-    b.navigate(URL % 5, wait=1.4)
-    time.sleep(0.25)
-    g = b.js(GEO)
-    chk(len(g['sprites']) == 2, 'стр. 23 (приветствие): Екатерина вошла',
+    chk(len(g['sprites']) == 2, 'стр. 21 (описание «кудрявые седые…»): Екатерина вошла',
         'sprites=%d' % len(g['sprites']))
 finally:
     b.close()
