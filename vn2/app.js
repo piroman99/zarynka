@@ -23,8 +23,9 @@
   const OVL_OFF = qp.get("ovl") === "0";     // ?ovl=0 — кадр без титр-слоя (для пиксельных проверок)
   const INSTANT = qp.get("instant") === "1";     // не печатать по буквам (для скриншотов)
   const SHOT = qp.has("node");
-  // ?ovln=N — тест-хук для снимков середины набора: показать ровно N букв надписи
+  // ?ovln=N — тест-хук: показать ровно N букв надписи; ?ovlp=P — показать срез прогресса P (0..1)
   const OVL_N = qp.has("ovln") ? Math.max(0, parseInt(qp.get("ovln"), 10) || 0) : null;
+  const OVL_P = qp.has("ovlp") ? Math.min(1, Math.max(0, parseFloat(qp.get("ovlp")) || 0)) : null;
 
   let curBg = "", curVo = "";
   let bgActive = bgA, other = bgB, typing = null;
@@ -39,8 +40,9 @@
 
   let autoTimer = null, playToken = 0;
   let paused = qp.get("pause") === "1";
-  // титр-слой: буквы проявляются тем же ритмом, что идёт подстрочник (0 ₽, решение Ивана 2026-11-04)
-  let OVL_SPANS = [], OVL_REVEAL = 0;
+  // титр-слой: строки ждут свою фразу и печатаются под озвучку (0 ₽, решение Ивана 2026-11-04)
+  let OVL_SPANS = [], OVL_LINES = [], OVL_PLATES = [], OVL_TICK = null, OVL_VOD = 0;
+  let ovlRun = 0, ovlLast = 0;
   let ty = null, tyPaused = false;
   // Стартовый экран без титров (Иван 2026-10-21: «титры бы выключить по умолчанию»).
   // Остаются логотип, «Начать» и полоска загрузки; ?titles=1 возвращает надписи.
@@ -477,18 +479,25 @@
 
   // ---------- титр-слой кадра (pg.ovl) ----------
   // Надписи кадров пролога до 2026-11-01 вжигались в PNG и висели весь кадр. Теперь это
-  // DOM-слой ПОВЕРХ кадра, живёт ПО СТРАНИЦАМ: страница = фраза, строка приходит вместе с ней.
+  // DOM-слой ПОВЕРХ кадра. Строка приходит НА СВОЕЙ ФРАЗЕ: у каждой строки в content.js
+  // есть `at` — доля текста страницы, на которой эта фраза звучит (Иван 2026-11-04:
+  // «я думал под озвучку… появляется вместе с фразой»). Часы берём у ОЗВУЧКИ
+  // (voice.currentTime/duration), а если голоса нет — у длительности записи (pg.vod)
+  // или у печати подстрочника. Буквы внутри строки идут очередью LINE_MS.
   // Координаты и кегли — в пространстве 2400x1350 (как было в _prolog_finals.py).
-  // 1em слоя = ШИРИНА кадра, поэтому вертикаль тоже считается по X (1350/2400 = 9/16):
-  // y_em = y/2400. Так всё масштабируется вместе со сценой на любом экране.
-  // Элемент: {t,f,s,c,x,y,a} — текст; {b:[x0,y0,x1,y1],c,a,bl} — скрим/плашка.
+  // Элемент: {t,f,s,c,x,y,a,at} — текст; {b:[x0,y0,x1,y1],c,a,bl} — скрим/плашка.
+  const LINE_MS = Math.max(12, Math.round(24 * PACE));   // одна буква строки
+
   function applyOvl(pg) {
     if (!ovlEl) return;
     ovlEl.textContent = "";
-    OVL_SPANS = []; OVL_REVEAL = 0;          // буквы новой страницы начинают набор с нуля
+    OVL_SPANS = []; OVL_LINES = []; OVL_PLATES = []; OVL_VOD = 0;
+    ovlRun = 0; ovlLast = performance.now();
+    clearInterval(OVL_TICK); OVL_TICK = null;
     if (OVL_OFF) { ovlEl.classList.remove("on"); return; }   // ?ovl=0 — снимок кадра без слоя (проверки)
     const list = (pg && pg.ovl) || null;
     if (!list || !list.length) { ovlEl.classList.remove("on"); return; }
+    OVL_VOD = (pg && pg.vod) || 0;             // длительность озвучки страницы, сек
     const E = 2400;
     const px = ovlEl.clientWidth || 2400;
     ovlEl.style.fontSize = px + "px";       // 1em = ширина кадра
@@ -503,18 +512,22 @@
         el.style.background = "rgba(" + (it.c || [6, 8, 14]).join(",") + "," +
           ((it.a == null ? 150 : it.a) / 255).toFixed(3) + ")";
         if (it.bl) el.style.filter = "blur(" + (it.bl / E) + "em)";
+        el.style.opacity = 0;                // плашка выезжает вместе с первой строкой, а не пустым прямоугольником
         ovlEl.appendChild(el);
+        OVL_PLATES.push(el);
         return;
       }
       const el = document.createElement("b");
+      const spans = [];
       // буквы кладём span'ами СРАЗУ (ширина строки и её центровка не пляшут при наборе),
-      // видимыми они станут по очереди — см. ovlSync(). Пробелы — обычные текстовые узлы.
+      // видимыми они станут по очереди — см. ovlTick(). Пробелы — обычные текстовые узлы.
       Array.prototype.forEach.call(String(it.t), function (c) {
         if (c === " ") { el.appendChild(document.createTextNode(c)); return; }
         const sp = document.createElement("span");
         sp.textContent = c;
         el.appendChild(sp);
         OVL_SPANS.push(sp);
+        spans.push(sp);
       });
       el.style.fontSize = (it.s || 48) / E + "em";
       el.style.fontFamily = (it.f === "l" ? "LatoBold" : "URWGothicDemi") + ",sans-serif";
@@ -528,17 +541,20 @@
       el.style.transform = (a === "mm") ? "translate(-50%,-50%)"
                          : (a === "lt" ? "none" : "translateX(-50%)");
       ovlEl.appendChild(el);
+      OVL_LINES.push({ spans: spans, at: (it.at == null ? 0 : it.at), i: 0, t0: -1 });
     });
     ovlEl.classList.add("on");
-    if (OVL_N !== null) {                      // тест-хук: ровно N букв (снимок середины набора)
-      while (OVL_REVEAL < OVL_N && OVL_REVEAL < OVL_SPANS.length) ovlShow(OVL_SPANS[OVL_REVEAL++]);
-    } else if (INSTANT || !LETTERS) ovlSync();  // снимок/ручной режим — строка сразу целиком
+    if (INSTANT || !LETTERS || OVL_N !== null || OVL_P !== null) {
+      ovlTestReveal();                        // снимки/проверки — без ожидания фраз
+    } else {
+      ovlTick();                              // первая строка ставится сразу (at=0)
+      OVL_TICK = setInterval(ovlTick, 40);
+    }
   }
 
   // ---------- набор букв титр-слоя ----------
-  // Одна буква — один span; показываем их ПРОПОРЦИОНАЛЬНО прочитанному подстрочнику:
-  // сколько текста под кадром напечатано, столько букв надписи и проступило. Так надпись
-  // приходит «по фразе», а не висит целиком с первого кадра. ?letters=0 — без анимации.
+  // Одна буква — один span. Строка ждёт свою фразу (`at`), затем пишется очередью LINE_MS.
+  // Часы слоя (ovlRun) стоят на паузе/при скрытом тексте — буквы тоже стоят.
   function ovlShow(sp) {
     if (!sp || sp.dataset.on) return;
     sp.dataset.on = "1";
@@ -546,15 +562,56 @@
     // виртуальным временем замирает на кадре opacity:0 и кадр «без надписей».
     sp.classList.add(LETTERS && !INSTANT ? "in" : "plain");
   }
-  function ovlSync() {
-    if (!OVL_SPANS.length) return;
-    let k = OVL_SPANS.length;
-    if (ty && ty.full && ty.full.length) {
-      k = Math.floor(ty.i / ty.full.length * OVL_SPANS.length);
-    }
-    if (OVL_N !== null) k = Math.min(k, OVL_N);   // тест-хук ограничивает и автонабор
-    while (OVL_REVEAL < k) ovlShow(OVL_SPANS[OVL_REVEAL++]);
+  function ovlClock() {                     // накопленное «игровое» время слоя, сек
+    const now = performance.now();
+    if (!paused && !tyPaused && started) ovlRun += (now - ovlLast) / 1000;
+    ovlLast = now;
+    return ovlRun;
   }
+  function ovlProgress() {
+    if (OVL_P !== null) return OVL_P;                     // тест-хук ?ovlp=0.4
+    if (INSTANT) return 1;
+    if (voiceOn && curVo && !voice.paused && isFinite(voice.duration) && voice.duration > 0.2) {
+      return Math.min(1, voice.currentTime / voice.duration);   // часы озвучки — главные
+    }
+    if (OVL_VOD > 0.2 && !typing && !ty) return Math.min(1, ovlClock() / OVL_VOD);  // голоса нет и печати нет
+    if (ty && ty.full && ty.full.length) return ty.i / ty.full.length;   // голос выключен — по печати
+    return 1;
+  }
+  function ovlTestReveal() {                // режимы снимков: ?instant / ?letters=0 / ?ovln / ?ovlp
+    OVL_LINES.forEach(function (L) {
+      if (OVL_P !== null && L.at > OVL_P) return;
+      if (OVL_N !== null) {
+        const room = OVL_N - OVL_SPANS.filter(function (s) { return s.dataset.on; }).length;
+        L.spans.slice(0, Math.max(0, room)).forEach(ovlShow);
+        return;
+      }
+      L.spans.forEach(ovlShow);
+    });
+    if (OVL_LINES.length && OVL_LINES.some(function (L) { return L.spans[0] && L.spans[0].dataset.on; })) {
+      ovlPlateOn();
+    }
+  }
+  function ovlPlateOn() {                    // плашка = часть надписи: ждёт первую строку
+    OVL_PLATES.forEach(function (el) { el.style.opacity = ""; });
+  }
+  function ovlTick() {
+    if (!OVL_LINES.length) { clearInterval(OVL_TICK); OVL_TICK = null; return; }
+    if (OVL_N !== null || OVL_P !== null || INSTANT) return;
+    const t = ovlClock(), p = ovlProgress();
+    let pending = false;
+    OVL_LINES.forEach(function (L) {
+      if (L.i >= L.spans.length) return;               // строка дописана
+      if (p < L.at) { pending = true; return; }        // её фраза ещё не звучит
+      if (L.t0 < 0) L.t0 = t;                          // фраза пошла — строка пишется
+      ovlPlateOn();                                    // и плашка появляется вместе с ней
+      const k = Math.floor((t - L.t0) * 1000 / LINE_MS);
+      while (L.i < L.spans.length && L.i < k) ovlShow(L.spans[L.i++]);
+      if (L.i < L.spans.length) pending = true;
+    });
+    if (!pending) { clearInterval(OVL_TICK); OVL_TICK = null; }
+  }
+  function ovlSync() { ovlTick(); }          // совместимость: тик печати тоже подталкивает слой
 
   function enterPos(i, skipBreak) {
     if (i < 0) i = 0;
@@ -1129,7 +1186,12 @@
                    get paused() { return paused; }, get voQ() { return voQ.length; },
                    get wake() { return { want: wakeWant, held: !!wakeLock, ok: WAKE_OK }; },
                    get fs() { return !!fsEl(); },
-                   get fsTried() { return fsTried; } };
+                   get fsTried() { return fsTried; },
+                   // состояние музыки — для проверок «трек не рвётся» (_music_probe.py)
+                   get music() { return { paused: music.paused, t: music.currentTime,
+                                          vol: music.volume, dur: music.duration,
+                                          key: musicKey, duck: duck,
+                                          src: (music.currentSrc || "").split("/").pop() }; } };
   if (SHOT) {                      // режим скриншота: сразу к нужному узлу
     started = true;
     const ni = parseInt(qp.get("node"), 10);

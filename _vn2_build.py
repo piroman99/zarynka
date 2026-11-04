@@ -9,7 +9,7 @@
 Текст — АВТОРСКИЙ ДОСЛОВНО из assets/story.txt (строки 5,7,9 = пролог; 13..67 = приёмная).
 Голос — ПОСТРАНИЧНО: у каждой страницы поле vo = audio/vo/<файл>, закадр пишет _vn2_vo.py.
 """
-import os, json, re, shutil, sys
+import os, json, re, shutil, subprocess, sys
 import hashlib
 from collections import deque
 import numpy as np
@@ -369,12 +369,46 @@ PROLOG = [('s1', [prolog_par[0]], 's1'),
 # До 2026-11-01 надписи вжигались в PNG (_prolog_finals.py) и висели весь кадр.
 # Теперь они живут в движке и появляются ПО СТРАНИЦАМ: страница = фраза.
 # Координаты и кегли — в пространстве 2400x1350 (ровно как было в _prolog_finals.py).
-def ovl_t(t, size, color, x, y, kind='g', anchor='ma'):
-    return {'t': t, 'f': kind, 's': size, 'c': color, 'x': x, 'y': y, 'a': anchor}
+def ovl_t(t, size, color, x, y, kind='g', anchor='ma', at=None):
+    # at = ФРАЗА строки: подстрока текста страницы, на которой строка появляется
+    # (в content.js уезжает долей 0..1). None → строка стоит с начала страницы.
+    return {'t': t, 'f': kind, 's': size, 'c': color, 'x': x, 'y': y, 'a': anchor, 'at': at}
 
 
 def ovl_b(box, color=(6, 8, 14), alpha=150, blur=20):
     return {'b': list(box), 'c': list(color), 'a': alpha, 'bl': blur}
+
+
+def _norm(s):
+    return s.lower().replace('ё', 'е')
+
+
+def ovl_at(tx, marker):
+    """Доля текста страницы, где начинается фраза-маркер (регистр/ё не важны)."""
+    i = _norm(tx).find(_norm(marker))
+    if i < 0:
+        raise SystemExit('титр: маркер %r не найден в тексте %r' % (marker, tx[:60]))
+    return round(i / float(max(1, len(tx))), 4)
+
+
+_FF = os.path.join(HERE, '..', '..', '.probe', '.lib', 'imageio_ffmpeg', 'binaries',
+                   'ffmpeg-linux-x86_64-v7.0.2')
+_DUR = {}
+
+
+def vo_dur(rel):
+    """Длительность озвучки страницы, сек (из mp3 через ffmpeg). Кеш на сборку."""
+    if rel in _DUR:
+        return _DUR[rel]
+    p = os.path.join(VN2, rel)
+    sec = 0.0
+    if os.path.exists(p) and os.path.exists(_FF):
+        r = subprocess.run([_FF, '-hide_banner', '-i', p], capture_output=True, text=True)
+        m = re.search(r'Duration: (\d+):(\d+):([\d.]+)', r.stderr)
+        if m:
+            sec = int(m.group(1)) * 3600 + int(m.group(2)) * 60 + float(m.group(3))
+    _DUR[rel] = round(sec, 2)
+    return _DUR[rel]
 
 
 CREAM = '#f6eede'
@@ -384,30 +418,36 @@ WARM = '#fce2aa'
 
 # ключ = (id узла, номер страницы)
 OVL_PAGES = {
-    # кадр 9 — зал: весь абзац — ОДНА страница (движок так режет текст), поэтому плашка и
-    # строки те же, что были вожжены в PNG (утверждённый вид кадра не меняется)
+    # кадр 9 — зал: подстрочник — один абзац, но надписи идут ПО ФРАЗАМ (at = маркер):
+    # «Марс — дело общее?» → хор «Общее!» → «а что же обычных людей нет?»
     ('s3', 0): [ovl_b((620, 330, 1780, 1010), alpha=150, blur=26),
-                ovl_t('«МАРС —', 108, CREAM, 1200, 430),
-                ovl_t('ДЕЛО ОБЩЕЕ?»', 108, CREAM, 1200, 560),
-                ovl_t('«ОБЩЕЕ!»', 86, GREEN, 1200, 720),
-                ovl_t('а что же обычных людей нет?', 52, CREAM, 1200, 860, 'l')],
-    # кадр 10 — ролик: подпись на экране панели (кегль 61 — 94% ширины экрана ТВ)
+                ovl_t('«МАРС —', 108, CREAM, 1200, 430, at='Марс — дело общее'),
+                ovl_t('ДЕЛО ОБЩЕЕ?»', 108, CREAM, 1200, 560, at='Марс — дело общее'),
+                ovl_t('«ОБЩЕЕ!»', 86, GREEN, 1200, 720, at='«Общее!»'),
+                ovl_t('а что же обычных людей нет?', 52, CREAM, 1200, 860, 'l',
+                      at='обычных людей')],
+    # кадр 10 — ролик: подпись на экране панели (кегль 61 — 94% ширины экрана ТВ).
+    # Появляется на «неудобным вопросом» — подпись и есть этот вопрос.
     ('s4', 0): [ovl_b((738, 684, 1644, 777), color=(4, 5, 10), alpha=180, blur=14),
-                ovl_t('а что же обычных людей нет?', 61, CREAM, 1191, 730, 'l', 'mm')],
+                ovl_t('а что же обычных людей нет?', 61, CREAM, 1191, 730, 'l', 'mm',
+                      at='неудобным вопросом')],
     # кадр 11 — площадь (вариант B кадра, 2026-11-03): полоса лозунга занимает ВСЮ светлую
     # панель-витрину справа (вариант i, выбран Иваном). Панель замерена детектом плоских
     # светлых областей (_s5ab_panels.py): 1119,499,1848,895. Край резкий (blur=0) — это плакат.
     # Кегли подобраны под ширину панели 729 при 92%: 62 / 58 (_s5a_band_B.py).
     ('s5a', 0): [ovl_b((1119, 505, 1848, 890), color=(168, 40, 34), alpha=232, blur=0),
-                 ovl_t('МАРС — ДЕЛО ОБЩЕЕ!', 62, CREAM, 1483, 636),
-                 ovl_t('ДАЁШЬ МАРС ДЛЯ ВСЕХ!', 58, WARM, 1483, 782)],
+                 ovl_t('МАРС — ДЕЛО ОБЩЕЕ!', 62, CREAM, 1483, 636, at='Марс дело общее'),
+                 ovl_t('ДАЁШЬ МАРС ДЛЯ ВСЕХ!', 58, WARM, 1483, 782, at='Даешь Марс')],
+    # вторая страница кадра 11 — лозунг уже облетел страну, плакат стоит целиком
     ('s5a', 1): [ovl_b((1119, 505, 1848, 890), color=(168, 40, 34), alpha=232, blur=0),
                  ovl_t('МАРС — ДЕЛО ОБЩЕЕ!', 62, CREAM, 1483, 636),
                  ovl_t('ДАЁШЬ МАРС ДЛЯ ВСЕХ!', 58, WARM, 1483, 782)],
     # кадр 12 — Верховный Совет: чип по центру кадра (вариант A, правка Ивана 2026-11-04):
     # раньше центр был x=960 при центре кадра 1200 → чип висел левее на 240 px.
+    # Чип — про «два места для людей с улицы», на этой фразе и появляется.
     ('s5b', 0): [ovl_b((801, 690, 1599, 780), alpha=150, blur=14),
-                 ovl_t('ДВА МЕСТА — ЛЮДЯМ С УЛИЦЫ', 46, GOLD, 1200, 735, 'g', 'mm')],
+                 ovl_t('ДВА МЕСТА — ЛЮДЯМ С УЛИЦЫ', 46, GOLD, 1200, 735, 'g', 'mm',
+                       at='два места')],
 }
 for item in PROLOG:
     name, texts, vo = item[0], item[1], item[2]
@@ -422,7 +462,17 @@ for item in PROLOG:
     for i, pg in enumerate(pgs):
         ov = OVL_PAGES.get((name, i))
         if ov:
+            for it in ov:
+                if 't' not in it:
+                    continue
+                if isinstance(it.get('at'), str):
+                    it['at'] = ovl_at(pg['tx'], it['at'])     # фраза → доля текста
+                elif it.get('at') is None:
+                    it['at'] = 0.0
             pg['ovl'] = ov
+            pg['vod'] = vo_dur(pg['vo'])          # длительность озвучки — часы титр-слоя
+            print('титр %s[%d]: озвучка %.2f с, at=%s'
+                  % (name, i, pg['vod'], [it.get('at') for it in ov if 't' in it]))
     node = {'t': 'scene', 'id': name, 'bg': f'img/prolog/{img}{CLIENT_EXT}',
             'music': 'prolog', 'pages': pgs}
     nodes.append(node)
