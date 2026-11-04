@@ -7,6 +7,7 @@
   3) в титрах есть Иван (piroman99) и nanobot, и НЕТ придуманных должностей;
   4) страница 48 приёмной — CG-кадр (вариант А) без спрайтов поверх.
 """
+import json
 import os
 import re
 import sys
@@ -97,7 +98,15 @@ try:
           '%.1f с' % gone if gone else 'не ушло')
 
     # ---------- 3) конец серии → титры сами ----------
-    b.navigate(BASE + '?preload=0&auto=0&node=%d&page=56' % REC, wait=1.4)
+    # ПОСЛЕДНЯЯ страница ПОСЛЕДНЕГО узла с текстом — не хардкод: после приёмной
+    # появилась сцена «аллея», и reception больше не финал эпизода.
+    _src = open(os.path.join(HERE, 'vn2', 'content.js'), encoding='utf-8').read()
+    _D = json.loads(_src[_src.index('=') + 1:].strip().rstrip(';'))
+    _last = [(i, n) for i, n in enumerate(_D['nodes']) if n.get('pages')][-1]
+    LAST_NODE, LAST_PAGE = _last[0], len(_last[1]['pages']) - 1
+    print('  (последний узел %s = node=%d, страниц %d)'
+          % (_last[1].get('id'), LAST_NODE, LAST_PAGE + 1))
+    b.navigate(BASE + '?preload=0&auto=0&node=%d&page=%d' % (LAST_NODE, LAST_PAGE), wait=1.4)
     # первый клик может только дописать текст страницы — жмём до перехода
     for _ in range(4):
         b.js("document.getElementById('next').click()")

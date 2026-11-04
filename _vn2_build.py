@@ -158,6 +158,23 @@ if os.path.exists(cab_src):
 else:
     print('bg cabinet SKIP (нет', cab_src, ')')
 
+# Аллея у ворот (сцена после приёмной, story.txt строки 71..121): ДВА кадра —
+#   steps — «вышла из дверей… спустилась по широким ступеням»
+#   alley — «на скамейке между зелёных еловых лап сидел юноша» (вариант B, ворота видны)
+# Иван 2026-11-04: «надо следующую сцену делать… но сначала фон».
+ALLEY_BG = {'steps': 'steps_a', 'alley': 'alley_b'}
+for _name, _stem in ALLEY_BG.items():
+    _src = None
+    for _ext in ('.png', '.jpg'):
+        _p = os.path.join(GEN, _stem + '_0' + _ext)
+        if os.path.exists(_p):
+            _src = _p
+    if not _src:
+        raise SystemExit('нет кадра сцены «аллея»: %s' % _stem)
+    save_client(Image.open(_src).convert('RGB').resize((W, H), Image.LANCZOS),
+                os.path.join(IMG, 'bg'), _name)
+    print('bg %s OK <- %s' % (_name, _stem))
+
 # базовые спрайты + готовые эмоции (отсутствующие файлы пропускаем;
 # остальные эмоции рисует _vn2_emo.py — движок подхватит их без правок)
 def first_existing(*cands):
@@ -524,7 +541,10 @@ SPEAK = {15: 'Старик', 23: 'Сергей', 25: 'Екатерина', 29: '
          47: 'Екатерина', 49: 'Сергей', 51: 'Екатерина', 53: 'Сергей', 57: 'Сергей',
          61: 'Сергей', 63: 'Екатерина', 65: 'Сергей', 67: 'Екатерина'}
 NAME = {'Сергей': 'Лихнецкий Сергей', 'Екатерина': 'Екатерина Ивановна',
-        'Старик': 'Старик'}
+        'Старик': 'Старик',
+        # поэт по имени представится только после тренировки («Я Лёша, Лёша Савушкин»),
+        # поэтому в плашке до того момента — без фамилии
+        'Поэт': 'Поэт'}
 
 # --- приёмная: страницы, каст (кто и где стоит) и эмоции ---
 # Эмоции/появления проставлены РУЧНО по смыслу текста (в тексте эмоций нет).
@@ -670,6 +690,128 @@ nodes.append({'t': 'scene', 'id': 'starik', 'bg': 'img/bg/cabinet' + CLIENT_EXT,
               'music': 'reception', 'trans': 'fade', 'pages': flash})
 nodes.append({'t': 'scene', 'id': 'reception', 'bg': 'img/bg/reception' + CLIENT_EXT,
               'music': 'reception', 'pages': present})
+
+
+# ---------------------------------------------------- СЦЕНА «АЛЛЕЯ У ВОРОТ»
+# story.txt строки 71..121: Екатерина выходит из приёмной и находит на скамейке поэта,
+# которого Лихнецкий только что завернул. Разбивка страниц — ТЕМ ЖЕ кодом, что и
+# приёмная (_text_seg.segments/pages_of), чтобы подстрочник и озвучка совпадали.
+def _mk_pages(pars, speak, prefix):
+    """Абзацы → страницы с говорящими; имя mp3 = <prefix>_NN.mp3 (как rec_NN).
+
+    `vof` — ПЛАН озвучки (какие файлы должны быть), `vo` — только реально существующие:
+    пока файл не записан, движок его не просит (иначе 404 в консоли и красный
+    регресс «js-ошибок нет»). После записи достаточно пересобрать — `vo` появится сам.
+    """
+    def _exist(rel):
+        return os.path.exists(os.path.join(VN2, rel))
+
+    out = []
+    for n in sorted(pars):
+        who = speak.get(n, '')
+        for kind, p in pages_of(segments(pars[n]), 2):
+            if kind == 'mix':
+                idx = len(out)
+                vos, parts, vwho = [], [], []
+                for j, (k, t) in enumerate(p):
+                    t = re.sub(r'(?<=[а-яё])\.(?=[А-ЯЁ])', '. ', t)
+                    vos.append('audio/vo/%s_%02d%s.mp3' % (prefix, idx, '' if j == 0 else 'b'))
+                    parts.append(('— ' + t) if k == 'speech' else t)
+                    vwho.append(who if (k == 'speech' and who) else 'narr')
+                pg = {'tx': ' — '.join(parts), 'vof': vos, 'vtx': parts, 'vwho': vwho}
+                _have = [v for v in vos if _exist(v)]
+                if _have:
+                    pg['vo'] = _have
+                out.append(pg)
+                continue
+            tx = p
+            if kind == 'speech' and tx[:1].islower():
+                tx = '— ' + tx
+            tx = re.sub(r'(?<=[а-яё])\.(?=[А-ЯЁ])', '. ', tx)
+            name = 'audio/vo/%s_%02d.mp3' % (prefix, len(out))
+            pg = {'tx': tx, 'vof': name}
+            if _exist(name):
+                pg['vo'] = name
+            if kind == 'speech' and who:
+                pg['who'] = who
+                pg['name'] = NAME[who]
+            out.append(pg)
+    return out
+
+
+ALLEY_SPEAK = {75: 'Екатерина', 79: 'Екатерина', 85: 'Екатерина', 89: 'Поэт',
+               91: 'Екатерина', 95: 'Поэт', 97: 'Екатерина', 99: 'Поэт',
+               103: 'Екатерина', 105: 'Поэт', 107: 'Екатерина', 109: 'Поэт',
+               111: 'Екатерина', 115: 'Екатерина', 119: 'Екатерина'}
+alley_par = {n: L[n] for n in range(71, 122)
+             if L.get(n) and not L[n].startswith('*')}
+raw2 = _mk_pages(alley_par, ALLEY_SPEAK, 'al')
+
+
+def _anchor2(frag):
+    for i, pg in enumerate(raw2):
+        if frag in pg['tx']:
+            return i
+    raise SystemExit('якорь сцены «аллея» не найден: %r' % frag)
+
+
+# состав: (якорь, сторона, кто, эмоция); кто '-' — убрать спрайт
+ALLEY_CAST = [
+    ('Расстроенная Екатерина Ивановна вышла', 'l', 'Екатерина', 'sad'),
+    ('Недалеко от кованых ажурных ворот', 'l', 'Екатерина', 'neutral'),
+    ('Недалеко от кованых ажурных ворот', 'r', 'Поэт', 'upset'),
+    ('Юноша еще долго сидел на скамейке', 'l', '-', ''),
+]
+ALLEY_EMO = [
+    ('Екатерина Ивановна улыбнулась и стала искать', 'Екатерина', 'smile'),
+    ('Юноша отнял лицо от ладоней', 'Поэт', 'neutral'),
+    ('Тот что-то неразборчиво буркнул', 'Поэт', 'upset'),
+    ('Наконец оторвавшись от ладоней', 'Поэт', 'upset'),
+    ('Что это?', 'Поэт', 'interested'),
+    ('Поэт поджал губы', 'Поэт', 'upset'),
+]
+_cdict2 = {}
+for frag, side, who, em in ALLEY_CAST:
+    _cdict2.setdefault(_anchor2(frag), {})[side] = (who, em)
+_edict2 = {}
+for frag, who, em in ALLEY_EMO:
+    _edict2[_anchor2(frag)] = (who, em)
+
+_l2 = _r2 = None
+for i, pg in enumerate(raw2):
+    ev = _cdict2.get(i)
+    if ev:
+        if 'l' in ev:
+            _l2 = None if ev['l'][0] == '-' else (list(ev['l']) if ev['l'][0] in CHARS_AVAIL else _l2)
+        if 'r' in ev:
+            _r2 = None if ev['r'][0] == '-' else (list(ev['r']) if ev['r'][0] in CHARS_AVAIL else _r2)
+    e = _edict2.get(i)
+    if e:
+        who, em = e
+        if _l2 and _l2[0] == who:
+            _l2 = [_l2[0], em]
+        if _r2 and _r2[0] == who:
+            _r2 = [_r2[0], em]
+    cast = {}
+    if _l2:
+        cast['l'] = _l2
+    if _r2:
+        cast['r'] = _r2
+    if pg.get('who'):
+        cast['speak'] = pg['who']
+    pg['cast'] = cast
+
+_cut2 = _anchor2('Недалеко от кованых ажурных ворот')
+steps_pages, alley_pages = raw2[:_cut2], raw2[_cut2:]
+if not steps_pages or not alley_pages:
+    raise SystemExit('сцена «аллея»: пустая часть (steps %d, alley %d)'
+                     % (len(steps_pages), len(alley_pages)))
+# перебивка на «* * *» перед выходом из приёмной — тот же длинный переход, что у кабинета
+nodes.append({'t': 'scene', 'id': 'steps', 'bg': 'img/bg/steps' + CLIENT_EXT,
+              'music': 'reception', 'trans': 'fade', 'pages': steps_pages})
+nodes.append({'t': 'scene', 'id': 'alley', 'bg': 'img/bg/alley' + CLIENT_EXT,
+              'music': 'reception', 'pages': alley_pages})
+print('сцена «аллея»: steps %d стр., alley %d стр.' % (len(steps_pages), len(alley_pages)))
 
 
 # ---------------------------------------------------------------- титры (благодарности)
