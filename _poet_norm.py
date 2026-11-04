@@ -8,63 +8,31 @@ gpt-image-2 отдал разные кадры (864x1152, 1086x1448, 1254x1254 �
 
 Мерка — ШИРИНА ПЛЕЧ (пояс 35–55 % высоты фигуры): от причёски не зависит, в отличие от
 ширины головы (у длинноволосого в «голову» попадает масса волос).
+Эталон: Сергей `vn2/img/char/sergey.webp` — плечи/холст = 0.559.
 
-Эталон: Сергей `vn2/img/char/sergey.webp` — плечи/холст = 0.559. К нему и приводим.
+Вырезание — НЕ `cutout()` сборки, а `_poet_matte.matte()`: мягкая альфа по цвету фона,
+удаление ЗАМКНУТЫХ областей фона (петли волос) и despill серой каймы. Поэтому на выходе
+RGBA, и сборка такие файлы больше не режет (см. CHAR_SRC в `_vn2_build.py`).
 
-Как: холст = фигура, обрезанная по bbox; высоту холста подгоняем так, чтобы
-плечи/высота = TARGET_SH: не хватает высоты — прозрачный паддинг СВЕРХУ (низ фигуры
-остаётся на нижней кромке), избыток — подрезка СНИЗУ (видно меньше торса).
-
-Результат: `assets/sprites/poet_<emo>.png`. Проверка — `_poet_scale_check.py`.
+Результат: `assets/sprites/poet_<emo>.png`. Проверка — `_poet_scale_check.py`,
+ровность края — `_poet_hair_check.py`.
 """
 import os
 import sys
-from collections import deque
 
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from _poet_matte import matte  # noqa: E402
+
 GEN = os.path.join(HERE, 'assets', 'gen')
 SPR = os.path.join(HERE, 'assets', 'sprites')
 os.makedirs(SPR, exist_ok=True)
 
 TARGET_SH = 0.56          # плечи / высота холста (Сергей 0.559)
 SIDE_MARGIN = 0.03        # поля по бокам, доля ширины фигуры
-
-
-def cutout(im, tol=34):
-    a = np.asarray(im.convert('RGB'), np.float32)
-    h, w, _ = a.shape
-    ring = np.concatenate([a[:8].reshape(-1, 3),
-                           a[:h * 3 // 5, :8].reshape(-1, 3),
-                           a[:h * 3 // 5, -8:].reshape(-1, 3)])
-    seed = np.median(ring, 0)
-    cand = np.sqrt(((a - seed) ** 2).sum(2)) <= tol
-    vis = np.zeros((h, w), bool)
-    dq = deque()
-    for x in range(w):
-        for y in (0, h - 1):
-            if cand[y, x] and not vis[y, x]:
-                vis[y, x] = True
-                dq.append((y, x))
-    for y in range(h):
-        for x in (0, w - 1):
-            if cand[y, x] and not vis[y, x]:
-                vis[y, x] = True
-                dq.append((y, x))
-    while dq:
-        y, x = dq.popleft()
-        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-            ny, nx = y + dy, x + dx
-            if 0 <= ny < h and 0 <= nx < w and cand[ny, nx] and not vis[ny, nx]:
-                vis[ny, nx] = True
-                dq.append((ny, nx))
-    A = Image.fromarray(np.where(vis, 0, 255).astype(np.uint8), 'L').filter(
-        ImageFilter.GaussianBlur(1.1))
-    out = im.convert('RGBA')
-    out.putalpha(A)
-    return out
 
 
 def shoulders(mask):
@@ -77,7 +45,7 @@ def shoulders(mask):
 
 
 def norm(path, name):
-    rgba = cutout(Image.open(path))
+    rgba, st = matte(Image.open(path))
     mask = np.asarray(rgba.split()[-1]) > 128
     sh, bh = shoulders(mask)
     if not sh:
@@ -95,21 +63,15 @@ def norm(path, name):
         canvas.alpha_composite(fig, (mw, canvas_h - fh))
         mode = 'паддинг сверху %d px' % (canvas_h - fh)
     else:                                   # избыток -> подрезка снизу
-        keep = fig.crop((0, 0, fig.width, canvas_h))
-        canvas.alpha_composite(keep, (mw, 0))
+        canvas.alpha_composite(fig.crop((0, 0, fig.width, canvas_h)), (mw, 0))
         mode = 'подрезка снизу %d px' % (fh - canvas_h)
     out = os.path.join(SPR, 'poet_%s.png' % name)
-    # СОХРАНЯЕМ НА СВЕТЛО-СЕРОМ ФОНЕ (RGB), а не прозрачным: сборка сама прогоняет
-    # cutout() по всем CHAR_SRC, и повторная вырезка по уже прозрачному PNG съела бы
-    # тёмные волосы (конверт в RGB даёт чёрный фон, он в допуске «фона»).
-    flat = Image.new('RGB', canvas.size, (205, 205, 205))
-    flat.paste(canvas, (0, 0), canvas)
-    flat.save(out)
+    canvas.save(out)
     m2 = np.asarray(canvas.split()[-1]) > 128
     sh2, _ = shoulders(m2)
-    print('  %-16s %4dx%-4d -> %dx%d  плечи %d -> %.3f  (%s)'
+    print('  %-16s %4dx%-4d -> %dx%d  плечи %d -> %.3f  (%s, фон снят %.0f%%)'
           % (name, Image.open(path).width, Image.open(path).height, canvas_w, canvas_h,
-             sh, sh2 / canvas_h, mode))
+             sh, sh2 / canvas_h, mode, 100 * st['removed']))
     return out
 
 
@@ -127,7 +89,8 @@ def find(name):
 
 if __name__ == '__main__':
     only = sys.argv[1:]
-    print('нормировка эмоций поэта (плечи/холст = %.2f) -> assets/sprites/' % TARGET_SH)
+    print('нормировка эмоций поэта (плечи/холст = %.2f, матирование _poet_matte) -> assets/sprites/'
+          % TARGET_SH)
     for key in FILES:
         if only and key not in only:
             continue

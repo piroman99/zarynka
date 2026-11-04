@@ -192,9 +192,16 @@ for dst, src in CHAR_SRC.items():
     if not os.path.exists(src):
         print('char SKIP (нет источника):', dst)
         continue
-    out = cutout(Image.open(src))
-    save_client(out, os.path.join(IMG, 'char'), dst.rsplit('.', 1)[0], lossless=False)
-    print('char', dst, out.size, out.mode)
+    _im = Image.open(src)
+    # Спрайт уже вырезан с мягкой альфой (поэт, `_poet_matte.py`) — повторный cutout()
+    # съел бы тёмные волосы и снова оставил серые пятна в петлях. Такие файлы берём как есть.
+    _pre_matted = (_im.mode == 'RGBA' and
+                   float((np.asarray(_im.split()[-1]) < 8).mean()) > 0.02)
+    out = _im if _pre_matted else cutout(_im)
+    # без потерь: на тёмных волосах lossy-webp даёт серую кайму (замер `_poet_hair_check.py`)
+    save_client(out, os.path.join(IMG, 'char'), dst.rsplit('.', 1)[0],
+                lossless=True if _pre_matted else False)
+    print('char', dst, out.size, out.mode, '(pre-matted)' if _pre_matted else '')
 
 
 # доступные спрайты и эмоции (по фактическим файлам в img/char) — движок
