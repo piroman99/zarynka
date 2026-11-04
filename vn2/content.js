@@ -69,6 +69,22 @@ window.VN = {
    "emos": {
     "stern": "img/char/starik_stern.webp"
    }
+  },
+  "Поэт": {
+   "base": "img/char/poet.webp",
+   "emos": {
+    "neutral": "img/char/poet.webp",
+    "interested": "img/char/poet_interested.webp",
+    "upset": "img/char/poet_upset.webp"
+   }
+  },
+  "Поэт (стриж.)": {
+   "base": "img/char/poet_sh.webp",
+   "emos": {
+    "neutral": "img/char/poet_sh.webp",
+    "tired": "img/char/poet_sh_tired.webp",
+    "inspired": "img/char/poet_sh_inspired.webp"
+   }
   }
  },
  "nodes": [
@@ -485,6 +501,10 @@ window.VN = {
      "cast": {
       "l": [
        "Сергей",
+       "neutral"
+      ],
+      "r": [
+       "Поэт",
        "neutral"
       ]
      }

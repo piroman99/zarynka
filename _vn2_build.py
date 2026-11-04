@@ -178,6 +178,15 @@ CHAR_SRC = {
     'sergey_concerned.png': first_existing(os.path.join(GEN, 'sergey_concerned_0.png'),
                                            os.path.join(GEN, 'sergey_concerned_0.jpg')),
     'starik_stern.png': os.path.join(SPR, 'starik_stern.png'),
+    # Поэт Лёша Савушкин (2026-11-04): два вида по канону 2016 — с длинной плохой
+    # причёской и стриженный. Файлы уже нормированы по плечам (`_poet_norm.py`),
+    # лежат RGB на светло-сером фоне — вырезает их тот же cutout(), что и каст.
+    'poet.png':              os.path.join(SPR, 'poet_ha_neutral.png'),
+    'poet_interested.png':   os.path.join(SPR, 'poet_ha_interested.png'),
+    'poet_upset.png':        os.path.join(SPR, 'poet_ha_upset.png'),
+    'poet_sh.png':           os.path.join(SPR, 'poet_sh_neutral.png'),
+    'poet_sh_tired.png':     os.path.join(SPR, 'poet_sh_tired.png'),
+    'poet_sh_inspired.png':  os.path.join(SPR, 'poet_sh_inspired.png'),
 }
 for dst, src in CHAR_SRC.items():
     if not os.path.exists(src):
@@ -191,8 +200,10 @@ for dst, src in CHAR_SRC.items():
 # доступные спрайты и эмоции (по фактическим файлам в img/char) — движок
 # рисует только то, что есть, и подхватит новые эмоции без правок кода
 def char_manifest():
-    key_of = {'Сергей': 'sergey', 'Екатерина': 'kate', 'Старик': 'starik'}
-    known = ['neutral', 'smile', 'sad', 'concerned', 'stern']
+    key_of = {'Сергей': 'sergey', 'Екатерина': 'kate', 'Старик': 'starik',
+              'Поэт': 'poet', 'Поэт (стриж.)': 'poet_sh'}
+    known = ['neutral', 'smile', 'sad', 'concerned', 'stern',
+             'interested', 'upset', 'tired', 'inspired']
     have = set(os.listdir(os.path.join(IMG, 'char')))
     d = {}
     for who, k in key_of.items():
@@ -528,11 +539,17 @@ EMO_ANCHOR = [
     ('она внезапно тепло улыбнулась', 'Екатерина', 'smile'),
 ]
 # смена состава: якорь -> сторона ('l' левый / 'r' правый) : (кто, эмоция)
+# кто = '-' — УБРАТЬ спрайт с этой стороны (уход персонажа из кадра)
 # Флешбэк в кабинете Старика (Сергей попался под горячую руку) → приёмная: Сергей один,
 # потом входит Екатерина.
 CAST_ANCHOR = [
     ('Лихнецкому не повезло', 'l', 'Старик', 'stern'),
     ('Так и пришлось долгих два месяца', 'l', 'Сергей', 'neutral'),
+    # Поэт Лёша Савушкин — его Лихнецкий заворачивает первым делом («длинноволосый поэт…
+    # Его он тоже отправил вслед за остальными»). Правка Ивана 2026-11-04: «надо его спрайты
+    # сделать, и потом вернуть этот спрайт в отказ лихнецкого в самом начале».
+    ('Сегодня первыми кандидатами', 'r', 'Поэт', 'neutral'),
+    ('Его он тоже отправил вслед за остальными', 'r', '-', ''),
     # Появление Екатерины — на ОПИСАНИИ (правка Ивана 2026-11-04: «появление Екатерины надо
     # перенести на „Кудрявые седые как снег волосы, мягкое лицо“»). Было: спрайт въезжал
     # только на приветствии «Добрый день. Добро пожаловать в Звездный городок».
@@ -591,8 +608,10 @@ lside = rside = None
 for i, pg in enumerate(raw):
     ev = cdict.get(i)
     if ev:
-        if 'l' in ev and ev['l'][0] in CHARS_AVAIL: lside = list(ev['l'])
-        if 'r' in ev and ev['r'][0] in CHARS_AVAIL: rside = list(ev['r'])
+        if 'l' in ev:
+            lside = None if ev['l'][0] == '-' else (list(ev['l']) if ev['l'][0] in CHARS_AVAIL else lside)
+        if 'r' in ev:
+            rside = None if ev['r'][0] == '-' else (list(ev['r']) if ev['r'][0] in CHARS_AVAIL else rside)
     e = edict.get(i)
     if e:
         who, em = e

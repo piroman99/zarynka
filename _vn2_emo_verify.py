@@ -14,9 +14,15 @@ D = json.loads(src[src.index('=') + 1:].strip().rstrip(';'))
 rec = [n for n in D['nodes'] if n.get('id') == 'reception'][0]
 CH = D['chars']
 
+# номер узла не хардкодим: при вставке кадров индексы СДВИГАЮТСЯ (было 9, теперь 14) —
+# из-за хардкода тест «сверял» страницы приёмной с узлом s5a и врал на 45 проблем.
+from _vn2_nodes import node_index  # noqa: E402
+REC = node_index('reception')
+print('приёмная = node=%d' % REC)
+
 bad = 0
 for i, pg in enumerate(rec['pages']):
-    url = ('file://' + IDX + '?instant=1&node=9&page=%d&text=1&voice=0&music=0' % i)
+    url = ('file://' + IDX + '?instant=1&node=%d&page=%d&text=1&voice=0&music=0' % (REC, i))
     r = subprocess.run([CHROME, '--headless=new', '--no-sandbox', '--disable-dev-shm-usage',
                         '--disable-gpu', '--virtual-time-budget=4000', '--dump-dom', url],
                        capture_output=True, text=True, timeout=120)
