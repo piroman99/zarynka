@@ -488,10 +488,10 @@
     list.forEach(function (it) {
       if (it.b) {                            // мягкая плашка/скрим под текст
         const b = it.b, el = document.createElement("i");
-        el.style.left = b[0] / E + "em";
-        el.style.top = b[1] / E + "em";
-        el.style.width = (b[2] - b[0]) / E + "em";
-        el.style.height = (b[3] - b[1]) / E + "em";
+        el.style.left = b[0] / E * 100 + "%";
+        el.style.top = b[1] / 1350 * 100 + "%";
+        el.style.width = (b[2] - b[0]) / E * 100 + "%";
+        el.style.height = (b[3] - b[1]) / 1350 * 100 + "%";
         el.style.borderRadius = 20 / E + "em";
         el.style.background = "rgba(" + (it.c || [6, 8, 14]).join(",") + "," +
           ((it.a == null ? 150 : it.a) / 255).toFixed(3) + ")";
@@ -504,8 +504,11 @@
       el.style.fontSize = (it.s || 48) / E + "em";
       el.style.fontFamily = (it.f === "l" ? "LatoBold" : "URWGothicDemi") + ",sans-serif";
       el.style.color = it.c || "#f6eede";
-      el.style.left = (it.x == null ? 1200 : it.x) / E + "em";
-      el.style.top = (it.y == null ? 675 : it.y) / E + "em";
+      // ВАЖНО: left/top — в ПРОЦЕНТАХ кадра, а не в em. У строки свой font-size (кегль),
+      // и em в left/top считается от него, а не от ширины кадра: из-за этого все надписи
+      // уезжали в левый верхний угол и обрезались (баг найден 2026-11-04).
+      el.style.left = ((it.x == null ? 1200 : it.x) / E * 100) + "%";
+      el.style.top = ((it.y == null ? 675 : it.y) / 1350 * 100) + "%";
       const a = it.a || "mm";
       el.style.transform = (a === "mm") ? "translate(-50%,-50%)"
                          : (a === "lt" ? "none" : "translateX(-50%)");
