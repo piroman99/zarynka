@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Живая проверка демо: кадр первой страницы s1 = стена (s1a), второй = подворотня,
-кадр p6 = лунная станция.
+"""Живая проверка: p6[0] = Марс, p6[1] = лунная база, s1[0] = стена, s1[1] = подворотня.
 
-    python3 _live_s1p6.py
-
-Смотрит на https://piroman99.github.io/zarynka/vn2/ (без локального сервера), читает
-фактический backgroundImage активного слоя и текст страницы.
+    python3 _live_s1p6.py   (обновлённые ожидания)
 """
 import os
 import sys
@@ -26,8 +22,8 @@ GEO = """
 """
 CHECKS = [('s1[0] стена', 'node=3&page=0', 's1a.webp'),
           ('s1[1] подворотня', 'node=3&page=1', 's1.webp'),
-          ('p6[0] лунная станция', 'node=4&page=0', 'p6.webp'),
-          ('p6[1] лунная станция', 'node=4&page=1', 'p6.webp')]
+          ('p6[0] Марс', 'node=4&page=0', 'p6.webp'),
+          ('p6[1] лунная база', 'node=4&page=1', 'p6luna.webp')]
 
 bad = 0
 b = Browser(1280, 720)
@@ -38,8 +34,8 @@ try:
         g = b.js(GEO)
         ok = g.get('bg') == want
         bad += 0 if ok else 1
-        print('%s %-22s bg=%-14s %s' % ('OK  ' if ok else 'FAIL', name, g.get('bg'),
-                                        g.get('tx', '')[:60]))
+        print('%s %-20s bg=%-14s %s' % ('OK  ' if ok else 'FAIL', name, g.get('bg'),
+                                        g.get('tx', '')[:58]))
     errs = [e for e in b.errors() if 'favicon' not in e]
     print('js-ошибок: %d %s' % (len(errs), errs[:2]))
 finally:
