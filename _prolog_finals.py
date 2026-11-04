@@ -58,7 +58,14 @@ for n, desc in PLATES.items():
                                      outdir="assets/gen", name='prologfin_%s' % n, max_price_rub=12)
     print('plate %s -> %s  price=%s' % (n, os.path.relpath(files[0], HERE), st.get('priceRub')))
 
-PLATE_FILE = {'s1': 'prologfin_s1_b_0.jpg',   # B: котобус мелом ВПЕЧЁН в кадр (не наклейка)
+# СТЕНА Звёздного городка (кадр S1, страница 1) — выбор варианта ОДНОЙ строкой:
+#   s1wall_a — крупно, фрунтально, у стены ведро и тряпка
+#   s1wall_b — шире: угол двора, весенние тени, фигура спиной
+# Кадр без наших букв: граффити «МАРС — ДЕЛО ОБЩЕЕ» нарисовано моделью (gpt-image-2).
+WALL_PLATE = os.environ.get('WALL_PLATE', 's1wall_b__gpt-image-2_0.png')
+
+PLATE_FILE = {'s1': 'prologfin_s1_b_0.jpg',   # B: котобус мелом ВПЕЧЁН в кадр (не наклейка);
+                                             # с 2026-11-04 — ВТОРАЯ страница кадра s1
               's2': 'prologfin2_s2a_0.jpg',    # цех сборки (номер 410 отменён, космодром не берём)
               's3': 'prologfin3_s3_d_0.jpg',  # D: светлый зал, озабоченные-но-не-грустные лица
               's4': 'prologfin4_s4_d_0.jpg',  # D: комната 2061, станция у Марса на экране, без букв
@@ -77,7 +84,8 @@ def F(p, s):
 
 
 def load_plate(name):
-    im = Image.open(os.path.join(GEN, PLATE_FILE[name])).convert('RGB')
+    fn = WALL_PLATE if name == 's1wall' else PLATE_FILE[name]
+    im = Image.open(os.path.join(GEN, fn)).convert('RGB')
     return im.resize((FW, FH), Image.LANCZOS)
 
 
@@ -123,11 +131,15 @@ def vignette(im, strength=0.75):
 def build(n):
     base = load_plate(n)
     if n == 's1':
-        # котобус мелом уже ВПЕЧЁН в плашку flux-2; сверху — только текстовый слой
-        base = soft(base, (620, 990, 1780, 1120), (6, 8, 14), 175, blur=18)
-        ImageDraw.Draw(base).text((1200, 1055), 'МАРС — ДЕЛО ОБЩЕЕ?',
-                                  font=F(GOTHIC, 58), fill=(238, 214, 150), anchor='mm')
+        # 2026-11-04 (решение Ивана, развилка A): это теперь ВТОРАЯ страница кадра s1
+        # («поймать умника в темной подворотне»). Подпись «МАРС — ДЕЛО ОБЩЕЕ?» снята:
+        # сама надпись ушла на первую страницу — в граффити на стене (кадр s1a).
+        # Котобус мелом остаётся — он ВПЕЧЁН в плашку flux-2.
         base = tag(base, 'ПОДВОРОТНЯ')
+    elif n == 's1wall':
+        # Первая страница кадра s1: стена Звёздного городка, полустёртое граффити.
+        # Своих букв НЕ добавляем — надпись в кадре нарисована моделью.
+        base = tag(base, 'ЗВЁЗДНЫЙ ГОРОДОК')
     elif n == 's2':
         base = tag(base, 'ЦЕХ · СБОРКА')
     elif n == 's3':
@@ -165,12 +177,13 @@ def build(n):
         base = _s7_plaque2.plaque(base, 'a')
         base = tag(base, 'ПРОХОДНАЯ · ОЧЕРЕДЬ')
     out = vignette(base).resize((OUTW, OUTH), Image.LANCZOS)
-    p = os.path.join(FIN, n + '.png')
+    # s1wall — первая страница кадра s1: в движке живёт как отдельный кадр img/prolog/s1a
+    p = os.path.join(FIN, ('s1a' if n == 's1wall' else n) + '.png')
     out.save(p)
     print('final', n, '->', os.path.relpath(p, HERE))
 
 
-ONLY = sys.argv[1:] or ('s1', 's3', 's4', 's5', 's5a', 's6', 's7')
+ONLY = sys.argv[1:] or ('s1', 's1wall', 's3', 's4', 's5', 's5a', 's6', 's7')
 for n in ONLY:
     build(n)
 print('готово')

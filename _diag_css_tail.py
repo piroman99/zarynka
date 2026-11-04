@@ -1,0 +1,10 @@
+s = open('vn2/style.css', encoding='utf-8').read()
+i = s.index('/* STARS:BEGIN')
+print(s[i:i + 260].replace('radial-gradient', 'RG'))
+print('...')
+j = s.index('.cr-stars .l0')
+seg = s[j:j + 400]
+print(seg.replace('radial-gradient', 'RG'))
+print('--- animation occurrences:', s.count('animation:crTwinkle'))
+k = s.index('animation:crTwinkle')
+print(repr(s[k - 150:k + 120]))

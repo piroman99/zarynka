@@ -1,0 +1,27 @@
+<!doctype html><meta charset="utf-8">
+<iframe id="f" src="index.html?auto=0&text=1&voice=1&music=1&preload=1&node=12&page=0" width="960" height="540"></iframe>
+<script>
+const POST = "http://127.0.0.1:49775/rows";
+const f = document.getElementById("f");
+let rows = [], n = 0;
+function send(rs) {
+  return fetch(POST, {method: "POST", body: JSON.stringify(rs)}).catch(() => {});
+}
+const iv = setInterval(() => {
+  const w = f.contentWindow;
+  if (!w || !w.__DBG) return;
+  const m = w.__DBG.music, d = w.__DBG;
+  rows.push([n, Math.round(performance.now()), Math.round(m.t * 100) / 100,
+             m.paused ? 1 : 0, Math.round(m.vol * 100) / 100,
+             Math.round((m.dur || 0) * 10) / 10, m.key,
+             Math.round(m.duck * 100) / 100, m.src,
+             d.node, d.pos, d.inBreak ? 1 : 0]);
+  send(rows);
+  if (n % 3 === 2) { try { w.document.getElementById("stage").click(); } catch (e) {} }
+  n++;
+  if (n >= 48) {
+    clearInterval(iv);
+    send(rows).then(() => fetch(POST.replace("/rows", "/done"), {method: "POST", body: "[]"}));
+  }
+}, 500);
+</script>
