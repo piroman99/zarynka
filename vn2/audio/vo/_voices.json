@@ -597,5 +597,320 @@
   "chars": 127,
   "price": 0.22,
   "text": "Волна требований докатилась до Верховного Совета и не успокоилась, пока в экспедицию не включили два места для людей «с улицы»."
+ },
+ "audio/vo/al_00.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 131,
+  "price": 0.38,
+  "text": "Расстроенная Екатерина Ивановна вышла из дверей приемной комиссии. Яркое весеннее солнце резануло по глазам, заставляя зажмуриться."
+ },
+ "audio/vo/al_01.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 136,
+  "price": 0.39,
+  "text": "Опустив голову и прикрывая от света рукой лицо, она спустилась по широким ступеням и повернула на аллею, обсаженную с двух сторон елями."
+ },
+ "audio/vo/al_02.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 239,
+  "price": 0.68,
+  "text": "Недалеко от кованых ажурных ворот, где металл причудливо сплетался в контур посадочного лунного модуля, на скамейке между зеленых еловых лап сидел юноша. Низко склонившись, закрыв лицо ладонями, с подрагивающими, будто от рыданий, плечами."
+ },
+ "audio/vo/al_03.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 111,
+  "price": 0.32,
+  "text": "Екатерина Ивановна остановилась, удивленно рассматривая фигуру на скамейке, а затем решительно двинулась к ней."
+ },
+ "audio/vo/al_04.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 10,
+  "price": 0.11,
+  "text": "Вам плохо?"
+ },
+ "audio/vo/al_05.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 134,
+  "price": 0.38,
+  "text": "Юноша отнял лицо от ладоней и непонимающе посмотрел на женщину. Будь здесь Лихнецкий, он бы узнал в нем поэта, отправленного восвояси."
+ },
+ "audio/vo/al_06.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 27,
+  "price": 0.3,
+  "text": "Вам плохо, молодой человек?"
+ },
+ "audio/vo/al_07.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 64,
+  "price": 0.19,
+  "text": "Тот что-то неразборчиво буркнул и снова уронил голову на ладони."
+ },
+ "audio/vo/al_08.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 83,
+  "price": 0.24,
+  "text": "Екатерина Ивановна присела на скамейку рядом с юношей и положила руку ему на плечо."
+ },
+ "audio/vo/al_09.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 79,
+  "price": 0.86,
+  "text": "У вас не приняли документы? Не переживайте, через неделю можете подать еще раз."
+ },
+ "audio/vo/al_10.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 68,
+  "price": 0.2,
+  "text": "Поэт нерешительно дернул плечом, словно пытаясь сбросить чужую руку."
+ },
+ "audio/vo/al_11.mp3": {
+  "voice": "Поэт",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 11,
+  "price": 0.04,
+  "text": "Бесполезно."
+ },
+ "audio/vo/al_12.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 53,
+  "price": 0.58,
+  "text": "Ну почему же? Ведь вам сказали, в чем причина отказа?"
+ },
+ "audio/vo/al_13.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 76,
+  "price": 0.22,
+  "text": "Наконец оторвавшись от ладоней, юноша выпрямился и с обреченностью вздохнул."
+ },
+ "audio/vo/al_14.mp3": {
+  "voice": "Поэт",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 53,
+  "price": 0.15,
+  "text": "У меня нет научной программы. Да и откуда она у меня?"
+ },
+ "audio/vo/al_15.mp3": {
+  "voice": "Поэт",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 6,
+  "price": 0.02,
+  "text": "Я поэт"
+ },
+ "audio/vo/al_16.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 85,
+  "price": 0.25,
+  "text": "в голосе юноши удивительно сплелась гордость за себя, почти самолюбование, и отчаяние"
+ },
+ "audio/vo/al_17.mp3": {
+  "voice": "Поэт",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 54,
+  "price": 0.16,
+  "text": "я не придумаю программу и за год. А она там ждет меня."
+ },
+ "audio/vo/al_18.mp3": {
+  "voice": "Поэт",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 26,
+  "price": 0.08,
+  "text": "Только я не прилечу к ней."
+ },
+ "audio/vo/al_19.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 9,
+  "price": 0.1,
+  "text": "Кто ждет?"
+ },
+ "audio/vo/al_20.mp3": {
+  "voice": "Поэт",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 4,
+  "price": 0.02,
+  "text": "Муза"
+ },
+ "audio/vo/al_20b.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 63,
+  "price": 0.18,
+  "text": "юноша покраснел и отвернулся, словно сказал что-то неприличное."
+ },
+ "audio/vo/al_21.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 67,
+  "price": 0.19,
+  "text": "Екатерина Ивановна улыбнулась и стала искать что-то у себя в сумке."
+ },
+ "audio/vo/al_22.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 7,
+  "price": 0.08,
+  "text": "Держите"
+ },
+ "audio/vo/al_22b.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 36,
+  "price": 0.11,
+  "text": "она протянула ему визитную карточку."
+ },
+ "audio/vo/al_23.mp3": {
+  "voice": "Поэт",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 8,
+  "price": 0.03,
+  "text": "Что это?"
+ },
+ "audio/vo/al_24.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 11,
+  "price": 0.12,
+  "text": "Скорее, кто"
+ },
+ "audio/vo/al_24b.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 30,
+  "price": 0.09,
+  "text": "Екатерина Ивановна рассмеялась"
+ },
+ "audio/vo/al_25.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 81,
+  "price": 0.88,
+  "text": "это мой старый знакомый, Петр Алексеевич. Прекрасный биолог, но сейчас на пенсии."
+ },
+ "audio/vo/al_26.mp3": {
+  "voice": "Поэт",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 13,
+  "price": 0.04,
+  "text": "Зачем он мне?"
+ },
+ "audio/vo/al_26b.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 26,
+  "price": 0.08,
+  "text": "раздраженно отозвался поэт"
+ },
+ "audio/vo/al_27.mp3": {
+  "voice": "Поэт",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 69,
+  "price": 0.2,
+  "text": "он может написать программу на заказ? Так денег у меня все равно нет."
+ },
+ "audio/vo/al_28.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 107,
+  "price": 1.16,
+  "text": "Нет, он не станет ничего делать за вас. Что он может — это подсказать, к кому обратиться в своем институте."
+ },
+ "audio/vo/al_29.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 158,
+  "price": 1.72,
+  "text": "Там много хороших студентов, они смогут вам помочь придумать что-то такое, что вы сможете в космосе делать вместе с ними. Что-то, что будет интересно для них."
+ },
+ "audio/vo/al_30.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 65,
+  "price": 0.71,
+  "text": "Будет ли интересно вам, я не знаю. Но свою программу вы получите."
+ },
+ "audio/vo/al_31.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 82,
+  "price": 0.24,
+  "text": "Поэт поджал губы, всем видом выражая, что ни за что не пойдет к кому-то на поклон."
+ },
+ "audio/vo/al_32.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 71,
+  "price": 0.77,
+  "text": "Никто за вас работать не будет. Если хотите чего-то добиться, работайте"
+ },
+ "audio/vo/al_33.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 55,
+  "price": 0.16,
+  "text": "Екатерина Ивановна улыбнулась и потрепала его по голове"
+ },
+ "audio/vo/al_34.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 43,
+  "price": 0.47,
+  "text": "делайте, и у вас все получится. Старайтесь."
+ },
+ "audio/vo/al_35.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 83,
+  "price": 0.9,
+  "text": "Это же ваша мечта. Если она вас там ждет — вы должны сделать все, чтобы её достичь."
+ },
+ "audio/vo/al_36.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 4,
+  "price": 0.05,
+  "text": "Так?"
+ },
+ "audio/vo/al_37.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 30,
+  "price": 0.09,
+  "text": "Она поднялась, собираясь уйти."
+ },
+ "audio/vo/al_38.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 27,
+  "price": 0.3,
+  "text": "Удачи вам. И подстригитесь."
+ },
+ "audio/vo/al_39.mp3": {
+  "voice": "Екатерина",
+  "model": "elevenlabs-v4-tts",
+  "chars": 41,
+  "price": 0.45,
+  "text": "Вряд ли такая прическа уместна в космосе."
+ },
+ "audio/vo/al_40.mp3": {
+  "voice": "narr",
+  "model": "gemini-3.8-flash-tts",
+  "chars": 64,
+  "price": 0.19,
+  "text": "Юноша еще долго сидел на скамейке, смотря вслед ушедшей женщине."
  }
 }

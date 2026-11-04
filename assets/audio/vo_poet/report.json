@@ -1,0 +1,38 @@
+[
+ {
+  "n": 1,
+  "voice": "Achird",
+  "file": "assets/audio/vo_poet/poet_01_achird.mp3",
+  "price": 0.41
+ },
+ {
+  "n": 2,
+  "voice": "Umbriel",
+  "file": "assets/audio/vo_poet/poet_02_umbriel.mp3",
+  "price": 0.41
+ },
+ {
+  "n": 3,
+  "voice": "Algieba",
+  "file": "assets/audio/vo_poet/poet_03_algieba.mp3",
+  "price": 0.41
+ },
+ {
+  "n": 4,
+  "voice": "Enceladus",
+  "file": "assets/audio/vo_poet/poet_04_enceladus.mp3",
+  "price": 0.41
+ },
+ {
+  "n": 5,
+  "voice": "Achernar",
+  "file": "assets/audio/vo_poet/poet_05_achernar.mp3",
+  "price": 0.41
+ },
+ {
+  "n": 6,
+  "voice": "Zubenelgenubi",
+  "file": "assets/audio/vo_poet/poet_06_zubenelgenubi.mp3",
+  "price": 0.41
+ }
+]

@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
-"""Озвучка Приёмной ГОЛОСАМИ КАСТА (постранично, по полю page.who).
+"""Озвучка сцен ГОЛОСАМИ КАСТА (постранично, по полю page.who).
 
-Голоса зафиксированы Иваном (2026-10-18):
+Голоса зафиксированы Иваном:
   закадр/автор  -> gemini-3.8-flash-tts  Charon  «кинохроника без иронии»
   Старик        -> gemini-3.8-flash-tts  Fenrir
   Сергей        -> gemini-3.8-flash-tts  Charon
   Екатерина     -> elevenlabs-v4-tts     Charlotte   (вариант 9)
+  Поэт (Лёша)   -> gemini-3.8-flash-tts  Umbriel     (Иван 2026-11-04: «2»
+                   из теста `_voice_poet_test.py`, порядок 1 Achird … 2 Umbriel)
+
+Обрабатывает ВСЕ узлы с текстом (приёмная, `steps`, `alley`), а не только приёмную.
+Имена файлов берёт из плана `pg.vof` (его пишет сборка), а не из `pg.vo` — иначе
+ещё не записанные страницы новых сцен не видны (404 в консоли и красный регресс).
 
 Манифест vn2/audio/vo/_voices.json хранит, каким голосом сделан каждый файл:
 повторный запуск переозвучивает ТОЛЬКО страницы, чей голос изменился.
@@ -54,6 +60,12 @@ SERGEY_STYLE = (
     "ровный, вежливо-официальный, немного усталый. Чёткая дикция, доброжелательно, "
     "но сдержанно, без иронии."
 )
+POET_STYLE = (
+    "Молодой мужчина двадцати пяти лет, поэт. Голос мягкий, негромкий, с лёгкой "
+    "хрипотцой и надломом. Говорит тихо и сбивчиво, как человек, который только что "
+    "плакал: в интонации гордость за себя и отчаяние одновременно. Без театральности, "
+    "без пафоса, без жалобы. Не диктор, не бас, не мальчик-подросток."
+)
 
 VOICES = {
     'narr':     ('gemini-3.8-flash-tts', {'gemini_voice': 'Charon', 'engine': 'flash',
@@ -63,11 +75,14 @@ VOICES = {
     'Сергей':   ('gemini-3.8-flash-tts', {'gemini_voice': 'Charon', 'engine': 'flash',
                                           'style_instructions': SERGEY_STYLE}, 1.70),
     'Екатерина': ('elevenlabs-v4-tts', {'voice': 'Charlotte'}, 10.84),
+    'Поэт':     ('gemini-3.8-flash-tts', {'gemini_voice': 'Umbriel', 'engine': 'flash',
+                                         'style_instructions': POET_STYLE}, 1.70),
 }
 
 src = open(os.path.join(HERE, 'vn2', 'content.js'), encoding='utf-8').read()
 D = json.loads(src[src.index('=') + 1:].strip().rstrip(';'))
-nd = [n for n in D['nodes'] if n.get('id') == 'reception'][0]
+# все узлы с текстом: приёмная, «аллея» (steps + alley) и всё, что появится дальше
+nds = [n for n in D['nodes'] if n.get('pages')]
 
 man = {}
 if os.path.exists(MANIFEST):
@@ -80,10 +95,13 @@ def norm(tx):
     t = re.sub(r'[,;:]+$', '', t)          # «Спасибо,» → «Спасибо» (иначе TTS тянет паузу)
     return re.sub(r'\s+', ' ', t).strip()
 
-def segs_of(pg):
+def segs_of(pg, plan=False):
     """Страница -> [(файл, текст, кто)]. У склеенной страницы ДВА сегмента
-    («Спасибо» — Екатерина, «от улыбки…» — закадр), у обычной — один."""
-    vo = pg.get('vo')
+    («Спасибо» — Екатерина, «от улыбки…» — закадр), у обычной — один.
+    Берём `vo` (уже записано) или, при plan=True, `vof` (план записи) — новые сцены
+    живут на `vof`. Для ПЕРЕИСПОЛЬЗОВАНИЯ читаем только `vo`: план файла ещё не значит,
+    что файл существует (иначе тест пытается копировать несуществующее и шумит)."""
+    vo = pg.get('vo') or (pg.get('vof') if plan else None)
     if not vo:
         return []
     vos = [vo] if isinstance(vo, str) else list(vo)
@@ -138,47 +156,49 @@ def reuse_ok(src_vo, key, tx):
 
 todo, done, reused = [], [], 0
 skipped = []
-for pg in nd['pages']:
-    for vo, stx, skey in segs_of(pg):
-        key = skey if skey in VOICES else 'narr'
-        name = os.path.basename(vo)[:-4]
-        dst = os.path.join(OUTDIR, name + '.mp3')
-        tx = norm(stx)
-        rec = man.get(vo, {})
-        if name in FORCE:
-            todo.append((vo, name, key, stx.strip(), tx))
-            continue
-        if (rec.get('voice') == key and rec.get('text') == tx
-                and not rec.get('stale_reason')
-                and os.path.exists(dst) and os.path.getsize(dst) > 2000):
-            done.append(name)
-            continue
-        # тот же голос + тот же текст уже озвучен в предыдущей сборке → копируем файл
-        # (из git-блоба HEAD, а НЕ из рабочего дерева — иначе каскад копий)
-        src_vo = None if NO_REUSE else REUSE.get((key, tx))
-        if src_vo:
-            ok, why = reuse_ok(src_vo, key, tx)
-            if not ok:
-                skipped.append('%s: %s' % (name, why))
-                src_vo = None
-        if src_vo:
-            rel = 'vn2/audio/vo/' + os.path.basename(src_vo)[:-4] + '.mp3'
-            blob = git_blob(rel)
-            if blob and len(blob) > 2000:
-                with open(dst, 'wb') as fo:
-                    fo.write(blob)
-                man[vo] = {'voice': key, 'text': tx, 'chars': len(tx), 'price': 0,
-                           'reused_from': os.path.basename(src_vo)}
-                reused += 1
+for nd in nds:
+    for pg in nd['pages']:
+        for vo, stx, skey in segs_of(pg, plan=True):
+            key = skey if skey in VOICES else 'narr'
+            name = os.path.basename(vo)[:-4]
+            dst = os.path.join(OUTDIR, name + '.mp3')
+            tx = norm(stx)
+            rec = man.get(vo, {})
+            if name in FORCE:
+                todo.append((vo, name, key, stx.strip(), tx))
                 continue
-        todo.append((vo, name, key, stx.strip(), tx))
+            if (rec.get('voice') == key and rec.get('text') == tx
+                    and not rec.get('stale_reason')
+                    and os.path.exists(dst) and os.path.getsize(dst) > 2000):
+                done.append(name)
+                continue
+            # тот же голос + тот же текст уже озвучен в предыдущей сборке → копируем файл
+            # (из git-блоба HEAD, а НЕ из рабочего дерева — иначе каскад копий)
+            src_vo = None if NO_REUSE else REUSE.get((key, tx))
+            if src_vo:
+                ok, why = reuse_ok(src_vo, key, tx)
+                if not ok:
+                    skipped.append('%s: %s' % (name, why))
+                    src_vo = None
+            if src_vo:
+                rel = 'vn2/audio/vo/' + os.path.basename(src_vo)[:-4] + '.mp3'
+                blob = git_blob(rel)
+                if blob and len(blob) > 2000:
+                    with open(dst, 'wb') as fo:
+                        fo.write(blob)
+                    man[vo] = {'voice': key, 'text': tx, 'chars': len(tx), 'price': 0,
+                               'reused_from': os.path.basename(src_vo)}
+                    reused += 1
+                    continue
+            todo.append((vo, name, key, stx.strip(), tx))
 
 chars = {}
 for _, _, key, _, tx in todo:
     chars[key] = chars.get(key, 0) + len(tx)
 cost = sum(len(tx) * VOICES[key][2] / 1000 for _, _, key, _, tx in todo)
+npages = sum(len(n['pages']) for n in nds)
 print('страниц: %d, к переозвучке: %d, уже в нужном голосе: %d, переиспользовано: %d'
-      % (len(nd['pages']), len(todo), len(done), reused))
+      % (npages, len(todo), len(done), reused))
 for s in skipped:
     print('  переиспользование отклонено — ' + s)
 for k, n in sorted(chars.items(), key=lambda x: -x[1]):
