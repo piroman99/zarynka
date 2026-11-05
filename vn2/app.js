@@ -7,6 +7,7 @@
   const $ = (id) => document.getElementById(id);
   const bgA = $("bg-a"), bgB = $("bg-b");
   const castEls = Array.from(document.querySelectorAll("#cast .sprite"));
+  const propEl = document.querySelector("#props .prop");   // статичный предмет сцены (скамейка)
   const box = $("box"), nameEl = $("name"), textEl = $("text"), chapter = $("chapter");
   const hud = $("hud"), title = $("title"), vlayer = $("vlayer"), znak = $("znak"), vskip = $("vskip");
   const music = $("music"), voice = $("voice");
@@ -238,6 +239,17 @@
     if (!ch) return null;
     return (ch.emos && (ch.emos[emo] || ch.emos.neutral)) || ch.base || null;
   }
+  // Предмет сцены (скамейка): ставится по УЗЛУ (nd.prop) и НИЧЕГО не анимирует.
+  // Пустое значение = убрать (например, на странице CG, где кадр рисуется целиком).
+  function applyProp(p) {
+    if (!propEl) return;
+    if (!p || !p.src) { propEl.classList.remove("on"); propEl.removeAttribute("src"); return; }
+    if (propEl.getAttribute("src") !== p.src) propEl.src = p.src;
+    propEl.style.left = p.left || "50%";
+    propEl.style.bottom = p.bottom || "-3%";
+    propEl.style.height = p.h || "40%";
+    propEl.classList.add("on");
+  }
   function applySlot(i, who, emo) {
     const el = castEls[i]; if (!el) return;
     // сброс инлайновой opacity: в режиме скриншота (INSTANT) она ставится в 1 и
@@ -247,6 +259,7 @@
     if (!url) { el.classList.remove("on", "dim", "breathe"); el.style.opacity = ""; return; }
     el.dataset.base = charUrl(who, "neutral") || url;
     if (el.getAttribute("src") !== url) el.src = url;
+    el.classList.toggle("seated", !!(D.chars && D.chars[who] && D.chars[who].seated));
     el.classList.add("on", "breathe");
     if (INSTANT) { el.style.transition = "none"; el.style.opacity = 1; }
   }
@@ -255,13 +268,16 @@
     const l = c.l, r = c.r, sp = c.speak;
     applySlot(0, l && l[0], l && l[1]);
     applySlot(1, r && r[0], r && r[1]);
-    const solo = !(l && r);
+    // Сидящего НЕ центруем, когда он остался один (правка 2026-11-05, сцена «аллея»):
+    // скамейка-проп стоит на месте, и от центровки фигура уезжала бы с неё.
+    const seated = (who) => !!(who && D.chars && D.chars[who] && D.chars[who].seated);
+    const solo = !(l && r) && !seated(l && l[0]) && !seated(r && r[0]);
     castEls[0].classList.toggle("solo", solo);
     castEls[1].classList.toggle("solo", solo);
     castEls[0].classList.toggle("dim", !!(l && r && sp && l[0] !== sp));
     castEls[1].classList.toggle("dim", !!(l && r && sp && r[0] !== sp));
   }
-  function clearCast() { castEls.forEach((el) => el.classList.remove("on", "dim", "breathe", "solo")); }
+  function clearCast() { castEls.forEach((el) => el.classList.remove("on", "dim", "breathe", "solo", "seated")); }
   // нет файла эмоции -> откат на базовый спрайт (движок готов к доб. эмоциям)
   castEls.forEach((el) => el.addEventListener("error", () => {
     if (el.dataset.base && el.getAttribute("src") !== el.dataset.base) el.src = el.dataset.base;
@@ -640,6 +656,7 @@
     // страницу можно перекрыть своим кадром (CG): pg.bg важнее фона сцены
     const wantBg = pg.bg || nd.bg;
     if (wantBg !== curBg) setBg(wantBg);
+    applyProp(pg.cg ? null : nd.prop);   // CG = кадр целиком, предмет сцены не нужен
     renderCast(pg.cast);
     applyCam(pg);
     applyOvl(pg);                    // надписи кадра — по страницам (было вожжено в PNG)
@@ -705,6 +722,7 @@
     playToken++;
     curNode = -1;
     clearCast();
+    applyProp(null);        // предмет сцены не должен висеть над финальным экраном
     clearCam();
     paused = false; tyPaused = false;
     showHud(false);
@@ -736,6 +754,7 @@
     playToken++;
     curNode = -1;
     clearCast();
+    applyProp(null);
     clearCam();
     paused = false; tyPaused = false;
     pos = 0;

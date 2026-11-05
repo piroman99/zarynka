@@ -35,6 +35,16 @@ body{
 
 /* спрайты: ДВА слота. Смена персонажа = кроссфейд (старый тает, новый проявляется),
    говорящий ярко, слушающий притемнён, у говорящего лёгкое «дыхание». */
+/* ПРЕДМЕТЫ СЦЕНЫ (проп): статичный слой под спрайтами. z-index 1 — выше фона,
+   ниже персонажей. Никакой анимации: предмет не должен дрожать со спрайтом. */
+#props{position:absolute; inset:0; z-index:1; pointer-events:none}
+#props .prop{
+  position:absolute; bottom:-3%; left:50%; height:40%; width:auto; opacity:0;
+  transform:translateX(-50%); transition:opacity .45s ease;
+  filter:drop-shadow(0 10px 18px rgba(0,0,0,.35));
+}
+#props .prop.on{opacity:1}
+
 #cast{position:absolute; inset:0; z-index:2; pointer-events:none}
 .sprite{
   position:absolute; bottom:-3%; height:99%; width:auto; object-fit:contain; opacity:0;
@@ -56,6 +66,14 @@ body{
   50%{transform:translateX(-50%) translateY(-4px) scale(1.004)}}
 .sprite.solo.breathe[data-slot="0"]{animation:breatheS0 3.2s ease-in-out infinite}
 .sprite.solo.breathe[data-slot="1"]{animation:breatheS1 3.6s ease-in-out infinite}
+/* СИДЯЩИЕ спрайты — ОСОБОЕ дыхание (правка Ивана 2026-11-05):
+   обычный ключ подскакивает на 4 px, и сидящий на скамейке «вибрирует» вместе с мебелью.
+   Здесь только масштаб от НИЖНЕЙ кромки: верх тела живёт, точка опоры не едет.
+   Сама скамейка — в #props, без анимации вообще. */
+.sprite.seated{height:75%}
+.sprite.seated.on.breathe{animation:breatheSeated 4.6s ease-in-out infinite}
+@keyframes breatheSeated{0%,100%{transform:translateX(-50%) scale(1)}
+  50%{transform:translateX(-50%) scale(1.004)}}
 @keyframes breatheS0{0%,100%{transform:translateX(-50%) translateY(0) scale(1)}
   50%{transform:translateX(-50%) translateY(-4px) scale(1.004)}}
 @keyframes breatheS1{0%,100%{transform:translateX(-50%) translateY(0) scale(1)}

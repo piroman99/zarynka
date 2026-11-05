@@ -201,10 +201,15 @@ CHAR_SRC = {
     'poet.png':              os.path.join(SPR, 'poet_ha_neutral.png'),
     'poet_interested.png':   os.path.join(SPR, 'poet_ha_interested.png'),
     'poet_upset.png':        os.path.join(SPR, 'poet_ha_upset.png'),
-    # сидящий поэт (сцена «аллея»: по тексту он на скамейке) — правка Ивана 2026-11-04
-    'poet_sit.png':          os.path.join(SPR, 'poet_sit_neutral.png'),
-    'poet_sit_interested.png': os.path.join(SPR, 'poet_sit_interested.png'),
-    'poet_sit_upset.png':    os.path.join(SPR, 'poet_sit_upset.png'),
+    # сидящий поэт на скамейке (сцена «аллея») — правка Ивана 2026-11-05: скамейка больше
+    # НЕ часть спрайта (она статичный проп `img/prop/bench`), в кадре — фигура целиком
+    # от макушки до ступней; 6 эмоций.
+    'poet_seat.png':          os.path.join(SPR, 'poet_seat_neutral.png'),
+    'poet_seat_interested.png': os.path.join(SPR, 'poet_seat_interested.png'),
+    'poet_seat_upset.png':    os.path.join(SPR, 'poet_seat_upset.png'),
+    'poet_seat_shy.png':      os.path.join(SPR, 'poet_seat_shy.png'),
+    'poet_seat_sullen.png':   os.path.join(SPR, 'poet_seat_sullen.png'),
+    'poet_seat_smile.png':    os.path.join(SPR, 'poet_seat_smile.png'),
     'poet_sh.png':           os.path.join(SPR, 'poet_sh_neutral.png'),
     'poet_sh_tired.png':     os.path.join(SPR, 'poet_sh_tired.png'),
     'poet_sh_inspired.png':  os.path.join(SPR, 'poet_sh_inspired.png'),
@@ -227,11 +232,30 @@ for dst, src in CHAR_SRC.items():
 
 # доступные спрайты и эмоции (по фактическим файлам в img/char) — движок
 # рисует только то, что есть, и подхватит новые эмоции без правок кода
+# Предметы сцены (статичный проп). Скамейка сцены «аллея»: отдельным кадром от спрайта
+# (правка Ивана 2026-11-05 №1 и №2: «скамейка должна быть длинной» + «не должна дрожать
+# вместе со спрайтом поэта»). Спрайт поэта — без мебели.
+PROP_SRC = {'bench': os.path.join(SPR, 'prop_bench.png')}
+PROP_DIR = os.path.join(IMG, 'prop')
+os.makedirs(PROP_DIR, exist_ok=True)
+for _n, _p in PROP_SRC.items():
+    if not os.path.exists(_p):
+        print('prop SKIP (нет источника):', _n)
+        continue
+    _im = Image.open(_p).convert('RGBA')
+    if _im.height > 700:
+        _im = _im.resize((round(_im.width * 700 / _im.height), 700), Image.LANCZOS)
+    _im.save(os.path.join(PROP_DIR, _n + '.webp'), 'WEBP', quality=82, method=6)
+    print('prop', _n, _im.size)
+
+
 def char_manifest():
     key_of = {'Сергей': 'sergey', 'Екатерина': 'kate', 'Старик': 'starik',
-              'Поэт': 'poet', 'Поэт (стриж.)': 'poet_sh', 'Поэт (сидя)': 'poet_sit'}
+              'Поэт': 'poet', 'Поэт (стриж.)': 'poet_sh', 'Поэт (на скамейке)': 'poet_seat'}
+    # «сидят» — те, у кого в движке особое дыхание (масштаб от нижней кромки, без подскока)
+    seated = {'Поэт (на скамейке)'}
     known = ['neutral', 'smile', 'sad', 'concerned', 'stern',
-             'interested', 'upset', 'tired', 'inspired']
+             'interested', 'upset', 'tired', 'inspired', 'shy', 'sullen']
     have = set(os.listdir(os.path.join(IMG, 'char')))
     d = {}
     for who, k in key_of.items():
@@ -243,6 +267,8 @@ def char_manifest():
         if emos:
             d[who] = {'base': emos.get('neutral') or next(iter(emos.values())),
                       'emos': emos}
+            if who in seated:
+                d[who]['seated'] = True
     return d
 
 
@@ -382,12 +408,13 @@ os.makedirs(CG_DIR, exist_ok=True)
 CG_P4 = 'cg_p4v3_a'          # P4 на стр. 35..37. v3 = Сергей со спрайта (щетина, жилет, бейдж);
                              # 'a' (общий от окна — принят Иваном 2026-10-25) | 'b' (через плечо).
                              # v2 (бритый, в галстуке) забракован — оставлен исходником в assets/gen.
-CG_MUZA = 'cg_muza'          # «— Муза, — юноша покраснел и отвернулся» (сцена «аллея»,
-                             # решение Ивана 2026-11-04: «давай попробуем CG на музу»)
+CG_MUZA = 'cg_muza2'         # «— Муза, — юноша покраснел и отвернулся» (сцена «аллея»).
+                             # v1 забракован Иваном 2026-11-05: «скамейка углом к дороге,
+                             # так не бывает» → v2: скамейка стоит ВДОЛЬ аллеи.
 CG_SAD = 'cg_room_a'         # сникшая Екатерина на стр. 59..61 (принят 2026-10-24)
 CG_SOURCES = {'rec_35': CG_P4, 'rec_48': CG_SAD, 'al_muza': CG_MUZA}
 # имя файла генерации: у новых партий gpt-image-2 без суффикса модели
-CG_FILE = {'rec_35': None, 'rec_48': None, 'al_muza': 'cg_muza_0.png'}
+CG_FILE = {'rec_35': None, 'rec_48': None, 'al_muza': 'cg_muza2_0.png'}
 for _out, _stem in CG_SOURCES.items():
     _src = os.path.join(GEN, CG_FILE.get(_out) or (_stem + '__gpt-image-2_0.png'))
     if not os.path.exists(_src):
@@ -763,20 +790,26 @@ def _anchor2(frag):
     raise SystemExit('якорь сцены «аллея» не найден: %r' % frag)
 
 
-# состав: (якорь, сторона, кто, эмоция); кто '-' — убрать спрайт
+# состав: (якорь, сторона, кто, эмоция); кто '-' — убрать спрайт.
+# 2026-11-05 Иван: поэт теперь СЛЕВА — он сидит на скамейке у края аллеи (как и в тексте:
+# «на скамейке между зелёных еловых лап»), Екатерина стоит на дороге справа.
 ALLEY_CAST = [
-    ('Расстроенная Екатерина Ивановна вышла', 'l', 'Екатерина', 'sad'),
-    ('Недалеко от кованых ажурных ворот', 'l', 'Екатерина', 'neutral'),
-    ('Недалеко от кованых ажурных ворот', 'r', 'Поэт (сидя)', 'upset'),
-    ('Юноша еще долго сидел на скамейке', 'l', '-', ''),
+    ('Расстроенная Екатерина Ивановна вышла', 'r', 'Екатерина', 'sad'),
+    ('Недалеко от кованых ажурных ворот', 'r', 'Екатерина', 'neutral'),
+    ('Недалеко от кованых ажурных ворот', 'l', 'Поэт (на скамейке)', 'upset'),
+    ('Юноша еще долго сидел на скамейке', 'r', '-', ''),
 ]
 ALLEY_EMO = [
     ('Екатерина Ивановна улыбнулась и стала искать', 'Екатерина', 'smile'),
-    ('Юноша отнял лицо от ладоней', 'Поэт (сидя)', 'neutral'),
-    ('Тот что-то неразборчиво буркнул', 'Поэт (сидя)', 'upset'),
-    ('Наконец оторвавшись от ладоней', 'Поэт (сидя)', 'upset'),
-    ('Что это?', 'Поэт (сидя)', 'interested'),
-    ('Поэт поджал губы', 'Поэт (сидя)', 'upset'),
+    ('Юноша отнял лицо от ладоней', 'Поэт (на скамейке)', 'neutral'),
+    ('Тот что-то неразборчиво буркнул', 'Поэт (на скамейке)', 'upset'),
+    ('Поэт нерешительно дернул плечом', 'Поэт (на скамейке)', 'sullen'),
+    ('Наконец оторвавшись от ладоней', 'Поэт (на скамейке)', 'neutral'),
+    ('юноша покраснел и отвернулся', 'Поэт (на скамейке)', 'shy'),
+    ('Что это?', 'Поэт (на скамейке)', 'interested'),
+    ('Зачем он мне', 'Поэт (на скамейке)', 'sullen'),
+    ('Поэт поджал губы', 'Поэт (на скамейке)', 'sullen'),
+    ('потрепала его по голове', 'Поэт (на скамейке)', 'smile'),
 ]
 _cdict2 = {}
 for frag, side, who, em in ALLEY_CAST:
@@ -829,7 +862,10 @@ print('CG al_muza: страница %d сцены «аллея» (%r)' % (_muza,
 nodes.append({'t': 'scene', 'id': 'steps', 'bg': 'img/bg/steps' + CLIENT_EXT,
               'music': 'reception', 'trans': 'fade', 'pages': steps_pages})
 nodes.append({'t': 'scene', 'id': 'alley', 'bg': 'img/bg/alley' + CLIENT_EXT,
-              'music': 'reception', 'pages': alley_pages})
+              'music': 'alley',
+              # скамейка — статичный предмет сцены: не дрожит и не масштабируется со спрайтом
+              'prop': {'src': 'img/prop/bench.webp', 'left': '22%', 'bottom': '-6%', 'h': '59%'},
+              'pages': alley_pages})
 print('сцена «аллея»: steps %d стр., alley %d стр.' % (len(steps_pages), len(alley_pages)))
 
 
@@ -867,7 +903,11 @@ data = {
     'voVer': VO_VER,
     'emblemVer': EMBLEM_VER,
     'music': {'prolog': '../assets/audio/sketch/prolog_bed_soft_0.mp3',
-              'reception': '../assets/audio/sketch/vn_reception_soft_0.mp3'},
+              'reception': '../assets/audio/sketch/vn_reception_soft_0.mp3',
+              # сцена «аллея» — своя тема весенней улицы (правка Ивана 2026-11-05, п.5):
+              # тёплая тема + фон улицы (капель, птицы, ветер в елях).
+              # Варианты рядом: alley_bed.mp3 (только тема), alley_amb.mp3 (только улица).
+              'alley': '../assets/audio/sketch/alley_mix.mp3'},
     'chars': CHARS_AVAIL,
     'nodes': nodes,
 }

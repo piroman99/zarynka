@@ -19,6 +19,11 @@
   <div id="stage">
     <div id="bg-a" class="bg"></div>
     <div id="bg-b" class="bg"></div>
+    <!-- ПРЕДМЕТЫ СЦЕНЫ (статичные): скамейка под сидящим персонажем и т.п.
+         Отдельный слой именно для того, чтобы предмет НЕ дышал вместе со спрайтом
+         (правка Ивана 2026-11-05: «скамейка не должна вибрировать вместе с поэтом»).
+         Ставится по узлу: nd.prop = {src, left, bottom, h} в content.js. -->
+    <div id="props" aria-hidden="true"><img class="prop" alt=""></div>
     <div id="cast">
       <img class="sprite" data-slot="0" alt="">
       <img class="sprite" data-slot="1" alt="">
