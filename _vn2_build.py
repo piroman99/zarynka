@@ -907,7 +907,7 @@ data = {
               # сцена «аллея» — своя тема весенней улицы (правка Ивана 2026-11-05, п.5):
               # тёплая тема + фон улицы (капель, птицы, ветер в елях).
               # Варианты рядом: alley_bed.mp3 (только тема), alley_amb.mp3 (только улица).
-              'alley': '../assets/audio/sketch/alley_mix.mp3'},
+               'alley': '../assets/audio/sketch/alley_mix.mp3?v=2'},
     'chars': CHARS_AVAIL,
     'nodes': nodes,
 }

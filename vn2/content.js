@@ -46,7 +46,7 @@ window.VN = {
  "music": {
   "prolog": "../assets/audio/sketch/prolog_bed_soft_0.mp3",
   "reception": "../assets/audio/sketch/vn_reception_soft_0.mp3",
-  "alley": "../assets/audio/sketch/alley_mix.mp3"
+  "alley": "../assets/audio/sketch/alley_mix.mp3?v=2"
  },
  "chars": {
   "Сергей": {
