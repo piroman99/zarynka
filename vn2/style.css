@@ -266,6 +266,8 @@ body.nofx #trans, body.nofx #trans .tlogo{transition:none}
 .tg.pause{background:linear-gradient(180deg,#f59e0b,#d97706);
   border-color:rgba(245,158,11,.9); box-shadow:0 6px 18px rgba(217,119,6,.45)}
 .tg[hidden]{display:none}
+/* тумблер «спрятать/показать ряд» — нужен только в портрете */
+#t-menu{display:none}
 
 /* навигация: назад / далее */
 #nav{position:absolute; inset:0; pointer-events:none; z-index:9}
@@ -429,4 +431,13 @@ body.nofx #trans, body.nofx #trans .tlogo{transition:none}
   #text{font-size:clamp(16px,4.6vw,26px); line-height:1.5}
   #name{top:-1.1em; left:5vw; font-size:clamp(14px,3.9vw,20px)}
   #hint{display:none}
+
+  /* тулбар в портрете сворачивается в одну кнопку: ряд из шести кнопок
+     на телефоне наезжал на кадр и закрывал арт. Пауза остаётся снаружи —
+     иначе в авто-режиме её нечем нажать. */
+  #tools{gap:.4em}
+  #t-menu{display:block}
+  /* :not(#t-menu) — иначе это правило (специфичность выше) гасит и сам тумблер */
+  #tools:not(.open) .tg:not(#t-menu){display:none}
+  #tools:not(.open) #t-pause:not([hidden]){display:block}
 }

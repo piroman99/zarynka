@@ -908,6 +908,27 @@
   };
   $("t-pause").onclick = (e) => { e.stopPropagation(); togglePause(); };
 
+  // ---------- сворачиваемый тулбар (только портрет) ----------
+  // В портрете ряд из шести кнопок наезжал на кадр, поэтому он прячется за ☰.
+  // На десктопе #t-menu скрыт, .open ни на что не влияет — поведение прежнее.
+  const tools = $("tools"), tMenu = $("t-menu");
+  function setToolsOpen(on) {
+    tools.classList.toggle("open", !!on);
+    tMenu.textContent = on ? "✕" : "☰";
+    tMenu.setAttribute("aria-expanded", on ? "true" : "false");
+    tMenu.title = on ? "Скрыть кнопки" : "Кнопки: авто, текст, голос, музыка, экран";
+  }
+  tMenu.onclick = (e) => { e.stopPropagation(); setToolsOpen(!tools.classList.contains("open")); };
+  // Ловим в фазе ПЕРЕХВАТА: сами кнопки зовут stopPropagation(), в всплытии
+  // до #tools клик не доходит. Любой клик мимо ☰ (по тумблеру, по кадру,
+  // по стрелке) сворачивает ряд — как обычное мобильное меню.
+  document.addEventListener("click", (e) => {
+    if (!tools.classList.contains("open")) return;
+    if (e.target.closest && e.target.closest("#t-menu")) return;
+    setToolsOpen(false);
+  }, true);
+  setToolsOpen(false);
+
   // пауза: замораживает таймер + голос + печать (резюм с того же места)
   function togglePause() {
     if (!autoOn) return;
