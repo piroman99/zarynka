@@ -64,8 +64,13 @@ try:
         b.js(CLICK % 'e-menu')
         time.sleep(0.4)
         check('прогон %d: меню показано' % run, b.js(SHOW % 'title'))
-        check('прогон %d: кнопка «Начать»' % run, b.js("document.getElementById('start').textContent") == 'Начать',
-              b.js("document.getElementById('start').textContent"))
+        # после прохождения серии до конца кнопка снова «Начать» (2026-11-09:
+        # «Продолжить» включается только для незаконченного прохода)
+        lbl = b.js("document.getElementById('start').textContent")
+        check('прогон %d: кнопка снова «Начать»' % run, lbl == 'Начать', lbl)
+        check('прогон %d: галочки в оглавлении остались' % run,
+              b.js("window.__TOC.max") >= b.js("window.__TOC.counts().length") - 1,
+              b.js("window.__TOC.max"))
 
     errs = b.errors()
     check('js-ошибок нет', not errs, ' | '.join(errs)[:300])

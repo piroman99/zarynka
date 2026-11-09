@@ -67,6 +67,227 @@
   SCENES.forEach((s, i) => { if (!(s.n in scriptStart)) scriptStart[s.n] = i; });
   let pos = 0;
 
+  // ---------- ПРОГРЕСС И ОГЛАВЛЕНИЕ ----------
+  // Иван 2026-11-09: третья кнопка на заставке — оглавление «как в книге»:
+  // главы с подпунктами, счёт страниц, первая фраза, метка «пройдено».
+  // Пройденное помнит localStorage (раньше движок вообще не помнил, где ты).
+  const PROG_KEY = "zaryanka.progress.v1";
+  function progLoad() {
+    try {
+      const v = JSON.parse(localStorage.getItem(PROG_KEY) || "null");
+      if (v && typeof v.max === "number" && v.max >= 0) {
+        return Math.min(Math.floor(v.max), SCENES.length - 1);
+      }
+    } catch (e) {}
+    return -1;
+  }
+  function progSave() {
+    try { localStorage.setItem(PROG_KEY, JSON.stringify({ max: progMax, at: Date.now() })); } catch (e) {}
+  }
+  let progMax = progLoad();        // дальний индекс SCENES, до которого дошли (-1 = ещё не начинали)
+  function progMark(i) {
+    if (SHOT || i < 0) return;     // скриншоты — не игра, прогресс не трогают
+    if (i > progMax) { progMax = i; progSave(); }
+  }
+  function pagesWord(n) {
+    const a = Math.abs(n) % 100, b = a % 10;
+    if (a > 10 && a < 20) return "страниц";
+    if (b === 1) return "страница";
+    if (b >= 2 && b <= 4) return "страницы";
+    return "страниц";
+  }
+
+  // Структура оглавления: глава → узлы content.js. id сверять с _vn2_nodes.node_index().
+  const TOC = [
+    { t: "Пролог", items: [
+      ["s1", "Клич «Марс — дело общее»"],
+      ["p6", "Вторая Марсианская"],
+      ["p7", "Недостроенный корабль"],
+      ["p8", "Стыковка у станции"],
+      ["s3", "Зал · вопрос"],
+      ["s4", "Ролик на скорую руку"],
+      ["s5a", "Площадь · лозунг"],
+      ["s5b", "Триумф"],
+      ["s6", "Открытый конкурс"],
+      ["s7", "Тысячи людей"],
+    ] },
+    { t: "Кабинет Старика", items: [["starik", ""]] },
+    { t: "Приёмная", items: [["reception", ""]] },
+    { t: "Аллея у ворот", items: [["steps", "Ступени"], ["alley", "У ворот"]] },
+  ];
+
+  function nodeById(id) {
+    for (let i = 0; i < NODES.length; i++) if (NODES[i].id === id) return i;
+    return -1;
+  }
+  function nodeStart(id) {                 // первая страница узла в SCENES
+    const ni = nodeById(id);
+    return ni < 0 ? -1 : (ni in scriptStart ? scriptStart[ni] : -1);
+  }
+  function nodePages(id) {
+    const ni = nodeById(id);
+    return ni < 0 ? 0 : ((NODES[ni].pages || []).length);
+  }
+  function nodeExcerpt(id) {               // первая фраза узла — как первая строка в книге
+    const ni = nodeById(id);
+    const pg = ni >= 0 && NODES[ni].pages && NODES[ni].pages[0];
+    if (!pg || !pg.tx) return "";
+    let s = String(pg.tx).split("\n")[0].trim();
+    const m = s.match(/^[^.!?…]{14,}?[.!?…]/);
+    if (m) s = m[0];
+    if (s.length > 64) s = s.slice(0, 63).replace(/[\s,;:—–-]+$/, "") + "…";
+    return s;
+  }
+
+  const tocEl = $("toc"), tocList = $("toclist"), tocNote = $("tocnote");
+  let tocShown = false;
+  function tocIsOpen() { return tocShown; }
+
+  function renderToc() {
+    if (!tocList) return;
+    tocList.innerHTML = "";
+    const hereId = (started && SCENES[pos]) ? NODES[SCENES[pos].n].id : null;
+    TOC.forEach((ch) => {
+      const st0 = nodeStart(ch.items[0][0]);
+      const total = ch.items.reduce((s, it) => s + nodePages(it[0]), 0);
+      const box = document.createElement("div");
+      box.className = "toc-chap";
+      // строка главы: сама кликабельна (ведёт на первую страницу главы)
+      const head = document.createElement("button");
+      head.type = "button";
+      const lockedCh = !(st0 >= 0 && st0 <= progMax);
+      head.className = "toc-row toc-chaprow" + (lockedCh ? " locked" : "") +
+                       (st0 >= 0 && st0 <= progMax ? " done" : "") +
+                       (ch.items.length === 1 && ch.items[0][0] === hereId ? " here" : "");
+      head.disabled = lockedCh;
+      const hn = document.createElement("span");
+      hn.className = "n";
+      hn.textContent = ch.t;
+      const hp = document.createElement("span");
+      hp.className = "pg";
+      hp.textContent = total + " " + pagesWord(total);
+      head.appendChild(hn);
+      head.appendChild(hp);
+      const ex = nodeExcerpt(ch.items[0][0]);
+      if (ex) {
+        const sn = document.createElement("span");
+        sn.className = "sn";
+        sn.textContent = ex;
+        hn.appendChild(sn);
+      }
+      head.onclick = (e) => { e.stopPropagation(); if (!lockedCh) tocJump(st0); };
+      box.appendChild(head);
+      // подпункты — только там, где их реально несколько
+      if (ch.items.length > 1) {
+        ch.items.forEach((it) => {
+          const id = it[0], label = it[1] || it[0];
+          const st = nodeStart(id);
+          if (st < 0) return;
+          const cnt = nodePages(id);
+          const locked = st > progMax;
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "toc-row" + (locked ? " locked" : "") +
+                        (st <= progMax ? " done" : "") + (id === hereId ? " here" : "");
+          b.disabled = locked;
+          b.dataset.node = id;
+          b.dataset.start = String(st);
+          const n = document.createElement("span");
+          n.className = "n";
+          n.textContent = label;
+          const p = document.createElement("span");
+          p.className = "pg";
+          p.textContent = cnt + " " + pagesWord(cnt);
+          b.appendChild(n);
+          b.appendChild(p);
+          b.onclick = (e) => { e.stopPropagation(); if (!locked) tocJump(st); };
+          const sub = document.createElement("div");
+          sub.className = "toc-sub";
+          sub.appendChild(b);
+          box.appendChild(sub);
+        });
+      }
+      tocList.appendChild(box);
+    });
+    if (tocNote) {
+      const all = SCENES.length;
+      tocNote.textContent = progMax < 0
+        ? "ещё не начато · всего " + all + " " + pagesWord(all)
+        : (progDone() ? "пройдено до конца · " + all + " " + pagesWord(all)
+                      : "пройдено до стр. " + (progMax + 1) + " из " + all);
+    }
+  }
+
+  function tocOpen() {
+    if (!tocEl) return;
+    renderToc();
+    tocShown = true;
+    tocEl.classList.add("show");
+    tocEl.setAttribute("aria-hidden", "false");
+    if (tocList) tocList.scrollTop = 0;
+  }
+  function tocClose() {
+    if (!tocEl) return;
+    tocShown = false;
+    tocEl.classList.remove("show");
+    tocEl.setAttribute("aria-hidden", "true");
+  }
+  function tocJump(i) {
+    tocClose();
+    if (started) { enterPos(i, true); return; }
+    beginAt(i);
+  }
+  // запуск сразу с выбранной страницы (значок и посвящение — только через «Начать»)
+  function beginAt(i) {
+    started = true; starting = false; pendingGo = null;
+    const btn = $("start");
+    if (btn) { btn.textContent = "Начать"; btn.title = ""; }
+    hideScreens();
+    tryFullscreen();
+    wakeOn();
+    if (music.src && musicOn) music.play().catch(() => {});
+    enterPos(i, true);
+    updateStartBtn();
+  }
+
+  // «Начать» превращается в «Продолжить», если уже что-то пройдено.
+  // Если серия дойдена до конца — снова «Начать» (продолжать с последней
+  // страницы бессмысленно), а галочки в оглавлении остаются.
+  function progDone() { return progMax >= SCENES.length - 1; }
+  function updateStartBtn() {
+    const btn = $("start");
+    if (!btn || started || starting) return;
+    if (progMax > 0 && !progDone()) {
+      btn.textContent = "Продолжить";
+      btn.title = "С " + (progMax + 1) + "-й страницы";
+    } else {
+      btn.textContent = "Начать";
+      btn.title = progDone() ? "Серия пройдена — можно пересмотреть" : "";
+    }
+  }
+
+  let resetArmed = false, resetT = null;
+  function resetProg() {
+    const b = $("toc-reset");
+    if (!resetArmed) {                    // защита от случайного клика: два шага
+      resetArmed = true;
+      if (b) { b.classList.add("arm"); b.textContent = "Точно? Прогресс сотрётся"; }
+      clearTimeout(resetT);
+      resetT = setTimeout(() => {
+        resetArmed = false;
+        if (b) { b.classList.remove("arm"); b.textContent = "Сбросить прогресс"; }
+      }, 4000);
+      return;
+    }
+    clearTimeout(resetT);
+    resetArmed = false;
+    if (b) { b.classList.remove("arm"); b.textContent = "Сбросить прогресс"; }
+    progMax = -1;
+    try { localStorage.removeItem(PROG_KEY); } catch (e) {}
+    renderToc();
+    updateStartBtn();
+  }
+
   // ---------- ПРЕДЗАГРУЗКА ----------
   // Кадры/голос качаются ЗАРАНЕЕ, чтобы не мигали во время просмотра.
   // Список берём из content.js (nd.bg / pg.cast / pg.vo / D.chars / D.music) —
@@ -644,6 +865,7 @@
     inBreak = false;
     playToken++;
     pos = i;
+    progMark(i);                     // помним, докуда дошли — для «Продолжить» и замков в оглавлении
     const s = SCENES[i], nd = NODES[s.n], pg = nd.pages[s.p];
     clearTimeout(autoTimer);
     showHud(true);
@@ -759,8 +981,7 @@
     paused = false; tyPaused = false;
     pos = 0;
     started = false; starting = false; pendingGo = null;
-    const btn = $("start");
-    if (btn) { btn.textContent = "Начать"; btn.title = ""; }
+    updateStartBtn();                // «Продолжить», если прогресс есть (или «Начать» после сброса)
     plStat();                        // вернуть полосу загрузки в актуальное состояние
     try { znak.onended = null; znak.pause(); } catch (err) {}
     showHud(false); hideScreens();
@@ -832,13 +1053,14 @@
       tryFullscreen();                 // клик = жест: можно сразу во весь экран
       wakeOn();                        // и экран больше не гаснет
       if (music.src && musicOn) music.play().catch(() => {});
+      if (progMax > 0 && !progDone()) { enterPos(progMax, true); return; }   // «Продолжить» — туда, где остановились
       enterZnak(NODES[1]);
     };
     if (PRELOAD_OFF) return go();
     // ждём только КРИТИЧНОЕ (значок + S1 + его голос), не весь эп1
     const crit = [];
     NODES.forEach((nd) => { if (nd.t === "znak") crit.push(nd.video); });
-    const first = SCENES[0];
+    const first = SCENES[(progMax > 0 && !progDone()) ? progMax : 0];
     if (first) {
       const nd = NODES[first.n];
       crit.push(nd.bg);
@@ -1041,6 +1263,10 @@
   // ---------- ввод ----------
   $("start").onclick = (e) => { e.stopPropagation(); start(); };
   $("teaser").onclick = (e) => { e.stopPropagation(); playCinema(AVM); };
+  if ($("toc-open")) $("toc-open").onclick = (e) => { e.stopPropagation(); tocOpen(); };
+  if ($("toc-x")) $("toc-x").onclick = (e) => { e.stopPropagation(); tocClose(); };
+  if ($("toc-reset")) $("toc-reset").onclick = (e) => { e.stopPropagation(); resetProg(); };
+  if (tocEl) tocEl.onclick = (e) => { if (e.target === tocEl) tocClose(); };   // клик мимо списка — закрыть
   $("e-menu").onclick = (e) => { e.stopPropagation(); goMenu(); };
   $("e-credits").onclick = (e) => { e.stopPropagation(); openCredits(); };
   $("cr-skip").onclick = (e) => { e.stopPropagation(); finishCredits(); };
@@ -1050,12 +1276,17 @@
   nextBtn.onclick = (e) => { e.stopPropagation(); next(); };
 
   document.getElementById("stage").addEventListener("click", () => {
+    if (tocShown) return;
     if (cinemaOpen || !vlayer.hidden || crOpen()) return;
     if (dedOpen()) { leaveDed(); return; }
     if (title.classList.contains("show") || endScr.classList.contains("show")) return;
     next();
   });
   addEventListener("keydown", (e) => {
+    if (tocIsOpen()) {                   // оглавление: только Esc закрывает
+      if (e.key === "Escape") { e.preventDefault(); tocClose(); }
+      return;
+    }
     if (dedOpen()) {                     // посвящение: любой « далее» уводит к прологу
       if ([" ", "Enter", "ArrowRight", "PageDown", "Escape"].includes(e.key)) { e.preventDefault(); leaveDed(); }
       return;
@@ -1202,6 +1433,7 @@
     if (curVo && voList(pg, nd).join("|") === curVo) scheduleAuto();
   });
   syncToggles();
+  updateStartBtn();                // «Продолжить» вместо «Начать», если прогресс сохранён
   // Значок перехода берётся с версией (D.emblemVer = хеш файла): иначе Pages отдаёт
   // старую картинку из кеша и форма (круг/пятиугольник) не меняется после пересборки.
   if (transLogo) transLogo.src = "img/trans_logo.png?v=" + (D.emblemVer || D.voVer || 1);
@@ -1226,6 +1458,10 @@
                                           vol: music.volume, dur: music.duration,
                                           key: musicKey, duck: duck,
                                           src: (music.currentSrc || "").split("/").pop() }; } };
+  window.__TOC = { open: tocOpen, close: tocClose, jump: tocJump, reset: resetProg,
+                   render: renderToc, get max() { return progMax; },
+                   get shown() { return tocShown; },
+                   counts: () => TOC.map((c) => c.t + ":" + c.items.reduce((s, it) => s + nodePages(it[0]), 0)) };
   if (SHOT) {                      // режим скриншота: сразу к нужному узлу
     started = true;
     const ni = parseInt(qp.get("node"), 10);
@@ -1239,4 +1475,5 @@
     else { enterEnd(); }
     if (qp.get("credits") === "1") openCredits();   // ?node=99&credits=1 — снимок титров
   }
+  if (qp.get("toc") === "1") tocOpen();             // ?toc=1 — снимок оглавления без клика
 })();

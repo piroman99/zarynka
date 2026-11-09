@@ -63,10 +63,28 @@
         <p class="sub">визуальная новелла</p>
         <p class="ep" id="tep"></p>
         <button id="start">Начать</button>
+        <button id="toc-open" class="ghost">Оглавление</button>
         <div id="pl" class="pl"><div id="plbar"></div></div>
         <p id="pltext" class="pltext"></p>
         <button id="teaser" class="ghost">▶ Тизер</button>
         <p class="by" id="byline"></p>
+      </div>
+    </section>
+
+    <!-- Оглавление «как в книге» (запрос Ивана 2026-11-09). Главы и кадры;
+         что ещё не пройдено — с замком и не нажимается. Прогресс помнит
+         localStorage, список строится в app.js (TOC). -->
+    <section id="toc" class="screen" aria-hidden="true">
+      <div class="toc-inner">
+        <div class="toc-head">
+          <h2 class="toc-ttl">Оглавление</h2>
+          <button id="toc-x" class="toc-x" title="Закрыть (Esc)">✕</button>
+        </div>
+        <div class="toc-list" id="toclist"></div>
+        <div class="toc-foot">
+          <span class="toc-note" id="tocnote"></span>
+          <button id="toc-reset" class="toc-reset" title="Забыть, что пройдено">Сбросить прогресс</button>
+        </div>
       </div>
     </section>
 
