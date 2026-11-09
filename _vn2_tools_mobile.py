@@ -84,21 +84,28 @@ try:
         check('раскрыто: %s виден' % bid, b.js(DISP % bid) != 'none', b.js(DISP % bid))
     b.shot(os.path.join(HERE, '_sat', 'tools_m_open.png'))
 
-    # ---------- клик по тумблеру: свернул И переключил ----------
+    # ---------- вариант B: ряд сам не сворачивается ----------
     b.js("document.getElementById('t-text').click()")
     time.sleep(0.25)
-    check('клик по «Aa» свернул ряд', b.js(OPEN) is False)
+    check('клик по «Aa» НЕ свернул ряд (вариант B)', b.js(OPEN) is True)
     check('клик по «Aa» переключил текст',
           b.js("document.getElementById('stage').classList.contains('notext')") is True)
     b.js("document.getElementById('t-text').click()")  # вернуть текст как было
-
-    # ---------- клик по кадру мимо тулбара ----------
-    b.js("document.getElementById('t-menu').click()")
     time.sleep(0.2)
-    check('раскрыли снова', b.js(OPEN) is True)
+    b.js("document.getElementById('t-music').click()")
+    time.sleep(0.2)
+    check('второй тумблер тоже без сворачивания', b.js(OPEN) is True)
+    b.js("document.getElementById('t-music').click()")
+
+    # ---------- клик по кадру не закрывает (только ✕) ----------
     b.js("document.getElementById('stage').click()")
     time.sleep(0.25)
-    check('клик по кадру свернул ряд', b.js(OPEN) is False)
+    check('клик по кадру ряд не закрывает', b.js(OPEN) is True)
+    b.js("document.getElementById('t-menu').click()")
+    time.sleep(0.2)
+    check('✕ закрывает ряд', b.js(OPEN) is False)
+    check('☰ вернулся', b.js("document.getElementById('t-menu').textContent") == '☰',
+          b.js("document.getElementById('t-menu').textContent"))
 
     # ---------- пауза остаётся доступной ----------
     # Авто по умолчанию ВКЛ (AUTO_DEFAULT = ?auto!=0), поэтому ⏸ виден сразу

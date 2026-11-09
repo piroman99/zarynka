@@ -919,14 +919,8 @@
     tMenu.title = on ? "Скрыть кнопки" : "Кнопки: авто, текст, голос, музыка, экран";
   }
   tMenu.onclick = (e) => { e.stopPropagation(); setToolsOpen(!tools.classList.contains("open")); };
-  // Ловим в фазе ПЕРЕХВАТА: сами кнопки зовут stopPropagation(), в всплытии
-  // до #tools клик не доходит. Любой клик мимо ☰ (по тумблеру, по кадру,
-  // по стрелке) сворачивает ряд — как обычное мобильное меню.
-  document.addEventListener("click", (e) => {
-    if (!tools.classList.contains("open")) return;
-    if (e.target.closest && e.target.closest("#t-menu")) return;
-    setToolsOpen(false);
-  }, true);
+  // Вариант B (Иван, 2026-11-09): ряд НЕ сворачивается сам — висит открытым,
+  // пока не нажмёшь ✕. Так удобнее, когда щёлкаешь два тумблера подряд.
   setToolsOpen(false);
 
   // пауза: замораживает таймер + голос + печать (резюм с того же места)
