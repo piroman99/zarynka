@@ -33,7 +33,9 @@ BOTTOM = 0.01         # поля снизу, доля высоты холста
 SIDE = 0.04
 
 FILES = [('neutral', 'sit2_neutral'), ('upset', 'sit_upset'), ('interested', 'sit_interested'),
-         ('shy', 'sit_shy'), ('sullen', 'sit_sullen'), ('smile', 'sit_smile')]
+         ('shy', 'sit_shy'), ('sullen', 'sit_sullen'), ('smile', 'sit2_smile2')]
+
+ONLY = [a for a in sys.argv[1:] if not a.startswith('-')]
 
 
 def head_width(mask):
@@ -46,6 +48,8 @@ def head_width(mask):
 
 
 for em, stem in FILES:
+    if ONLY and em not in ONLY:
+        continue
     src = os.path.join(GEN, stem + '_0.png')
     if not os.path.exists(src):
         print('нет', src)

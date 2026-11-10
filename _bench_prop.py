@@ -59,7 +59,7 @@ def prep(name, keep_big=True):
     return crop, np.asarray(crop.split()[-1]) > 90
 
 
-bench, bm = prep('bench_long')
+bench, bm = prep(sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('-') else 'bench_long')
 dst = os.path.join(SPR, 'prop_bench.png')
 bench.save(dst)
 

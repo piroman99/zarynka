@@ -70,7 +70,7 @@ body{
    обычный ключ подскакивает на 4 px, и сидящий на скамейке «вибрирует» вместе с мебелью.
    Здесь только масштаб от НИЖНЕЙ кромки: верх тела живёт, точка опоры не едет.
    Сама скамейка — в #props, без анимации вообще. */
-.sprite.seated{height:75%}
+.sprite.seated{height:88%}
 .sprite.seated.on.breathe{animation:breatheSeated 4.6s ease-in-out infinite}
 @keyframes breatheSeated{0%,100%{transform:translateX(-50%) scale(1)}
   50%{transform:translateX(-50%) scale(1.004)}}

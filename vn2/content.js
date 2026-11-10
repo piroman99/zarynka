@@ -46,7 +46,7 @@ window.VN = {
  "music": {
   "prolog": "../assets/audio/sketch/prolog_bed_soft_0.mp3",
   "reception": "../assets/audio/sketch/vn_reception_soft_0.mp3",
-  "alley": "../assets/audio/sketch/alley_mix.mp3?v=2"
+  "alley": "../assets/audio/sketch/alley2_mix.mp3?v=1"
  },
  "chars": {
   "Сергей": {
@@ -1433,9 +1433,9 @@ window.VN = {
    "music": "alley",
    "prop": {
     "src": "img/prop/bench.webp",
-    "left": "22%",
-    "bottom": "-6%",
-    "h": "59%"
+    "left": "41%",
+    "bottom": "-10.8%",
+    "h": "72%"
    },
    "pages": [
     {
