@@ -234,8 +234,11 @@
   }
   function tocJump(i) {
     tocClose();
-    if (started) { enterPos(i, true); return; }
-    beginAt(i);
+    const go = () => { if (started) enterPos(i, true); else beginAt(i); };
+    if (PRELOAD_OFF) return go();               // предзагрузка выключена — без ожидания
+    plWarm(i);                                   // тянем кадры выбранной главы
+    const want = plUrls(i).filter((u) => !/\.mp3$/.test(u));
+    plWhen(want, 2500).then(go);                  // ждём кадр не дольше 2.5 с
   }
   // запуск сразу с выбранной страницы (значок и посвящение — только через «Начать»)
   function beginAt(i) {
@@ -296,7 +299,19 @@
   // если явно не сказано ?node=N&preload=1).
   const PRELOAD_OFF = qp.get("preload") === "0" || (SHOT && qp.get("preload") !== "1");
   const PL_CONC = 4;                    // одновременных запросов (не душим канал)
+  // --- ПАМЯТЬ: горячее окно вместо «весь эпизод в RAM» -------------------
+  // Замер 2026-11-10 (_mem_probe.py): полная предзагрузка эп1 держала в памяти
+  // 271 МБ декодированных битмапов (42 картинки 1080p × 8.3 МБ) + 13.6 МБ blob'ов.
+  // На телефоне это гарантированная смерть вкладки. Теперь держим только окно
+  // вокруг текущей страницы (PL_AHEAD вперёд, PL_BEHIND назад) и не больше
+  // PL_CAP байт; остальное выкидываем — байты уже в HTTP-кеше браузера, повторный
+  // запрос идёт с диска, а не из сети. ?plcap=32 — поменять потолок (МБ).
+  const PL_CAP = Math.max(24, parseInt(qp.get("plcap") || "64", 10) || 64) * 1e6;
+  const PL_AHEAD = 8, PL_BEHIND = 2, PL_MIN_KEEP = 4;
   const plImg = new Map();              // url -> HTMLImageElement (держит декод)
+  const plBytes = new Map();            // url -> декодированные байты (W*H*4)
+  const plKeep = new Set();             // url'ы, которые сейчас нужны — не трогать
+  const plKeepOrder = [];               // они же от ближнего к дальнему
   const plAud = new Map();              // url -> blob: (мгновенный старт без сети)
   const plVid = new Map();
   const plMiss = new Set();             // 404 — второй раз не просим
@@ -329,8 +344,11 @@
         plImg.set(url, im);
         im.decoding = "async";
         const fin = () => res();
-        im.onload = () => { (im.decode ? im.decode() : Promise.resolve()).then(fin, fin); };
-        im.onerror = () => { plImg.delete(url); plMiss.add(url); fin(); };
+        im.onload = () => {
+          plBytes.set(url, (im.naturalWidth || 0) * (im.naturalHeight || 0) * 4);
+          (im.decode ? im.decode() : Promise.resolve()).then(fin, fin);
+        };
+        im.onerror = () => { plImg.delete(url); plBytes.delete(url); plMiss.add(url); fin(); };
         im.src = url;
       });
     }
@@ -340,6 +358,42 @@
       .then((r) => (r.ok ? r.blob() : Promise.reject(new Error(r.status))))
       .then((b) => { store.set(url, URL.createObjectURL(b)); })
       .catch(() => { plMiss.add(url); });
+  }
+
+  // сколько декодированных байт держим сейчас
+  function plImgBytes() { let s = 0; plBytes.forEach((v) => { s += v; }); return s; }
+
+  // выкинуть картинку из памяти (битмап освобождается, когда на него нет ссылок;
+  // сам файл остаётся в HTTP-кеше — повторный plPush возьмёт его с диска)
+  function plDrop(url) {
+    if (!plImg.has(url)) return;
+    const im = plImg.get(url);
+    plImg.delete(url); plBytes.delete(url);
+    plSeen.delete("img|" + url);       // можно попросить заново
+    try { im.onload = im.onerror = null; im.removeAttribute("src"); } catch (e) {}
+  }
+
+  // держим не больше PL_CAP байт: лишнее выкидываем.
+  // Сначала то, что вообще не в окне; если всё ещё много — с хвоста окна
+  // (самые дальние страницы), но первые PL_MIN_KEEP url'ов не трогаем никогда:
+  // это текущая страница.
+  function plTrim() {
+    if (PRELOAD_OFF) return;
+    let bytes = plImgBytes();
+    if (bytes <= PL_CAP) return;
+    const keys = Array.from(plImg.keys());   // Map хранит порядок вставки — старые первыми
+    for (let i = 0; i < keys.length && bytes > PL_CAP; i++) {
+      const u = keys[i];
+      if (plKeep.has(u)) continue;
+      bytes -= (plBytes.get(u) || 0);
+      plDrop(u);
+    }
+    for (let i = plKeepOrder.length - 1; i >= PL_MIN_KEEP && bytes > PL_CAP; i--) {
+      const u = plKeepOrder[i];
+      if (!plImg.has(u)) continue;
+      bytes -= (plBytes.get(u) || 0);
+      plDrop(u);
+    }
   }
 
   function plPump() {
@@ -353,6 +407,7 @@
       plActive++;
       plRun(t).then(() => {}, () => {}).then(() => { plActive--; plDone++; plStat(); plPump(); });
     }
+    if (!plActive && !plQ.length) plTrim();   // очередь пуста — лишнее отпускаем
   }
 
   function plPage(i, prio) {
@@ -367,31 +422,63 @@
     });
     voList(pg, nd).forEach((u) => plPush(u, "audio", prio));
   }
+  // все url'ы страницы — одним списком (для plPage и для plKeep)
+  function plUrls(i) {
+    const s = SCENES[i]; if (!s) return [];
+    const nd = NODES[s.n], pg = nd.pages[s.p], out = [];
+    if (s.p === 0 && nd.bg) out.push(nd.bg);
+    if (pg.bg) out.push(pg.bg);
+    if (nd.prop && nd.prop.src) out.push(nd.prop.src);
+    if (pg.cast) [pg.cast.l, pg.cast.r].forEach((c) => {
+      if (!c) return;
+      out.push(charUrl(c[0], c[1]));
+      out.push(charUrl(c[0], "neutral"));
+    });
+    return out;
+  }
   function plNode(ni, prio) {
     const nd = NODES[ni]; if (!nd || nd.t !== "scene") return;
     plPush(nd.bg, "img", prio);
     voList(null, nd).forEach((u) => plPush(u, "audio", prio));
   }
 
-  // весь эп1 в очередь: сначала ближние страницы, в конце — музыка и тизер
+  // url значка перехода с версией файла (иначе Pages отдаёт старую картинку из кеша)
+  function transLogoUrl() { return "img/trans_logo.png?v=" + (D.emblemVer || D.voVer || 1); }
+
+  // стартовая предзагрузка: только то, что нужно для входа + голос/музыка.
+  // Кадры остального эпизода тянутся по ходу чтения (plWarm), а не все 46 МБ сразу.
   function plBuild() {
     if (PRELOAD_OFF) return;
     plPush("img/logo.png", "img", 0);
+    plPush(transLogoUrl(), "img", 0);
     NODES.forEach((nd) => { if (nd.t === "znak") plPush(nd.video, "video", 0); });
-    SCENES.forEach((_, i) => plPage(i, i < 2 ? 0 : 1 + Math.floor(i / 6)));
-    Object.keys(D.chars || {}).forEach((w) => {
+    Object.keys(D.music || {}).forEach((k) => plPush(D.music[k], "audio", 0));
+    Object.keys(D.chars || {}).forEach((w) => {       // спрайты — только база (нейтрал)
       const ch = D.chars[w];
-      plPush(ch.base, "img", 90);
-      Object.keys(ch.emos || {}).forEach((e) => plPush(ch.emos[e], "img", 90));
+      plPush(ch.base, "img", 60);
     });
-    Object.keys(D.music || {}).forEach((k) => plPush(D.music[k], "audio", 95));
-    plPush(AVM, "video", 99);
+    plWarm(progMax > 0 && !progDone() ? progMax : 0);   // первые страницы и окно
   }
 
-  // при входе на страницу — поднять вперёд следующие 6
+  // при входе на страницу — держим окно вокруг неё: впереди PL_AHEAD страниц
+  // предзагружены, позади PL_BEHIND ещё живы, остальное отпускаем
   function plWarm(from) {
     if (PRELOAD_OFF) return;
-    for (let i = from; i < Math.min(SCENES.length, from + 6); i++) plPage(i, 0);
+    const hi = Math.min(SCENES.length, from + PL_AHEAD);
+    const lo = Math.max(0, from - PL_BEHIND);
+    plKeep.clear(); plKeepOrder.length = 0;
+    const keepPage = (i) => plUrls(i).forEach((u) => {
+      if (!plKeep.has(u)) { plKeep.add(u); plKeepOrder.push(u); }
+    });
+    plKeep.add("img/logo.png"); plKeep.add(transLogoUrl());
+    keepPage(from);                                       // текущая — первая в списке
+    for (let i = from + 1; i < hi; i++) keepPage(i);       // потом вперёд
+    for (let i = from - 1; i >= lo; i--) keepPage(i);      // и чуть назад
+    const nd = SCENES[from] ? NODES[SCENES[from].n] : null;
+    if (nd && nd.bg) plKeep.add(nd.bg);
+    if (nd && nd.t === "znak") plKeep.add(nd.video);
+    for (let i = from; i < hi; i++) plPage(i, i < from + 3 ? 0 : 1);   // очередь сети
+    plTrim();                          // и сразу отпускаем то, что уехало за окно
   }
 
   // ждём готовности конкретных url (только для старейшего запуска)
@@ -412,9 +499,21 @@
   }
 
   // ---------- фон / спрайт ----------
+  // кадр ещё не декодирован? тогда НЕ гасим старый фон (иначе мелькнёт чёрный):
+  // держим текущий кадр и меняем, когда новый готов (окно предзагрузки 2026-11-10)
+  function plReady(url) {
+    const im = plImg.get(url);
+    return !!(im && im.complete && im.naturalWidth);
+  }
   function setBg(url) {
     if (url === curBg) return;
     curBg = url;
+    if (PRELOAD_OFF || !url || plReady(url)) return setBgNow(url);
+    const want = url;
+    plPush(want, "img", 0);
+    plWhen([want], 2500).then(() => { if (curBg === want) setBgNow(want); });
+  }
+  function setBgNow(url) {
     clearCam();                         // при смене фона гасим наезд камеры
     other.style.backgroundImage = url ? `url("${url}")` : "none";
     other.classList.add("on");
@@ -634,7 +733,12 @@
   }
 
   // ---------- рендер ----------
-  function showHud(on) { hud.style.opacity = on ? "" : 0; hud.classList.toggle("on", on); }
+  function showHud(on) {
+    hud.style.opacity = on ? "" : 0; hud.classList.toggle("on", on);
+    // книжка-оглавление нужна только в игре: на заставке есть большая кнопка
+    const tt = $("t-toc");
+    if (tt) tt.style.display = on ? "" : "none";
+  }
   function hideScreens() {
     title.classList.remove("show"); endScr.classList.remove("show"); vlayer.hidden = true;
   }
@@ -1264,6 +1368,10 @@
   $("start").onclick = (e) => { e.stopPropagation(); start(); };
   $("teaser").onclick = (e) => { e.stopPropagation(); playCinema(AVM); };
   if ($("toc-open")) $("toc-open").onclick = (e) => { e.stopPropagation(); tocOpen(); };
+  if ($("t-toc")) $("t-toc").onclick = (e) => {   // книжка в тулбаре — из середины игры
+    e.stopPropagation();
+    if (tocIsOpen()) tocClose(); else tocOpen();
+  };
   if ($("toc-x")) $("toc-x").onclick = (e) => { e.stopPropagation(); tocClose(); };
   if ($("toc-reset")) $("toc-reset").onclick = (e) => { e.stopPropagation(); resetProg(); };
   if (tocEl) tocEl.onclick = (e) => { if (e.target === tocEl) tocClose(); };   // клик мимо списка — закрыть
@@ -1436,7 +1544,7 @@
   updateStartBtn();                // «Продолжить» вместо «Начать», если прогресс сохранён
   // Значок перехода берётся с версией (D.emblemVer = хеш файла): иначе Pages отдаёт
   // старую картинку из кеша и форма (круг/пятиугольник) не меняется после пересборки.
-  if (transLogo) transLogo.src = "img/trans_logo.png?v=" + (D.emblemVer || D.voVer || 1);
+  if (transLogo) transLogo.src = transLogoUrl();
   plBuild();                       // запускаем фоновую предзагрузку с гл. экрана
   fitScreens();                    // титул/конец серии — вписать в высоту экрана
   if (location.protocol === "http:" || location.protocol === "https:") {
@@ -1445,7 +1553,11 @@
   }
   // отладочные хуки для автотестов движка (без влияния на работу)
   window.__PL = { img: plImg, aud: plAud, vid: plVid, miss: plMiss,
-                  queue: () => plQ.length, off: () => PRELOAD_OFF };
+                  queue: () => plQ.length, off: () => PRELOAD_OFF,
+                  // память: сколько декодированных байт держим и каков потолок
+                  bytes: () => plImgBytes(), cap: () => PL_CAP,
+                  keep: () => plKeep.size, urls: (i) => plUrls(i),
+                  trim: () => plTrim() };
   window.__DBG = { get pos() { return pos; }, get node() { return curNode; },
                    get typing() { return !!typing; },
                    get started() { return started; }, get inBreak() { return inBreak; },

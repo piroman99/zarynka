@@ -486,3 +486,11 @@ body.nofx #trans, body.nofx #trans .tlogo{transition:none}
   #tools:not(.open) .tg:not(#t-menu){display:none}
   #tools:not(.open) #t-pause:not([hidden]){display:block}
 }
+
+/* Совсем узкие экраны (320–380 px): ряд из восьми кнопок с книжкой не влезает
+   и «Авто» уезжает за левый край. Сжимаем сами кнопки и зазоры. */
+@media (max-aspect-ratio:1/1) and (max-width:380px){
+  #tools{gap:.22em; right:2.4%}
+  .tg{width:30px; height:30px; font-size:13px}
+  .tg.wide{padding:0 .55em; font-size:11px}
+}

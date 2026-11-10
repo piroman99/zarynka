@@ -47,9 +47,14 @@ try:
     b.navigate(BASE)
     done = b.wait_js("(function(){var e=document.getElementById('pl');return !!(e&&e.classList.contains('done'))})()", timeout=90)
     check('предзагрузка завершилась', done)
-    check('изображений в кэше 12', b.js("__PL.img.size") == 12, b.js("__PL.img.size"))
-    check('аудио в кэше 65', b.js("__PL.aud.size") == 65, b.js("__PL.aud.size"))
-    check('видео в кэше 2', b.js("__PL.vid.size") == 2, b.js("__PL.vid.size"))
+    # контракт после 2026-11-10: держим ОКНО вокруг страницы, а не весь эпизод
+    nimg = b.js("__PL.img.size")
+    nby = b.js("__PL.bytes()") or 0
+    cap = b.js("__PL.cap()")
+    check('картинок в памяти 6..16 (окно, не все 42)', 6 <= nimg <= 16, nimg)
+    check('байт в потолке', nby <= cap, '%.1f / %.0f МБ' % (nby / 1e6, cap / 1e6))
+    check('музыка в кэше (>=3)', b.js("__PL.aud.size") >= 3, b.js("__PL.aud.size"))
+    check('видео в кэше 1 (только значок)', b.js("__PL.vid.size") == 1, b.js("__PL.vid.size"))
     check('промахов (404) нет', b.js("__PL.miss.size") == 0, b.js("__PL.miss.size"))
 
     b.js("document.getElementById('start').click()")
@@ -65,11 +70,14 @@ try:
     last = b.js("__DBG.pos")
     with LOCK:
         during = list(REQ)
-    check('листание 30 кликов = 0 сетевых запросов', len(during) == 0, during[:5])
+    # окно в 8 страниц: быстрые клики чуть обгоняют предзагрузку, но качается
+    # не весь эпизод (46 МБ), а несколько файлов впереди
+    check('листание 30 кликов: запросов немного (<=25)', len(during) <= 25, len(during))
     check('позиция уехала вперёд', last > 0, 'pos=' + str(last))
     check('голос играет из blob', str(b.js("document.getElementById('voice').getAttribute('src')")).startswith('blob:'))
 
     print('2) медленная сеть + повторный клик')
+    b.js("localStorage.clear()")             # иначе «Начать» станет «Продолжить»
     b.send('Network.enable')
     b.send('Network.clearBrowserCache')      # иначе ассеты возьмутся из кэша 1-го прогона
     b.send('Network.emulateNetworkConditions', offline=False, latency=150,
@@ -90,6 +98,7 @@ try:
           b.js("document.getElementById('start').textContent"))
 
     print('3) ?preload=0')
+    b.js("localStorage.clear()")
     b.send('Network.emulateNetworkConditions', offline=False, latency=0,
            downloadThroughput=-1, uploadThroughput=-1, connectionType='none')
     with LOCK:
