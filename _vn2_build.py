@@ -162,7 +162,7 @@ else:
 #   steps — «вышла из дверей… спустилась по широким ступеням»
 #   alley — «на скамейке между зелёных еловых лап сидел юноша» (вариант B, ворота видны)
 # Иван 2026-11-04: «надо следующую сцену делать… но сначала фон».
-ALLEY_BG = {'steps': 'steps_a', 'alley': 'alley_b'}
+ALLEY_BG = {'steps': 'steps_a', 'alley': 'alley_b_clean'}
 for _name, _stem in ALLEY_BG.items():
     _src = None
     for _ext in ('.png', '.jpg'):
@@ -235,6 +235,11 @@ for dst, src in CHAR_SRC.items():
 # Предметы сцены (статичный проп). Скамейка сцены «аллея»: отдельным кадром от спрайта
 # (правка Ивана 2026-11-05 №1 и №2: «скамейка должна быть длинной» + «не должна дрожать
 # вместе со спрайтом поэта»). Спрайт поэта — без мебели.
+# ЗЕРКАЛИМ: в фоне аллеи нарисованная скамейка уходит в глубину ВЛЕВО-ВВЕРХ
+# (замер `_bgbench_axis.py`: PCA длинной оси +11.8°, т.е. дальний торец слева, высота
+# 67 px слева против 104 справа). Новый проп `bench2` нарисован в обратную сторону —
+# отражение ставит его в ту же перспективу, что и аллея.
+PROP_FLIP = True
 PROP_SRC = {'bench': os.path.join(SPR, 'prop_bench.png')}
 PROP_DIR = os.path.join(IMG, 'prop')
 os.makedirs(PROP_DIR, exist_ok=True)
@@ -245,6 +250,9 @@ for _n, _p in PROP_SRC.items():
     _im = Image.open(_p).convert('RGBA')
     if _im.height > 700:
         _im = _im.resize((round(_im.width * 700 / _im.height), 700), Image.LANCZOS)
+    if PROP_FLIP:
+        _im = _im.transpose(Image.FLIP_LEFT_RIGHT)
+        print('prop %s: отражён по горизонтали (перспектива аллеи)' % _n)
     _im.save(os.path.join(PROP_DIR, _n + '.webp'), 'WEBP', quality=82, method=6)
     print('prop', _n, _im.size)
 
