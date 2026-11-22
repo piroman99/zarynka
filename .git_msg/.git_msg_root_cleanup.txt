@@ -1,0 +1,12 @@
+vn2: uborka kornja - skripty v tools/ i tools/scratch/, v korne 0
+
+- zhivye 543 -> tools/ (plosko: oni importirujut drug druga po imeni: pv, _vn2_nodes, _cdp)
+- mjortvye 575 -> tools/scratch/ (nikto ne upominaet i ne zovjot, provereno
+  tranzitivnym zamykaniem ot dokumentacii i sosednih katalogov)
+- vnutri fajlov: HERE ostalsja katalogom fajla, dobavlen ROOT nuzhnoj glubiny,
+  repo-katalogi (assets, vn2, out, _sat) perekljucheny na ROOT
+- ssylki v dokumentacii obnovleny: 422 v 14 fajlah
+- proverka tools/_verify_after_move.py: 1138 fajlov kompilirujutsja, bityh ROOT-putej 0,
+  pv/_vn2_nodes/_move_tools importirujutsja, alley/_poet_measure.py daet te zhe chisla
+  (taz -0.1 px, H=517.7 px), chto i do perenosa
+- pravila raskladki - tools/README.md

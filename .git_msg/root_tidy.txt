@@ -1,0 +1,8 @@
+vn2: hvosty kornja - soobshhenija kommitov i vremennye snimki v podkatalogi
+
+- .git_msg*.txt -> .git_msg/ (jetot tolko teksty dlja git commit -F)
+- _tmp_title_*.png -> _sat/title/, _vo_dup.txt -> _sat/
+- _pv_*.json/.txt i scenario.json ostalis: na nih ssylajutsja zhivye instrumenty
+  (pv_list/pv_parse/pv_music, _vn_build)
+- v korne ostalos 24 otslezhivaemyh fajla: 16 dokumentov, .gitignore, index.html,
+  5 dannyh PlusVibe, scenario.json

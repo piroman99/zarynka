@@ -1,0 +1,16 @@
+vn2: alleja - skamejka v Blender, akvarelnyj filtr, posadka poeta, defrinzh
+
+- skamejka sobrana v Blender (tools/alley/_bench_blend7.py, Cycles CPU, prozrachnyj fon):
+  4 doski sidenja, 3 doski spinki, 4 nozhki, 2 perekladiny, bez podlokotnikov i bokovyh shhitov
+- variant B: doski spinki lezhat na perednih granjah stoek, zazora net (provereno chislenno)
+- vinty: 6 na spinke + 8 na sidenje, shljapka 23 mm, vse 14 vidny (proverka po jarkosti)
+- akvarelnyj filtr _bench_wc.py (PIL+numpy, 0 rub): median, kvantovanie, wet edge,
+  poteK, zerno bumagi; cvetov 2919 -> 1274, rezkost 9.34 -> 4.28
+- prop v repozitorii: assets/sprites/prop_bench_blender.png
+- posadka poeta tolko ot zamerov: F_SEAT 0.6148 (perelom silujeta na dve nogi),
+  H = (niz - doska)/(F_FEET - F_SEAT); itog H_MULT=1.50, do 742 pri doske 712,
+  stupni 1030, figura 1.26 m pri 525 px/m
+- belyj obodok vokrug sprite poet: kromka 152.5 -> 68.5 pri jadre 69.7,
+  bahroma 209 -> 70.9; fajl lossless, vnutrennjaja oblast bit v bit
+- skripty sceny pereneseny iz kornja v tools/alley (11 fajlov, puti na ROOT,
+  provereno zapuskom)
