@@ -22,8 +22,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 ROOT = os.path.dirname(HERE)
 WS_ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
-CHROME = glob.glob(os.path.join(WS_ROOT, '.playwright-browsers', 'chromium-*',
-                                'chrome-linux64', 'chrome'))[0]
+from _chrome import CHROME   # noqa: E402  (путь ищется вверх, раскладка не важна)
 sys.path.insert(0, HERE)
 from _cdp import _WS          # noqa: E402
 

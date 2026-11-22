@@ -11,7 +11,7 @@ import os, subprocess, glob
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 WS = os.path.abspath(os.path.join(HERE, '..', '..'))
-CHROME = glob.glob(os.path.join(WS, '.playwright-browsers', 'chromium-*', 'chrome-linux64', 'chrome'))[0]
+from _chrome import CHROME   # noqa: E402  (путь ищется вверх, раскладка не важна)
 OUT = os.path.join(ROOT, 'assets', 'review', 'review_96_s5_vn_ok.png')
 NODE = 6  # s5
 URL = ('file://' + os.path.join(ROOT, 'vn2', 'index.html')

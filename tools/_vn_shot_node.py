@@ -7,7 +7,7 @@ import os, subprocess, glob, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 WS = os.path.abspath(os.path.join(HERE, '..', '..'))
-CHROME = glob.glob(os.path.join(WS, '.playwright-browsers', 'chromium-*', 'chrome-linux64', 'chrome'))[0]
+from _chrome import CHROME   # noqa: E402  (путь ищется вверх, раскладка не важна)
 
 NODE = {'s1': 2, 's2': 3, 's3': 4, 's4': 5, 's5': 6, 's6': 7, 's7': 8, 'reception': 9}
 which = sys.argv[1] if len(sys.argv) > 1 else 's5'

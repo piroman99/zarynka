@@ -12,7 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 ROOT = os.path.dirname(HERE)
 WS = os.path.abspath(os.path.join(HERE, '..', '..'))
-CHROME = glob.glob(os.path.join(WS, '.playwright-browsers', 'chromium-*', 'chrome-linux64', 'chrome'))[0]
+from _chrome import CHROME   # noqa: E402  (путь ищется вверх, раскладка не важна)
 BASE = 'file://' + os.path.join(ROOT, 'vn2', 'index.html') + '?node=5&text=1&voice=0&music=0'
 
 for tag, extra, budget in (('wide', '', 700), ('zoom', '&instant=1', 2500)):

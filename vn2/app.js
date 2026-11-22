@@ -85,8 +85,9 @@
     try { localStorage.setItem(PROG_KEY, JSON.stringify({ max: progMax, at: Date.now() })); } catch (e) {}
   }
   let progMax = progLoad();        // дальний индекс SCENES, до которого дошли (-1 = ещё не начинали)
+  let cheatFreeze = false;         // пасхалка «iddqd»: пока смотрим кадры, прогресс не пишем
   function progMark(i) {
-    if (SHOT || i < 0) return;     // скриншоты — не игра, прогресс не трогают
+    if (SHOT || cheatFreeze || i < 0) return;   // скриншоты и переход по пасхалке прогресс не трогают
     if (i > progMax) { progMax = i; progSave(); }
   }
   function pagesWord(n) {
@@ -251,6 +252,89 @@
     if (music.src && musicOn) music.play().catch(() => {});
     enterPos(i, true);
     updateStartBtn();
+  }
+
+  // ---------- пасхалка «iddqd»: переход на страницу ----------
+  // Нужна, чтобы смотреть кадры и спрайты, не правя адрес руками. Открывается
+  // набором iddqd (ловится по e.code — раскладка не важна) или пятью тапами по
+  // названию главы / логотипу (телефон, клавиатуры нет).
+  const jumpEl = $("jump"), jumpIn = $("jump-in"), jumpForm = $("jump-form"),
+        jumpHint = $("jump-hint");
+  let jumpShown = false;
+  // «alley» -> «Аллея у ворот · У ворот» — чтобы в подсказке было по-человечески
+  const NODE_LABEL = (() => {
+    const m = {};
+    TOC.forEach((ch) => ch.items.forEach((it) => {
+      m[it[0]] = it[1] ? ch.t + " · " + it[1] : ch.t;
+    }));
+    return m;
+  })();
+
+  function jumpWhere() {              // «где я сейчас» одной строкой
+    const total = SCENES.length;
+    if (!started || pos < 0 || pos >= total) {
+      return "всего " + total + " " + pagesWord(total) + " · ещё не начато";
+    }
+    const s = SCENES[pos], id = NODES[s.n].id;
+    return "всего " + total + " · сейчас " + (pos + 1) + " (" +
+           (NODE_LABEL[id] || id) + ", стр. " + (s.p + 1) + ")";
+  }
+
+  function jumpOpen() {
+    if (!jumpEl) return;
+    jumpShown = true;
+    jumpEl.classList.add("show");
+    jumpEl.setAttribute("aria-hidden", "false");
+    jumpHint.textContent = jumpWhere();
+    jumpHint.classList.remove("bad");
+    if (jumpIn) {
+      jumpIn.value = (started && pos >= 0) ? String(pos + 1) : "";
+      jumpIn.focus();
+      jumpIn.select();
+    }
+  }
+  function jumpClose() {
+    if (!jumpEl) return;
+    jumpShown = false;
+    jumpEl.classList.remove("show");
+    jumpEl.setAttribute("aria-hidden", "true");
+    if (jumpIn) jumpIn.blur();
+  }
+
+  // «42» — абсолютная страница; «alley 4» / «alley:4» — узел и страница в нём;
+  // «alley» — первая страница узла. Возвращает индекс в SCENES или -1.
+  function jumpParse(raw) {
+    const s = String(raw || "").trim().toLowerCase().replace(/[«»"'.,]/g, "");
+    if (!s) return -1;
+    const m = s.match(/^([a-zа-яё0-9_-]+)\s*[:\/ ]\s*(\d+)$/);
+    if (m) {
+      const ni = nodeById(m[1]);
+      if (ni < 0) return -1;
+      const cnt = (NODES[ni].pages || []).length;
+      const p = parseInt(m[2], 10) - 1;
+      if (!(p >= 0 && p < cnt)) return -1;
+      return scriptStart[ni] + p;
+    }
+    const ni2 = nodeById(s);
+    if (ni2 >= 0) return scriptStart[ni2];
+    if (/^\d+$/.test(s)) {
+      const n = parseInt(s, 10);
+      if (n >= 1 && n <= SCENES.length) return n - 1;
+    }
+    return -1;
+  }
+
+  function jumpGo(raw) {
+    const i = jumpParse(raw);
+    if (i < 0) {
+      jumpHint.textContent = "не понял: «" + String(raw || "").trim() + "» · нужно 1…" +
+                             SCENES.length + " или «alley 4»";
+      jumpHint.classList.add("bad");
+      return;
+    }
+    cheatFreeze = true;               // с этого момента прогресс не пишем
+    jumpClose();
+    tocJump(i);                       // тот же путь, что из оглавления (включая старт с заставки)
   }
 
   // «Начать» превращается в «Продолжить», если уже что-то пройдено.
@@ -1375,6 +1459,30 @@
   if ($("toc-x")) $("toc-x").onclick = (e) => { e.stopPropagation(); tocClose(); };
   if ($("toc-reset")) $("toc-reset").onclick = (e) => { e.stopPropagation(); resetProg(); };
   if (tocEl) tocEl.onclick = (e) => { if (e.target === tocEl) tocClose(); };   // клик мимо списка — закрыть
+
+  // ---------- пасхалка «iddqd»: ввод ----------
+  if (jumpEl) {
+    jumpEl.onclick = (e) => {
+      e.stopPropagation();                  // клик в панели не листает страницу
+      if (e.target === jumpEl) jumpClose();  // клик мимо карточки — закрыть
+    };
+    if (jumpForm) jumpForm.onsubmit = (e) => { e.preventDefault(); jumpGo(jumpIn.value); };
+    if ($("jump-x")) $("jump-x").onclick = (e) => { e.stopPropagation(); jumpClose(); };
+    // 5 тапов подряд — вход для телефона, где нет клавиатуры
+    const tapSecret = (el) => {
+      if (!el) return;
+      let n = 0, t = 0;
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const now = Date.now();
+        if (now - t > 1400) n = 0;
+        t = now;
+        if (++n >= 5) { n = 0; jumpOpen(); }
+      });
+    };
+    tapSecret($("chapter"));
+    tapSecret(document.querySelector("#title .logo"));
+  }
   $("e-menu").onclick = (e) => { e.stopPropagation(); goMenu(); };
   $("e-credits").onclick = (e) => { e.stopPropagation(); openCredits(); };
   $("cr-skip").onclick = (e) => { e.stopPropagation(); finishCredits(); };
@@ -1390,7 +1498,27 @@
     if (title.classList.contains("show") || endScr.classList.contains("show")) return;
     next();
   });
+  let cheatBuf = "";
   addEventListener("keydown", (e) => {
+    if (jumpShown) {                     // пасхалка открыта: Esc закрывает, остальное — в поле ввода
+      if (e.key === "Escape") { e.preventDefault(); jumpClose(); }
+      return;
+    }
+    // «iddqd» — читаем по e.code, поэтому работает и на русской раскладке
+    if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+      const ch = (e.code && e.code.indexOf("Key") === 0)
+        ? e.code.slice(3).toLowerCase()
+        : (e.key && e.key.length === 1 ? e.key.toLowerCase() : "");
+      if (ch) {
+        cheatBuf = (cheatBuf + ch).slice(-5);
+        if (cheatBuf === "iddqd") {
+          cheatBuf = "";
+          e.preventDefault();
+          jumpOpen();
+          return;
+        }
+      }
+    }
     if (tocIsOpen()) {                   // оглавление: только Esc закрывает
       if (e.key === "Escape") { e.preventDefault(); tocClose(); }
       return;

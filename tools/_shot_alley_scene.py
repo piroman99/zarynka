@@ -21,7 +21,7 @@ from _cdp import Browser  # noqa: E402
 from _vn2_nodes import node_index  # noqa: E402
 
 WS = os.path.abspath(os.path.join(HERE, '..', '..'))
-CHROME = glob.glob(os.path.join(WS, '.playwright-browsers', 'chromium-*', 'chrome-linux64', 'chrome'))[0]
+from _chrome import CHROME   # noqa: E402  (путь ищется вверх, раскладка не важна)
 REV = os.path.join(ROOT, 'assets', 'review')
 SAT = os.path.join(ROOT, '_sat')
 os.makedirs(SAT, exist_ok=True)

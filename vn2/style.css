@@ -494,3 +494,31 @@ body.nofx #trans, body.nofx #trans .tlogo{transition:none}
   .tg{width:30px; height:30px; font-size:13px}
   .tg.wide{padding:0 .55em; font-size:11px}
 }
+
+/* ---- ПАСХАЛКА «iddqd»: переход на страницу (для просмотра кадров) ----
+   Открывается набором iddqd на клавиатуре или пятью тапами по названию
+   главы / логотипу. Прогресс при переходе не пишется: «Продолжить» остаётся
+   там, где было. Панель живёт ПОВЕРХ всего (титры, оглавление, тулбар). */
+#jump{position:fixed; z-index:26;
+  background:radial-gradient(60% 60% at 50% 40%, rgba(16,20,28,.94) 0%, rgba(4,6,10,.97) 100%)}
+.jump-inner{margin:auto; width:min(430px,90vw); box-sizing:border-box;
+  padding:22px 20px 18px; border-radius:16px; background:rgba(18,23,33,.94);
+  border:1px solid rgba(255,255,255,.12); box-shadow:0 24px 60px rgba(0,0,0,.55)}
+.jump-head{display:flex; align-items:center; justify-content:space-between; gap:12px;
+  margin-bottom:14px}
+.jump-ttl{margin:0; font-size:clamp(14px,2.2vmin,18px); letter-spacing:.12em;
+  text-transform:uppercase; color:#e9eef7; font-weight:700; text-align:left}
+.jump-x{margin:0; padding:0; width:30px; height:30px; flex:0 0 auto; border-radius:50%;
+  font-size:14px; line-height:1; background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.16); box-shadow:none}
+.jump-form{display:flex; gap:8px; margin:0}
+.jump-in{flex:1 1 auto; min-width:0; box-sizing:border-box; margin:0;
+  padding:.6em .8em; border-radius:10px; font-family:inherit; letter-spacing:.04em;
+  font-size:clamp(16px,2.4vmin,20px); color:#fff; background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.18); outline:none}
+.jump-in:focus{border-color:rgba(255,90,77,.72); background:rgba(255,255,255,.10)}
+.jump-go{margin:0; padding:.6em 1.2em; flex:0 0 auto;
+  font-size:clamp(14px,2.1vmin,18px)}
+.jump-hint{margin:12px 0 0; min-height:1.2em; font-size:clamp(11px,1.7vmin,14px);
+  line-height:1.45; color:#8e9ab0; text-align:left}
+.jump-hint.bad{color:#ff9a8f}

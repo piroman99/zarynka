@@ -8,7 +8,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 ROOT = os.path.dirname(HERE)
 WS = os.path.abspath(os.path.join(HERE, '..', '..'))
-CHROME = glob.glob(os.path.join(WS, '.playwright-browsers', 'chromium-*', 'chrome-linux64', 'chrome'))[0]
+from _chrome import CHROME   # noqa: E402  (путь ищется вверх, раскладка не важна)
 
 query = sys.argv[1] if len(sys.argv) > 1 else '?preload=0'
 url = 'file://' + os.path.join(ROOT, 'vn2', 'index.html') + query

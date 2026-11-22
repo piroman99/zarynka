@@ -4,8 +4,9 @@
 """
 import os, io, json, base64, socket, struct, subprocess, time, glob, tempfile, urllib.request, shutil
 
-WS_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
-CHROME = glob.glob(os.path.join(WS_ROOT, '.playwright-browsers', 'chromium-*', 'chrome-linux64', 'chrome'))[0]
+WS_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+
+from _chrome import CHROME  # noqa: E402  (путь к Chromium — один на все скрипты)
 
 
 class _WS:

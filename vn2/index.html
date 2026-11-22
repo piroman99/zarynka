@@ -91,6 +91,28 @@
       </div>
     </section>
 
+    <!-- ПАСХАЛКА «iddqd»: быстрый переход на нужную страницу — чтобы смотреть
+         кадры и спрайты, не правя адрес руками. Открывается набором iddqd на
+         клавиатуре или пятью тапами по названию главы (логотипу на заставке).
+         Прогресс при переходе НЕ пишется: иначе «Продолжить» уехало бы туда,
+         куда прыгнули. Поле принимает номер страницы («42») или узел со
+         страницей внутри него («alley 4»). -->
+    <section id="jump" class="screen" aria-hidden="true">
+      <div class="jump-inner">
+        <div class="jump-head">
+          <h2 class="jump-ttl">Переход на страницу</h2>
+          <button id="jump-x" class="jump-x" title="Закрыть (Esc)">✕</button>
+        </div>
+        <form id="jump-form" class="jump-form">
+          <input id="jump-in" class="jump-in" type="text" inputmode="numeric"
+                 autocomplete="off" spellcheck="false" placeholder="42 или alley 4"
+                 aria-label="Страница">
+          <button id="jump-go" class="jump-go" type="submit">Перейти</button>
+        </form>
+        <p class="jump-hint" id="jump-hint"></p>
+      </div>
+    </section>
+
     <!-- Видео-узел: интро-значок -->
     <div id="vlayer" hidden>
       <video id="znak" playsinline preload="auto"></video>
