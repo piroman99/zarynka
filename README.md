@@ -34,10 +34,10 @@
 ## Как собрать
 
 ```bash
-python3 _prolog_finals.py        # кадры пролога: плашка + текстовый слой -> assets/final/prolog/
-python3 _vn2_build.py            # грейд + пересборка vn2 (ожидаем 10 узлов / 63 страницы)
-python3 _vn_shot_node.py s5      # скриншот одного узла (0 ₽, headless Chromium)
-python3 _vn2_restart.py          # регресс: меню → «Начать» → 126 кликов до конца (3/3 зелёный)
+python3 tools/_prolog_finals.py        # кадры пролога: плашка + текстовый слой -> assets/final/prolog/
+python3 tools/_vn2_build.py            # грейд + пересборка vn2 (ожидаем 10 узлов / 63 страницы)
+python3 tools/_vn_shot_node.py s5      # скриншот одного узла (0 ₽, headless Chromium)
+python3 tools/_vn2_restart.py          # регресс: меню → «Начать» → 126 кликов до конца (3/3 зелёный)
 ```
 
 Демо нельзя проверять через `file://` (CORS ломает fetch/blob) — поднимать локальный http-сервер.
@@ -45,7 +45,7 @@ Pages отдаёт обновления с задержкой ~70–100 с: жд
 
 ### Генерация арта (PlusVibe)
 
-`gen.py` / `pv.py` (stdlib, ключ `.pv_key`), чекер моделей `pv_check_models.py <model>`.
+`tools/gen.py` / `tools/pv.py` (stdlib, ключ `.pv_key`), чекер моделей `tools/pv_check_models.py <model>`.
 Картинка: `flux-2` (4.74 ₽/кадр) или `gpt-image-2` (2.70 ₽, держит кириллицу), музыка `suno`,
 озвучка `gemini-3.8-flash-tts` (голос Charon). Всегда передавать `max_price_rub`.
 Отклонённые кадры не удаляются — `assets/rejected/<узел>/` + причина в `REJECTED.md`.
@@ -75,16 +75,16 @@ Pages отдаёт обновления с задержкой ~70–100 с: жд
 |---|---|
 | Полный текст рассказа | `assets/story.txt` |
 | Движок VN (без зависимостей) | `vn2/index.html`, `vn2/app.js`, `vn2/style.css` |
-| Контент эп-1 (генерируется) | `vn2/content.js` ← `_vn2_build.py` |
+| Контент эп-1 (генерируется) | `vn2/content.js` ← `tools/_vn2_build.py` |
 | Кадры пролога | `assets/final/prolog/s1..s7.png`, плашки-исходники `assets/gen/` |
 | Спрайты | `assets/sprites/`, `assets/gen/sergey_*` |
 | Музыка и озвучка | `assets/audio/`, `vn2/audio/vo/` |
 | Тираж/тизер (16:9 + 9:16) | `out/avm_v3_epic.mp4`, `out/avm_v3_epic_9x16.mp4` |
-| Значок-видео | `out/znak3d_rot.mp4` (`_zn3d_hi.py` → `_zn3d_build_B.py`) |
+| Значок-видео | `out/znak3d_rot.mp4` (`tools/_zn3d_hi.py` → `tools/_zn3d_build_B.py`) |
 | Рабочие журналы | `STATUS.md`, `PROLOG_FIXES.md`, `SECRETS.md`, `PV_MODELS.md` |
 
-Ранние скрипты (`art.py`, `scenario.py`, `frames.py`, `build_intro.py`) — первый заход,
-оставлены как история; актуальный конвейер — `_prolog_finals.py` + `_vn2_build.py`.
+Ранние скрипты (`tools/art.py`, `tools/scenario.py`, `tools/frames.py`, `tools/build_intro.py`) — первый заход,
+оставлены как история; актуальный конвейер — `tools/_prolog_finals.py` + `tools/_vn2_build.py`.
 
 ## Архив 2016
 

@@ -1,7 +1,7 @@
 # «Зарянка» в Telegram
 
 **Канал:** https://t.me/zaryanka_vn (создан Иваном 2026-10-18).
-Публикация: `tg.py` (stdlib, Bot API) + `_tg_post_e.py` (текст первого поста).
+Публикация: `tools/tg.py` (stdlib, Bot API) + `tools/_tg_post_e.py` (текст первого поста).
 
 ## Что нужно один раз
 
@@ -17,7 +17,7 @@
    РКН/DPI у провайдера, а не песочница: DNS `api.telegram.org` резолвится (149.154.166.110),
    локального прокси/файрвола нет, в nanobot нет egress-allowlist — добавлять некуда и нечего.
    Симптом ровно один: TCP до DC Telegram флапает (таймаут, со второй попытки TLS 1.3 OK).
-   `tg.py` ходит на IP с `server_hostname=api.telegram.org` + `Host: api.telegram.org`
+   `tools/tg.py` ходит на IP с `server_hostname=api.telegram.org` + `Host: api.telegram.org`
    и ретраит (`149.154.167.220`, `149.154.167.197`, `149.154.175.50`; переопределяется `TG_API_IPS`).
    Никакой VPN/SSH-туннель/Browsec не нужен — расширения помогают только твоему браузеру.
    Настоящий обход (если флап достанет) — прокси/VPN на хосте, а не запись в allowlist.
@@ -25,16 +25,16 @@
 ## Команды
 
 ```sh
-python3 tg.py whoami                     # бот + канал (id, название, описание, подписчики)
-python3 tg.py info                       # описание/название/подписчики канала
-python3 tg.py desc "<текст>"             # описание канала (бот-админ)
-python3 tg.py title "<название>"         # переименовать канал
-python3 tg.py post "<текст|@file>" [--video f] [--photo f] [--silent]
-python3 tg.py edit <message_id> "<текст|@file>"
-python3 tg.py pin <message_id>
+python3 tools/tg.py whoami                     # бот + канал (id, название, описание, подписчики)
+python3 tools/tg.py info                       # описание/название/подписчики канала
+python3 tools/tg.py desc "<текст>"             # описание канала (бот-админ)
+python3 tools/tg.py title "<название>"         # переименовать канал
+python3 tools/tg.py post "<текст|@file>" [--video f] [--photo f] [--silent]
+python3 tools/tg.py edit <message_id> "<текст|@file>"
+python3 tools/tg.py pin <message_id>
 
-python3 _tg_post_e.py                    # первый пост с тизером (12.7 МБ, 30 с)
-python3 _tg_post_e.py --text             # то же без видео
+python3 tools/_tg_post_e.py                    # первый пост с тизером (12.7 МБ, 30 с)
+python3 tools/_tg_post_e.py --text             # то же без видео
 ```
 
 Текст — в HTML-разметке Telegram (`<b>…</b>`, `<i>`, `<a href>`), ссылки не превью-картинкой
