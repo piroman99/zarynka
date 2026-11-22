@@ -20,6 +20,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 CHAR = os.path.join(ROOT, 'vn2', 'img', 'char')
 
+# последний коммит ДО дефринжа: в HEAD спрайты уже обработанные
+REF = os.environ.get('REF', '0e50695')
+
 NAMES = [
     'poet.webp', 'poet_interested.webp', 'poet_upset.webp',
     'poet_seat.webp', 'poet_seat_interested.webp', 'poet_seat_shy.webp',
@@ -80,7 +83,7 @@ def ncomp(mask, min_area=30):
 
 
 def load_git(name):
-    raw = subprocess.check_output(['git', 'show', 'HEAD:vn2/img/char/' + name], cwd=ROOT)
+    raw = subprocess.check_output(['git', 'show', REF + ':vn2/img/char/' + name], cwd=ROOT)
     return np.asarray(Image.open(io.BytesIO(raw)).convert('RGBA'))
 
 

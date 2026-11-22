@@ -18,6 +18,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 CHAR = os.path.join(ROOT, 'vn2', 'img', 'char')
 
+# последний коммит ДО дефринжа: в HEAD спрайты уже обработанные
+REF = os.environ.get('REF', '0e50695')
+
 NAMES = [
     'poet.webp', 'poet_interested.webp', 'poet_upset.webp',
     'poet_seat.webp', 'poet_seat_interested.webp', 'poet_seat_shy.webp',
@@ -59,14 +62,14 @@ def ring_delta(arr):
 
 def load_git(name):
     try:
-        raw = subprocess.check_output(['git', 'show', 'HEAD:vn2/img/char/' + name],
+        raw = subprocess.check_output(['git', 'show', REF + ':vn2/img/char/' + name],
                                       cwd=ROOT, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
         return None
     return np.asarray(Image.open(io.BytesIO(raw)).convert('RGBA'))
 
 
-print('%-28s %-22s %-22s %s' % ('файл', 'git: кромка/внутри', 'сейчас: кромка/внутри', 'Δ каймы'))
+print('%-28s %-22s %-22s %s' % ('файл', REF + ': кромка/внутри', 'сейчас: кромка/внутри', 'Δ каймы'))
 for n in NAMES:
     g = load_git(n)
     w = np.asarray(Image.open(os.path.join(CHAR, n)).convert('RGBA'))
