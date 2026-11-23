@@ -35,7 +35,7 @@ FILL_PASSES = 10
 TARGETS = [
     'poet.webp', 'poet_interested.webp', 'poet_upset.webp',
     'poet_seat.webp', 'poet_seat_interested.webp', 'poet_seat_shy.webp',
-    'poet_seat_smile.webp', 'poet_seat_sullen.webp',
+    'poet_seat_smile.webp', 'poet_seat_sullen.webp', 'poet_seat_upset.webp',
     'poet_sh.webp', 'poet_sh_inspired.webp', 'poet_sh_tired.webp',
     'poet_sit.webp', 'poet_sit_interested.webp', 'poet_sit_upset.webp',
     'sergey.webp', 'sergey_concerned.webp', 'sergey_smile.webp',

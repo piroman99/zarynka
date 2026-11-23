@@ -70,7 +70,13 @@ body{
    обычный ключ подскакивает на 4 px, и сидящий на скамейке «вибрирует» вместе с мебелью.
    Здесь только масштаб от НИЖНЕЙ кромки: верх тела живёт, точка опоры не едет.
    Сама скамейка — в #props, без анимации вообще. */
-.sprite.seated{height:88%}
+/* 2026-11-23: посадка поэта пересчитана под новый фон (alley_b_nobench) и 3D-скамейку.
+   Числа сняты с принятого кадра C (`tools/alley/_alley_final2.py`, H_MULT=1.50) на
+   сетке 1920x1080: верх спрайта 261, высота 777 (= 71.944%), низ 1038 (= 3.889% от
+   низа), центр 421 (= 21.927%). Сидит только поэт в сцене «аллея» — класс .seated
+   ставит движок по манифесту персонажей (chars[…].seated). */
+.sprite.seated{height:71.944%; bottom:3.889%}
+.sprite.seated[data-slot="0"]{left:21.927%}
 .sprite.seated.on.breathe{animation:breatheSeated 4.6s ease-in-out infinite}
 @keyframes breatheSeated{0%,100%{transform:translateX(-50%) scale(1)}
   50%{transform:translateX(-50%) scale(1.004)}}

@@ -15,6 +15,9 @@ from collections import deque
 import numpy as np
 from PIL import Image, ImageFilter
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _defringe_batch import defringe, TARGETS as DEFRINGE_TARGETS  # noqa: E402
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 ROOT = os.path.dirname(HERE)
@@ -164,7 +167,10 @@ else:
 #   steps — «вышла из дверей… спустилась по широким ступеням»
 #   alley — «на скамейке между зелёных еловых лап сидел юноша» (вариант B, ворота видны)
 # Иван 2026-11-04: «надо следующую сцену делать… но сначала фон».
-ALLEY_BG = {'steps': 'steps_a', 'alley': 'alley_b'}
+# 2026-11-23: фон «аллеи» — новый кадр без нарисованной скамейки
+# (`alley_b_nobench__gpt-image-2_0.png`, принят Иваном 2026-11-22, 0.53 ₽):
+# скамейка теперь только 3D-проп, в кадре место под неё свободно.
+ALLEY_BG = {'steps': 'steps_a', 'alley': 'alley_b_nobench__gpt-image-2'}
 for _name, _stem in ALLEY_BG.items():
     _src = None
     for _ext in ('.png', '.jpg'):
@@ -226,9 +232,20 @@ for dst, src in CHAR_SRC.items():
     _pre_matted = (_im.mode == 'RGBA' and
                    float((np.asarray(_im.split()[-1]) < 8).mean()) > 0.02)
     out = _im if _pre_matted else cutout(_im)
+    # ДЕФРИНЖ (2026-11-22) — теперь часть сборки. Раньше он жил только в готовых
+    # клиентских webp, и любая пересборка молча возвращала белую кайму (поймано
+    # 2026-11-23: 15 файлов разошлись с HEAD). Мастера в assets/sprites остаются
+    # нетронутыми — кайма снимается на каждой сборке. Набор — ровно тот, что
+    # в `_defringe_batch.TARGETS` (там же логика и проверки); Старик и Екатерина
+    # чистые и не трогаются.
+    _lossless = _pre_matted
+    # dst здесь с .png (ключ CHAR_SRC), а TARGETS — клиентские .webp
+    _client_name = dst.rsplit('.', 1)[0] + '.webp'
+    if _client_name in DEFRINGE_TARGETS:
+        out = Image.fromarray(defringe(np.asarray(out.convert('RGBA'))), 'RGBA')
+        _lossless = True
     # без потерь: на тёмных волосах lossy-webp даёт серую кайму (замер `_poet_hair_check.py`)
-    save_client(out, os.path.join(IMG, 'char'), dst.rsplit('.', 1)[0],
-                lossless=True if _pre_matted else False)
+    save_client(out, os.path.join(IMG, 'char'), dst.rsplit('.', 1)[0], lossless=_lossless)
     print('char', dst, out.size, out.mode, '(pre-matted)' if _pre_matted else '')
 
 
@@ -237,7 +254,10 @@ for dst, src in CHAR_SRC.items():
 # Предметы сцены (статичный проп). Скамейка сцены «аллея»: отдельным кадром от спрайта
 # (правка Ивана 2026-11-05 №1 и №2: «скамейка должна быть длинной» + «не должна дрожать
 # вместе со спрайтом поэта»). Спрайт поэта — без мебели.
-PROP_SRC = {'bench': os.path.join(SPR, 'prop_bench.png')}
+# 2026-11-23: скамейка — 3D из Blender (`tools/alley/_bench_blend7.py`, Cycles, без
+# подлокотников) + акварельный фильтр `_bench_wc.py`, вариант B. Три генерации
+# gpt-image-2 Иван забраковал («кривая, с непонятными перилами по бокам»).
+PROP_SRC = {'bench': os.path.join(SPR, 'prop_bench_blender.png')}
 PROP_DIR = os.path.join(IMG, 'prop')
 os.makedirs(PROP_DIR, exist_ok=True)
 for _n, _p in PROP_SRC.items():
@@ -247,7 +267,9 @@ for _n, _p in PROP_SRC.items():
     _im = Image.open(_p).convert('RGBA')
     if _im.height > 700:
         _im = _im.resize((round(_im.width * 700 / _im.height), 700), Image.LANCZOS)
-    _im.save(os.path.join(PROP_DIR, _n + '.webp'), 'WEBP', quality=82, method=6)
+    # без потерь: у акварельной скамейки мягкая альфа по контуру, lossy-webp
+    # оставляет по краю серую кайму (та же грабля, что у спрайтов поэта)
+    _im.save(os.path.join(PROP_DIR, _n + '.webp'), 'WEBP', lossless=True, quality=100, method=6)
     print('prop', _n, _im.size)
 
 
@@ -866,12 +888,12 @@ nodes.append({'t': 'scene', 'id': 'steps', 'bg': 'img/bg/steps' + CLIENT_EXT,
 nodes.append({'t': 'scene', 'id': 'alley', 'bg': 'img/bg/alley' + CLIENT_EXT,
               'music': 'alley',
               # скамейка — статичный предмет сцены: не дрожит и не масштабируется со спрайтом.
-              # Геометрия посчитана `_alley_layout.py`, не на глаз: у ближнего торца спинка
-              # 0.90 м (391 px при 434 px/м), сиденье — половина этой высоты и попадает
-              # ровно на линию бёдер поэта (y=532), земля под скамейкой = его ступни (y=728).
-              # Новый проп `bench2` (перерисовка Ивана 2026-11-10): длина уходит в глубину
-              # вправо-вверх, ближний торец слева — раньше скамейка стояла поперёк аллеи.
-              'prop': {'src': 'img/prop/bench.webp', 'left': '41%', 'bottom': '-10.8%', 'h': '72%'},
+              # Геометрия 2026-11-23 снята с принятого кадра C (`tools/alley/_alley_final2.py`,
+              # H_MULT=1.50) на сетке 1920x1080: проп 876x526 в точке (78, 453) →
+              # центр x=516 = 26.875%, низ 979 = 9.352% от низа, высота 526 = 48.704%.
+              # Поэт на той же сетке: центр x=421 = 21.927%, верх 261, высота 777 = 71.944%
+              # (это в vn2/style.css, класс .sprite.seated).
+              'prop': {'src': 'img/prop/bench.webp', 'left': '26.875%', 'bottom': '9.352%', 'h': '48.704%'},
               'pages': alley_pages})
 print('сцена «аллея»: steps %d стр., alley %d стр.' % (len(steps_pages), len(alley_pages)))
 
