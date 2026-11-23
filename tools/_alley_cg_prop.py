@@ -20,7 +20,7 @@ BG = "(function(){var b=document.querySelector('.bg.on');return b?b.style.backgr
 b = Browser(1280, 720)
 try:
     for page, expect in ((18, False), (17, True), (19, True)):
-        b.navigate(BASE + '?node=16&page=%d&instant=1&text=1&voice=0&music=0' % page, wait=2.5)
+        b.navigate(BASE + '?node=16&page=%d&instant=1&auto=0&text=1&voice=0&music=0' % page, wait=2.5)
         b.wait_js("(document.querySelector('.bg.on')||{}).style.backgroundImage !== ''", timeout=20)
         bg = b.js(BG)
         on = b.js(PROP_ON)
